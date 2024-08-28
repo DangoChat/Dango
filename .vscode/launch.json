@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-DangoApplication<dango>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dangochat.dango.DangoApplication",
+      "projectName": "dango",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
