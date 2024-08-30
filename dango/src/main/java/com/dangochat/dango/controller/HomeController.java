@@ -7,7 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping({"", "/"})
     public String home() {
-        return "home";
+        return "home";              
+    }
+    @GetMapping("honeybitterchip")
+    public String honey() {
+    	return "honeybitterchip";
     }
     
 }
