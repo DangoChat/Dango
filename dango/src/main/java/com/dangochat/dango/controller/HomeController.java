@@ -9,5 +9,11 @@ public class HomeController {
     public String home() {
         return "home";
     }
-    
+
+
+    @GetMapping("miynnn")
+    public String miynnn() {
+        return "miynnn";
+    }
+
 }
