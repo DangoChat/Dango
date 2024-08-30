@@ -13,5 +13,11 @@ public class HomeController {
     public String honey() {
     	return "honeybitterchip";
     }
-    
+
+
+    @GetMapping("miynnn")
+    public String miynnn() {
+        return "miynnn";
+    }
+
 }
