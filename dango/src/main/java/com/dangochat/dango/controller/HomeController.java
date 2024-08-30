@@ -9,5 +9,10 @@ public class HomeController {
     public String home() {
         return "home";
     }
+
+    @GetMapping("/hyeonmin")
+    public String hyeonmin() {
+        return "hyeonmin";
+    }
     
 }
