@@ -10,4 +10,9 @@ public class HomeController {
         return "home";
     }
     
+    
+    @GetMapping("leean")
+    public String test() {
+    	return"leean";
+    }
 }
