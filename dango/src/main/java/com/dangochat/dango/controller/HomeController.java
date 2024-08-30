@@ -10,12 +10,21 @@ public class HomeController {
         return "home";              
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     @GetMapping("/hyeonmin")
     public String hyeonmin() {
         return "hyeonmin";
     }
     
+=======
+    
+    
+    @GetMapping("leean")
+    public String test() {
+    	return"leean";
+    }
+>>>>>>> bba1cc6e4e7c07f356b8faca53203b6927a4cc18
 =======
     @GetMapping("honeybitterchip")
     public String honey() {
