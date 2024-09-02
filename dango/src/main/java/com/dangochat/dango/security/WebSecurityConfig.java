@@ -21,8 +21,10 @@ public class WebSecurityConfig {
             ,"/member/joinForm"
             ,"/member/join"
             ,"/member/idCheck"
-            ,"/board/list"
-            ,"/board/download"
+            ,"/miynnn"
+            ,"/honeybitterchip"
+            ,"/leean"
+            ,"/hyeonmin"
     };
 
     @Bean
