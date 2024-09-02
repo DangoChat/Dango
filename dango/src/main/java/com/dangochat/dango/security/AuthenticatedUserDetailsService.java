@@ -24,7 +24,7 @@ public class AuthenticatedUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 전달받은 아이디로 회원정보 DB에서 조회, 없으면 예외 처리
         MemberEntity entity = memberRepository.findById(username)
-                .orElseThrow(() -> new EntityNotFoundException("회원정보가 없습니다."));
+                .orElseThrow(() -> new UsernameNotFoundException("회원정보가 없습니다."));
 
         // 있으면 그 정보로 AuthenticatedUser 객체 생성하여 리턴
         AuthenticatedUser user = AuthenticatedUser.builder()
