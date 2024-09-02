@@ -61,8 +61,5 @@ public class AuthenticatedUser implements UserDetails {
         return true;  // 자격 증명이 만료되지 않았음을 나타냄
     }
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;  // 계정 활성화 여부
-    }
+    
 }

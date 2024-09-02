@@ -13,7 +13,7 @@
             //가입폼의 submit 버튼을 클릭하면 실행됨
             $('#joinForm').submit(function () {
                 //아이디와 비밀번호는 반드시 입력해서 가입신청해야 함
-                if ($('#memberId').val() == '' || $('#memberPw').val() == '') {
+                if ($('#userId').val() == '' || $('#userPassword').val() == '') {
                     alert('ID와 비밀번호를 입력하세요.');
                     return false;
                 }
@@ -29,15 +29,15 @@
     <form id="joinForm" th:action="@{/member/join}" method="post">
         <p>
             <label>ID</label>
-            <input type="text" name="memberId" id="memberId">
+            <input type="text" name="userId" id="userId">
         </p>
         <p>
             <label>Email</label>
-            <input type="email" name="memberEmail" id="memberEmail">
+            <input type="email" name="userEmail" id="userEmail">
         </p>
         <p>
             <label>Password</label>
-            <input type="password" name="memberPw" id="memberPw">
+            <input type="password" name="userPassword" id="userPassword">
         </p>
         <p>
             <label>Nickname</label>
@@ -45,11 +45,11 @@
         </p>
         <p>
             <label>Phone</label>
-            <input type="text" name="phone" id="phone">
+            <input type="text" name="userPhone" id="userPhone">
         </p>
         <p>
             <label>Nationality</label>
-            <select name="nationality" id="nationality">
+            <select name="userNationality" id="userNationality">
                 <option value="Korea">한국</option>
                 <option value="Japan">일본</option>
             </select>
