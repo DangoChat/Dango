@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <!-- jQuery 파일 불러오기 -->
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script>
+        $(document).ready(function() {
+
+            //가입폼의 submit 버튼을 클릭하면 실행됨
+            $('#joinForm').submit(function () {
+                //아이디와 비밀번호는 반드시 입력해서 가입신청해야 함
+                if ($('#userId').val() == '' || $('#userPassword').val() == '') {
+                    alert('ID와 비밀번호를 입력하세요.');
+                    return false;
+                }
+                //서버로 폼을 전송
+                return true;
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>[ 회원가입 ]</h1>
+
+    <form id="joinForm" th:action="@{/member/join}" method="post">
+        <p>
+            <label>ID</label>
+            <input type="text" name="userId" id="userId">
+        </p>
+        <p>
+            <label>Email</label>
+            <input type="email" name="userEmail" id="userEmail">
+        </p>
+        <p>
+            <label>Password</label>
+            <input type="password" name="userPassword" id="userPassword">
+        </p>
+        <p>
+            <label>Nickname</label>
+            <input type="text" name="nickname" id="nickname">
+        </p>
+        <p>
+            <label>Phone</label>
+            <input type="text" name="userPhone" id="userPhone">
+        </p>
+        <p>
+            <label>Nationality</label>
+            <select name="userNationality" id="userNationality">
+                <option value="Korea">한국</option>
+                <option value="Japan">일본</option>
+            </select>
+        </p>
+        <p>
+            <input type="submit" value="가입">
+        </p>
+    </form>
+    
+</body>
+</html>
