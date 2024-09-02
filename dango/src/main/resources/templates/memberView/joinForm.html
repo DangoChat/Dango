@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>회원가입</title>
+	<!-- jQuery 파일 불러오기 -->
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+	<script>
+		$(document).ready(function() {
+
+			//가입폼의 submit 버튼을 클릭하면 실행됨
+			$('#joinForm').submit(function () {
+				//아이디와 비밀번호는 반드시 입력해서 가입신청해야 함
+				if ($('#memberId').val() == '' || $('#memberPw').val() == '') {
+					alert('ID와 비밀번호를 입력하세요.');
+					return false;
+				}
+				//서버로 폼을 전송
+				return true;
+			});
+		});
+	</script>
+</head>
+<body>
+	<h1>[ 회원가입 ]</h1>
+
+	<form id="joinForm" th:action="@{/member/join}" method="post">
+		<p>
+			<label>ID</label>
+			<input type="text" name="memberId" id="memberId">
+		</p>
+		<p>
+			<label>Password</label>
+			<input type="password" name="memberPw" id="memberPw">
+		</p>
+		<p>
+			<input type="submit" value="가입">
+		</p>
+	</form>
+	
+</body>
+</html>
