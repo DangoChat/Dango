@@ -25,6 +25,7 @@ public class WebSecurityConfig {
             ,"/honeybitterchip"
             ,"/leean"
             ,"/hyeonmin"
+            ,"/study/**"
     };
 
     @Bean
