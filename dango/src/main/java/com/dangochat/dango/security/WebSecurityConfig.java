@@ -42,8 +42,8 @@ public class WebSecurityConfig {
             //폼 로그인 설정
             .formLogin(formLogin -> formLogin      //수정할거면 따옴표 안에서만 변경
             		 .loginPage("/member/loginForm")              //로그인폼 페이지 경로
-                     .usernameParameter("memberId")               //폼의 ID 파라미터 이름
-                     .passwordParameter("memberPassword")         //폼의 비밀번호 파라미터 이름
+                     .usernameParameter("userId")               //폼의 ID 파라미터 이름
+                     .passwordParameter("userPassword")         //폼의 비밀번호 파라미터 이름
                      .loginProcessingUrl("/member/login")         //로그인폼 제출하여 처리할 경로
                      .defaultSuccessUrl("/")                      //로그인 성공 시 이동할 경로
                      .permitAll()                            //로그인 페이지는 모두 접근 허용
