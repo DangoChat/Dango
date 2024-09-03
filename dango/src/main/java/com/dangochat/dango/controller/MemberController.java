@@ -42,4 +42,10 @@ public class MemberController {
 	}
 	
 	
+	// 비밀번호 찾기 폼을 보여주는 메서드
+    @GetMapping("passwordSearch")
+    public String passwordSearch() {
+        return "memberView/passwordsearchForm";
+    }
+	
 }
