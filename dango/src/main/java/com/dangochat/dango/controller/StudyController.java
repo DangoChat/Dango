@@ -20,7 +20,8 @@ public class StudyController {
 
     @GetMapping("word")
     public String studyword(Model model) {
-        List<StudyEntity> studyContent = studyService.getStudyContentByLevel("2");
+        // 레벨 2인 데이터 중에서 랜덤으로 20개만 가져옴
+        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2");
         model.addAttribute("studyContent", studyContent);
         return "StudyView/word";
     }

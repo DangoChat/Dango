@@ -3,20 +3,20 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>학습 내용</title>
 </head>
 <body>
-<h1>Study Content </h1>
+<h1>학습 내용</h1>
 <table>
   <thead>
   <tr>
     <th>ID</th>
-    <th>Content</th>
-    <th>Pronunciation</th>
-    <th>Meaning</th>
-    <th>Type</th>
-    <th>Example</th>
+    <th>내용</th>
+    <th>발음</th>
+    <th>의미</th>
+    <th>타입</th>
+    <th>레벨</th>
   </tr>
   </thead>
   <tbody>
@@ -26,7 +26,7 @@
     <td th:text="${content.pronunciation}"></td>
     <td th:text="${content.meaning}"></td>
     <td th:text="${content.type}"></td>
-    <td th:text="${content.example}"></td>
+    <td th:text="${content.level}"></td>
   </tr>
   </tbody>
 </table>
