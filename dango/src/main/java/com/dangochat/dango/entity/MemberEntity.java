@@ -42,4 +42,8 @@ public class MemberEntity {
     @Column(name = "user_mileage", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int userMileage;
 
+    
+ // 토큰 필드 추가
+    @Column(name = "token", length = 200, nullable = true)
+    private String token;
 }

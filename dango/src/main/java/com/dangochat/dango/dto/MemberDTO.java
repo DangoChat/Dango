@@ -19,4 +19,5 @@ public class MemberDTO {
     private String currentLevel;
     private int userMileage;
     private String userNationality;
+    private String token;
 }
