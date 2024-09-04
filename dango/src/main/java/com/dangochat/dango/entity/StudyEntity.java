@@ -1,7 +1,5 @@
 package com.dangochat.dango.entity;
 
-
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
