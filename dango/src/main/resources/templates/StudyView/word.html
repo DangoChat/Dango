@@ -8,6 +8,11 @@
 </head>
 <body>
 <h1>학습 내용</h1>
+<form action="/study/word" method="GET">
+  <!-- userId를 동적으로 Thymeleaf를 통해 전달 -->
+  <input type="hidden" name="userId" th:value="${userId}">
+</form>
+
 <table>
   <thead>
   <tr>
@@ -30,5 +35,6 @@
   </tr>
   </tbody>
 </table>
+
 </body>
 </html>
