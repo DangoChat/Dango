@@ -13,14 +13,15 @@
     <a href="honeybitterchip">영서</a>
     <a href="leean">안호</a>
     <a href="hyeonmin">현민</a><br><br>
+    
     <div sec:authorize="not isAuthenticated()">
     <p><a th:href="@{/member/join}">회원가입</a></p>
   	<p><a th:href="@{/member/login}">로그인</a></p>
   	<p><a th:href="@{/member/passwordSearch}">비밀번호 찾기</a></p>
+  	<p><a th:href="@{/mail/passwordSearch2}">비밀번호 찾기2</a></p>
   	</div>
   	<div sec:authorize="isAuthenticated()">
   	<p><a th:href="@{/logout}">로그아웃</a></p>
   	</div>
-  	<p><a th:href="@{/member/logout}">로그아웃</a></p>
   </body>
 </html>

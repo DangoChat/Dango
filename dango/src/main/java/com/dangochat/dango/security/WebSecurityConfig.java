@@ -27,6 +27,7 @@ public class WebSecurityConfig {
             ,"/leean"
             ,"/hyeonmin"
             ,"/study/**"
+            ,"/mail/**"    // 메일 관련 경로 추가
     };
 
     @Bean
