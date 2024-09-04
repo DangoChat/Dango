@@ -1,6 +1,5 @@
 package com.dangochat.dango.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Table(name = "study_content")
+@Table(name = "Study_Content")
 public class StudyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

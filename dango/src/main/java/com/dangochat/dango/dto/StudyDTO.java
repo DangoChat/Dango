@@ -17,4 +17,5 @@ public class StudyDTO {
     private String meaning;
     private String type;
     private String example;
+    private String level;
 }
