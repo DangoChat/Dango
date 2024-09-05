@@ -5,13 +5,10 @@
 <head>
   <meta charset="UTF-8">
   <title>학습 내용</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>학습 내용</h1>
-<form action="/study/word" method="GET">
-  <!-- userId를 동적으로 Thymeleaf를 통해 전달 -->
-  <input type="hidden" name="userId" th:value="${userId}">
-</form>
 
 <table>
   <thead>
@@ -22,19 +19,61 @@
     <th>의미</th>
     <th>타입</th>
     <th>레벨</th>
+    <th>정답</th>
   </tr>
   </thead>
   <tbody>
-  <tr th:each="content : ${studyContent}">
+  <tr th:each="content : ${studyContent}" data-id="${content.studyContentId}">
     <td th:text="${content.studyContentId}"></td>
     <td th:text="${content.content}"></td>
     <td th:text="${content.pronunciation}"></td>
     <td th:text="${content.meaning}"></td>
     <td th:text="${content.type}"></td>
     <td th:text="${content.level}"></td>
+    <td>
+      <button class="answer-btn" data-answer="O">O</button>
+      <button class="answer-btn" data-answer="X">X</button>
+    </td>
   </tr>
   </tbody>
+
 </table>
+
+<script th:inline="javascript">
+  var userId = /*[[${userId}]]*/ 'defaultUserId';  // Thymeleaf에서 userId를 전달
+
+  $(document).ready(function () {
+    // 이벤트 위임으로 동적으로 생성된 버튼에 이벤트 처리
+    $('table').on('click', '.answer-btn', function () {
+      var studyContentId = $(this).closest('tr').data('id'); // studyContentId 추출
+      var answer = $(this).data('answer'); // O 또는 X
+      submitAnswer(studyContentId, answer); // Ajax 요청 보내기
+    });
+
+    // Ajax로 서버에 정답을 전송하는 함수
+    function submitAnswer(studyContentId, answer) {
+      $.ajax({
+        type: 'POST',
+        url: '/study/answer',
+        data: {
+          studyContentId: studyContentId,
+          userId: userId,
+          answer: answer
+        },
+        success: function (response) {
+          console.log("서버 응답:", response);  // 성공 시 로그 출력
+          alert('정답이 저장되었습니다.');
+          location.reload();  // 페이지 새로고침
+        },
+        error: function (xhr, status, error) {
+          console.error("오류 발생:", error);  // 오류 발생 시 로그 출력
+          alert('오류가 발생했습니다: ' + xhr.responseText);
+        }
+      });
+    }
+  });
+</script>
+
 
 </body>
 </html>
