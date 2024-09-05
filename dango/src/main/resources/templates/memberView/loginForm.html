@@ -1,43 +1,43 @@
 <!DOCTYPE html>
-<html lang="ko"
-	  xmlns:th="http://www.thymeleaf.org"
-	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-	<meta charset="UTF-8">
-	<title>로그인</title>
-	<!-- jQuery 파일 불러오기 -->
-	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
-	<script>
-		$(document).ready(function() {
-			//로그인시 아이디와 비밀번호는 반드시 입력해야 함
-			$('#loginForm').submit(function() {
-				if ($('#email').val() == '' || $('#password').val() == '') {
-					alert('ID와 비밀번호를 입력하세요.');
-					return false;
-				}
-				return true;
-			});
-		});
-	</script>
-</head>
-<body>
-	<h1>[ 로그인 ]</h1>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>로그인</title>
+    <!-- jQuery 파일 불러오기 -->
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script>
+      $(document).ready(function () {
+        //로그인시 아이디와 비밀번호는 반드시 입력해야 함
+        $("#loginForm").submit(function () {
+          if ($("#email").val() == "" || $("#password").val() == "") {
+            alert("ID와 비밀번호를 입력하세요.");
+            return false;
+          }
+          return true;
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>[ 로그인 ]</h1>
 
-	
-	<form id="loginForm" th:action="@{/member/login}" method="post">
-		<p>
-			<label>email</label>
-			<input type="text" name="userEmail" id="email">
-		</p>
-		<p>
-			<label>Password</label>
-			<input type="password" name="userPassword" id="password">
-		</p>
-		<p>
-			<button type="submit">Login</button>
-		</p>
-	</form>
-
-	
-</body>
+    <form id="loginForm" th:action="@{/member/login}" method="post">
+      <p>
+        <label>email</label>
+        <input type="text" name="userEmail" id="email" />
+      </p>
+      <p>
+        <label>Password</label>
+        <input type="password" name="userPassword" id="password" />
+      </p>
+      <p>
+        <button type="submit">Login</button>
+      </p>
+    </form>
+    <div th:if="${param.error}">email 또는 비밀번호가 틀립니다.</div>
+  </body>
 </html>
