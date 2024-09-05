@@ -93,6 +93,12 @@ public class MemberService {
 	    // 예: 데이터베이스에서 토큰으로 사용자 조회
 	    return memberRepository.findByToken(token);
 	}
+
+	
+	// 아이디 중복 체크 관련 서비스
+	public int idCheck(String id) {
+		return 0;
+	}
 	
 	
 	
