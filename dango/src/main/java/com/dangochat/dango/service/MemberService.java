@@ -33,7 +33,6 @@ public class MemberService {
 
         // DTO를 Entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
-                .userId(member.getUserId())
                 .userEmail(member.getUserEmail())
                 .userPassword(encodedPassword)
                 .nickname(member.getNickname())

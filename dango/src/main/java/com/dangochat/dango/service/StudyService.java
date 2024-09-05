@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +23,13 @@ public class StudyService {
 
     private static final int LIMIT = 20;
 
-    public List<StudyEntity> getRandomStudyContentByLevel(String level, String userId) {
-        if (userId == null || !memberRepository.existsById(userId)) {
+    public List<StudyEntity> getRandomStudyContentByLevel(String level, int userId) {
+        // userId가 0 이하일 경우 예외 처리
+        if (userId <= 0 || !memberRepository.existsById(userId)) {
             throw new IllegalArgumentException("Invalid or missing user ID: " + userId);
         }
 
+        // level에 따른 랜덤한 학습 콘텐츠 가져오기
         List<StudyEntity> studyContent = studyRepository.findRandomByLevel(level, LIMIT);
 
         for (StudyEntity content : studyContent) {

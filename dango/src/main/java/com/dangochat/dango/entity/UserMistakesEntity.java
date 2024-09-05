@@ -20,7 +20,7 @@ public class UserMistakesEntity {
     private int mistakeId;
 
     @Column(name = "user_id", nullable = false, length = 100)
-    private String userId;
+    private int userId;
 
     @Column(name = "study_content_id", nullable = false)
     private int studyContentId;
