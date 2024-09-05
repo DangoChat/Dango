@@ -24,7 +24,7 @@ public class MemberEntity {
     @Column(name = "user_id")
     private int userId;  // int로 설정, AUTO_INCREMENT 매핑
 
-    @Column(name = "user_email", length = 200, nullable = false)
+    @Column(name = "user_email", length = 200, nullable = false, unique = true)
     private String userEmail;
 
     @Column(name = "user_password", length = 200, nullable = false)
