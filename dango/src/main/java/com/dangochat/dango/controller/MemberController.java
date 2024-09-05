@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dangochat.dango.dto.MemberDTO;
 import com.dangochat.dango.service.MemberService;
@@ -85,4 +86,14 @@ public class MemberController {
     
     
 
+    //아이디 중복체크 컨트롤러
+    @PostMapping("/idCheck")
+	@ResponseBody
+	public int idCheck(@RequestParam("id") String email) {
+        // 서비스 메서드 호출하여 중복 여부 확인
+        return service.idCheck(email);
+		
+	}
+    
+    
 }

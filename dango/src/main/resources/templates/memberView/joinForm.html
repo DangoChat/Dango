@@ -8,19 +8,49 @@
     <!-- jQuery 파일 불러오기 -->
     <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
     <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
+        var emailValid = false;
 
-            //가입폼의 submit 버튼을 클릭하면 실행됨
-            $('#joinForm').submit(function () {
-                //아이디와 비밀번호는 반드시 입력해서 가입신청해야 함
-                if ($('#userEmail').val() == '' || $('#userPassword').val() == '') {
-                    alert('ID와 비밀번호를 입력하세요.');
-                    return false;
-                }
-                //서버로 폼을 전송
-                return true;
-            });
+        // 이메일 중복 체크 Ajax
+        $('#userEmail').on('input', function () {
+            var email = $(this).val();
+            if (email != '') {
+                $.ajax({
+                    type: 'POST',
+                    url: '/member/idCheck',
+                    data: { id: email },
+                    success: function(response) {
+                        if (response == 1) {
+                            $('#emailCheckMessage').text('누군가 이 이메일을 사용하고 있어요.').css('color', 'red');
+                            emailValid = false;
+                        } else {
+                            $('#emailCheckMessage').text('사용 가능한 이메일입니다.').css('color', 'green');
+                            emailValid = true;
+                        }
+                    }
+                });
+            } else {
+                $('#emailCheckMessage').text('');
+                emailValid = false;
+            }
         });
+
+        // 가입 폼 전송 시 이메일 중복 여부 체크
+        $('#joinForm').submit(function () {
+            if (!emailValid) {
+                alert('중복된 이메일입니다. 이메일을 확인하세요.');
+                return false;  // 중복된 이메일일 경우 폼이 제출되지 않음
+            }
+
+            // 다른 필수 입력값 체크
+            if ($('#userPassword').val() == '') {
+                alert('비밀번호를 입력하세요.');
+                return false;
+            }
+            
+            return true;  // 중복된 이메일이 없을 때만 폼 제출
+        });
+    });
     </script>
 </head>
 <body>
@@ -30,6 +60,7 @@
         <p>
             <label>Email</label>
             <input type="email" name="userEmail" id="userEmail">
+            <span id="emailCheckMessage"></span> <!-- 이메일 중복 체크 결과 표시 -->
         </p>
         <p>
             <label>Password</label>
