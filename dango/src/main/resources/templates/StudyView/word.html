@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>학습 내용</title>
@@ -23,7 +22,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="content : ${studyContent}" data-id="${content.studyContentId}">
+  <tr th:each="content : ${studyContent}" th:data-id="${content.studyContentId}">
     <td th:text="${content.studyContentId}"></td>
     <td th:text="${content.content}"></td>
     <td th:text="${content.pronunciation}"></td>
@@ -31,27 +30,29 @@
     <td th:text="${content.type}"></td>
     <td th:text="${content.level}"></td>
     <td>
-      <button class="answer-btn" data-answer="O">O</button>
-      <button class="answer-btn" data-answer="X">X</button>
+      <button class="answer-btn" data-answer="O" th:data-userId="${userId}">O</button>
+      <button class="answer-btn" data-answer="X" th:data-userId="${userId}">X</button>
     </td>
   </tr>
   </tbody>
 
 </table>
+     <button class="submit-btn" data-answer="O" th:data-userId="${userId}">O</button>
 
 <script th:inline="javascript">
-  var userId = /*[[${userId}]]*/ 'defaultUserId';  // Thymeleaf에서 userId를 전달
 
   $(document).ready(function () {
     // 이벤트 위임으로 동적으로 생성된 버튼에 이벤트 처리
     $('table').on('click', '.answer-btn', function () {
-      var studyContentId = $(this).closest('tr').data('id'); // studyContentId 추출
-      var answer = $(this).data('answer'); // O 또는 X
-      submitAnswer(studyContentId, answer); // Ajax 요청 보내기
+      let studyContentId = $(this).closest('tr').data('id'); // studyContentId 추출
+      let answer = $(this).data('answer'); // O 또는 X
+      let userId = $(this).data('userid');  // data-userid에서 userId 추출
+      console.log("전송할 데이터:", userId, studyContentId, answer);
+      submitAnswer(studyContentId, answer, userId); // Ajax 요청 보내기
     });
 
-    // Ajax로 서버에 정답을 전송하는 함수
-    function submitAnswer(studyContentId, answer) {
+    // Ajax로 서버에 o/x 를 전송하는 함수
+    function submitAnswer(studyContentId, answer, userId) {
       $.ajax({
         type: 'POST',
         url: '/study/answer',
@@ -73,7 +74,5 @@
     }
   });
 </script>
-
-
 </body>
 </html>
