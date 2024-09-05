@@ -37,7 +37,8 @@
 			<button type="submit">Login</button>
 		</p>
 	</form>
-
-	
+	<div th:if="${param.error}">
+				email 또는 비밀번호가 틀립니다.
+			</div>
 </body>
 </html>
