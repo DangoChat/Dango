@@ -13,7 +13,7 @@ public class MailConfig {
 	
 	@Value("${naver.id}")
 	private String id;
-	@Value("${naver.password")
+	@Value("${naver.password}")
 	private String password;
 	
 	@Bean
@@ -34,7 +34,7 @@ public class MailConfig {
 		Properties properties = new Properties();
 		properties.setProperty("mail.transport.protocol", "smtp");   //프로토콜 설정
 		properties.setProperty("mail.smtp.auth", "true");           // smtp 인증
-		properties.setProperty("mail.smtp.starttls.enable", "true");    
+	//  properties.setProperty("mail.smtp.starttls.enable", "true");    
 		properties.setProperty("mail.smtp.ssl.trust", "smtp.naver.com");
 		properties.setProperty("mail.debug", "true");
 		properties.setProperty("mail.smtp.ssl.enable", "true");

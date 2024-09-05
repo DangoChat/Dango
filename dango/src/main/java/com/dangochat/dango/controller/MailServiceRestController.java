@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller; // RestController 대신 Contr
 import org.springframework.web.bind.annotation.*;
 
 import com.dangochat.dango.service.MailService;
+import com.dangochat.dango.service.MailServiceImpl;
 
 @Controller  // @RestController 대신 @Controller 사용
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ import com.dangochat.dango.service.MailService;
 @RequestMapping("/mail")
 public class MailServiceRestController {
 
-    private final MailService mailService;
+    private final MailServiceImpl mailService;
 
     // HTML 뷰를 반환하는 메서드 (뷰 템플릿)
     @GetMapping("passwordSearch2")
