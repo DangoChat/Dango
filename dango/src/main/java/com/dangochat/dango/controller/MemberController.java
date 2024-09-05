@@ -23,7 +23,7 @@ public class MemberController {
 	
 	private final MemberService service;
 	
-	@GetMapping("login")
+	@GetMapping("loginForm")
 	public String loginForm() {
 		return "memberView/loginForm";
 	}

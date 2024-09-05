@@ -44,7 +44,7 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.name;  // 이름 또는 이메일을 반환하도록 설정할 수 있습니다
+        return this.email; 
     }
 
     @Override

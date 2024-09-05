@@ -43,7 +43,7 @@ public class WebSecurityConfig {
             
             //폼 로그인 설정
             .formLogin(formLogin -> formLogin      //수정할거면 따옴표 안에서만 변경
-            		 .loginPage("/memberView/loginForm")              //로그인폼 페이지 경로
+            		 .loginPage("/member/loginForm")              //로그인폼 페이지 경로
                      .usernameParameter("userEmail")               //폼의 userEmail 파라미터 이름
                      .passwordParameter("userPassword")         //폼의 비밀번호 파라미터 이름
                      .loginProcessingUrl("/member/login")         //로그인폼 제출하여 처리할 경로
