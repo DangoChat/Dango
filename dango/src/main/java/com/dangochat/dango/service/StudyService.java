@@ -3,6 +3,7 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
 import com.dangochat.dango.entity.UserStudyContentEntity;
+import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.repository.UserMistakesRepository;
 import com.dangochat.dango.repository.UserStudyContentRepository;
@@ -18,9 +19,12 @@ public class StudyService {
     private final UserStudyContentRepository userStudyContentRepository;
     private final UserMistakesRepository userMistakesRepository;
     private final StudyRepository studyRepository;
+    private final MemberRepository memberRepository;
+
+    private static final int LIMIT = 20;
 
     // 유저 공부 기록 저장 (O, X 상관없이)
-    public void recordStudyContent(int studyContentId, String userId, boolean isCorrect) {
+    public void recordStudyContent(int studyContentId, int userId, boolean isCorrect) {
         UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
         userStudyContent.setUserId(userId);
         userStudyContent.setStudyContentId(studyContentId);
@@ -28,9 +32,8 @@ public class StudyService {
         userStudyContentRepository.save(userStudyContent);
     }
 
-<<<<<<< HEAD
     // 오답 노트에 저장 (X 버튼을 눌렀을 때만)
-    public void recordMistake(String userId, int studyContentId) {
+    public void recordMistake(int userId, int studyContentId) {
         UserMistakesEntity userMistakes = new UserMistakesEntity();
         userMistakes.setUserId(userId);
         userMistakes.setStudyContentId(studyContentId);
@@ -39,10 +42,8 @@ public class StudyService {
         userMistakesRepository.save(userMistakes);
     }
     // 사용자 ID와 레벨에 따라 학습 콘텐츠를 가져오는 메서드
-    public List<StudyEntity> getRandomStudyContentByLevel(String level, String userId) {
-        return studyRepository.findRandomByLevelAndUserId(level, userId);  // 사용자 ID와 레벨로 필터링
-=======
     public List<StudyEntity> getRandomStudyContentByLevel(String level, int userId) {
+//        return studyRepository.findRandomByLevel(level, LIMIT);  // 사용자 ID와 레벨로 필터링
         // userId가 0 이하일 경우 예외 처리
         if (userId <= 0 || !memberRepository.existsById(userId)) {
             throw new IllegalArgumentException("Invalid or missing user ID: " + userId);
@@ -73,6 +74,5 @@ public class StudyService {
         }
 
         return studyContent;
->>>>>>> 398bc1f5764d9eca08d739f363c0f49462749339
     }
 }
