@@ -96,8 +96,10 @@ public class MemberService {
 
 	
 	// 아이디 중복 체크 관련 서비스
-	public int idCheck(String id) {
-		return 0;
+	public int idCheck(String email) {
+		// 중복된 이메일이 있으면 1, 없으면 0을 반환
+        boolean exists = memberRepository.existsByUserEmail(email);
+        return exists ? 1 : 0;
 	}
 	
 	

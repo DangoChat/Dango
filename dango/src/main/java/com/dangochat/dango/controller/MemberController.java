@@ -89,10 +89,9 @@ public class MemberController {
     //아이디 중복체크 컨트롤러
     @PostMapping("/idCheck")
 	@ResponseBody
-	public int idCheck(@RequestParam("id") String id) {
-		
-		int cnt = service.idCheck(id);
-		return cnt;
+	public int idCheck(@RequestParam("id") String email) {
+        // 서비스 메서드 호출하여 중복 여부 확인
+        return service.idCheck(email);
 		
 	}
     
