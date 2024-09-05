@@ -15,7 +15,7 @@ import com.dangochat.dango.service.MailServiceImpl;
 @RequestMapping("/mail")
 public class MailServiceRestController {
 
-    private final MailServiceImpl mailService;
+    private final MailService mailService;
 
     // HTML 뷰를 반환하는 메서드 (뷰 템플릿)
     @GetMapping("passwordSearch2")
