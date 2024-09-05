@@ -1,6 +1,7 @@
 package com.dangochat.dango.controller;
 
 import com.dangochat.dango.entity.StudyEntity;
+import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.StudyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 
 @Slf4j
@@ -26,9 +25,17 @@ public class StudyController {
     private final StudyService studyService;
 
     @GetMapping("word")
+<<<<<<< HEAD
     public String studyWord(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();  // 로그인된 유저 ID 가져오기
         // 학습 내용 가져오기 (레벨 2 기준)
+=======
+    public String studyword(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        // AuthenticatedUser로 캐스팅하여 userId(int)를 가져옴
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) userDetails;
+        int userId = authenticatedUser.getId(); // 로그인된 유저 ID(int) 가져오기
+
+>>>>>>> 398bc1f5764d9eca08d739f363c0f49462749339
         List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId);
         log.debug("========"+studyContent.toString());
         model.addAttribute("studyContent", studyContent);
@@ -36,6 +43,7 @@ public class StudyController {
         return "StudyView/word";
     }
 
+<<<<<<< HEAD
     @PostMapping("answer")
     public ResponseEntity<String> Answer(@RequestParam("studyContentId") int studyContentId,
                                          @RequestParam("userId") String userId,
@@ -59,4 +67,6 @@ public class StudyController {
         }
     }
 
+=======
+>>>>>>> 398bc1f5764d9eca08d739f363c0f49462749339
 }

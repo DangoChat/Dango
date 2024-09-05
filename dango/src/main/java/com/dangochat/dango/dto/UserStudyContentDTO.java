@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserStudyContentDTO {
-    private String userStudyRecordId;
+    private int userStudyRecordId;
     private int studyContentId;
-    private String userId;
+    private int userId;
     private java.util.Date recordStudyDate = new java.util.Date();
     private boolean recordIsCorrect;
 }

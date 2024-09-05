@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberDTO {
 
-	private String userId;
+	private int userId;
     private String userEmail;
     private String userPassword;
     private String nickname;
@@ -19,4 +19,5 @@ public class MemberDTO {
     private String currentLevel;
     private int userMileage;
     private String userNationality;
+    private String token;
 }

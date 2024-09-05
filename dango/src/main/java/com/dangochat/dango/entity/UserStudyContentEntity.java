@@ -27,7 +27,7 @@ public class UserStudyContentEntity {
     private int studyContentId;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private int userId;
 
     @Column(name = "record_study_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

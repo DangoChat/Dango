@@ -22,7 +22,7 @@ public class UserMistakesEntity {
 
     //회원 고유 아이디
     @Column(name = "user_id", nullable = false, length = 100)
-    private String userId;
+    private int userId;
 
     //공부 내용 고유 아이디
     @Column(name = "study_content_id", nullable = false)

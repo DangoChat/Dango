@@ -11,7 +11,7 @@
 		$(document).ready(function() {
 			//로그인시 아이디와 비밀번호는 반드시 입력해야 함
 			$('#loginForm').submit(function() {
-				if ($('#id').val() == '' || $('#password').val() == '') {
+				if ($('#email').val() == '' || $('#password').val() == '') {
 					alert('ID와 비밀번호를 입력하세요.');
 					return false;
 				}
@@ -26,8 +26,8 @@
 	
 	<form id="loginForm" th:action="@{/member/login}" method="post">
 		<p>
-			<label>ID</label>
-			<input type="text" name="userId" id="id">
+			<label>email</label>
+			<input type="text" name="userEmail" id="email">
 		</p>
 		<p>
 			<label>Password</label>
