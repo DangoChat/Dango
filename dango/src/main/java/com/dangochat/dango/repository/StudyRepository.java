@@ -1,8 +1,6 @@
 package com.dangochat.dango.repository;
 
 import com.dangochat.dango.entity.StudyEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;  // JpaRepository를 import
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
