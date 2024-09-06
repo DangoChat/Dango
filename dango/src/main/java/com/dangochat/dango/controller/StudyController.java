@@ -26,15 +26,15 @@ public class StudyController {
 
     private final StudyService studyService;
 
+    //단어 학습 하기
     @GetMapping("word")
     public String studyWord(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-//        String userId = userDetails.getUsername();  // 로그인된 유저 ID 가져오기
-        // 학습 내용 가져오기 (레벨 2 기준)
-        // AuthenticatedUser로 캐스팅하여 userId(int)를 가져옴
-//            AuthenticatedUser authenticatedUser = (AuthenticatedUser) userDetails;
-        int userId = userDetails.getId(); // 로그인된 유저 ID(int) 가져오기
-        log.debug("========" + userId);
 
+        // 로그인 된 유저 ID(int) 가져 오기
+        int userId = userDetails.getId();
+        log.debug("로그인 한 유저 아이디" + userId);
+
+        // 한국어 능력 시험 level 2
         List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
