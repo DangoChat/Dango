@@ -5,5 +5,5 @@ public interface MailService {
     String sendSimpleMessage(String to)throws Exception;
 
     // 검증
-    String verifyCode(String code);
+    // String verifyCode(String code);
 }
