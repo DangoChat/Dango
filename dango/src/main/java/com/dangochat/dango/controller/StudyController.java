@@ -42,7 +42,7 @@ public class StudyController {
         return "StudyView/word";
     }
 
-    //o/x 누르면 유저공부기록, 오답노트 테이블에 저장되는 거
+    // o/x 누르면 유저 공부 기록, 오답 노트 테이블에 저장 되는 거
     @ResponseBody
     @PostMapping("answer")
     public ResponseEntity<String> answer(
