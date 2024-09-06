@@ -1,7 +1,5 @@
 package com.dangochat.dango.controller;
 
-
-import com.dangochat.dango.dto.AnswerDTO;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.StudyService;
@@ -10,11 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -26,7 +22,7 @@ public class StudyController {
 
     private final StudyService studyService;
 
-    //단어 학습 하기
+    //단어 20개 학습 하기
     @GetMapping("word")
     public String studyWord(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
 
@@ -50,7 +46,6 @@ public class StudyController {
             @RequestParam("userId") Integer userId,
             @RequestParam("answer") String answer) {
         try {
-            log.debug("djflafjl");
             boolean isCorrect = "O".equals(answer);
             studyService.recordStudyContent(studyContentId, userId, isCorrect);
 
@@ -58,31 +53,13 @@ public class StudyController {
                 studyService.recordMistake(userId, studyContentId);
             }
 
-            return ResponseEntity.ok("정답이 성공적으로 저장되었습니다.");
+            return ResponseEntity.ok("정답이 성공적으로 저장 되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정답 저장 중 오류 발생");
         }
     }
 
-    @ResponseBody
-    @PostMapping("finish")
-    public ResponseEntity<String> finishStudy(@RequestBody List<AnswerDTO> answers) {
-        try {
-            for (AnswerDTO answer : answers) {
-                boolean isCorrect = "O".equals(answer.getAnswer());
-                studyService.recordStudyContent(answer.getStudyContentId(), answer.getUserId(), isCorrect);
-
-                if (!isCorrect) {
-                    studyService.recordMistake(answer.getUserId(), answer.getStudyContentId());
-                }
-            }
-            return ResponseEntity.ok("모든 정답이 성공적으로 저장되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정답 저장 중 오류 발생");
-        }
-    }
-
-
+    //학습 끝내기
     @PostMapping("complete")
     @ResponseBody
     public String completeStudy() {
@@ -91,4 +68,3 @@ public class StudyController {
     }
 
 }
-

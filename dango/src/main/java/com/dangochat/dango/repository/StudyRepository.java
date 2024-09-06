@@ -15,4 +15,8 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
 
     //findRandomByLevel 메서드를 호출 하는 곳에 level 이랑, limit 전달
     List<StudyEntity> findRandomByLevel(@Param("level") String level, @Param("limit") int limit);
+
+    // 특정 유저의 오답 노트(해결 되지 않은)에서 studyContentId에 해당하는 StudyEntity를 가져오는 메서드
+    @Query("SELECT s FROM StudyEntity s JOIN UserMistakesEntity m ON s.studyContentId = m.studyContentId WHERE m.userId = :userId AND m.mistakeResolved = false ORDER BY RAND() LIMIT :limit")
+    List<StudyEntity> findMistakesByUserId(@Param("userId") int userId, @Param("limit") int limit);
 }

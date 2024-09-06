@@ -38,8 +38,8 @@
 </table>
 <script th:inline="javascript">
   $(document).ready(function () {
-    let totalItems = 20; // 학습 항목의 총 개수
-    let answeredItems = 0; // 답변이 완료된 항목 개수
+    let totalWord = 20; // 학습 항목의 총 개수
+    let answerWord = 0; // 답변이 완료된 항목 개수
 
     // 이벤트 위임으로 동적으로 생성된 버튼에 이벤트 처리
     $('table').on('click', '.answer-btn', function () {
@@ -61,7 +61,7 @@
           answer: answer
         },
         success: function (response) {
-          console.log("서버 응답:", response);  // 성공 시 로그 출력
+          console.log("서버 응답:", response);
           alert('정답이 저장되었습니다.');
 
           // 정답 버튼을 비활성화하고, 이미 답변한 항목임을 표시
@@ -70,45 +70,37 @@
           row.find('.answer-btn[data-answer="' + answer + '"]').css('background-color', '#d4edda'); // 선택한 답의 색상 변경
 
           // 답변한 항목 개수 증가
-          answeredItems++;
+          answerWord++;
 
           // 모든 항목에 답변이 완료되면 "학습 끝내기" 버튼 활성화
-          if (answeredItems >= totalItems) {
-            $('#studyFinish-btn').removeAttr('disabled'); // 버튼 활성화
+          if (answerWord >= totalWord) {
+            $('#studyComplete-btn').removeAttr('disabled');
           }
         },
         error: function (xhr, status, error) {
-          console.error("오류 발생:", error);  // 오류 발생 시 로그 출력
-          alert('오류가 발생했습니다: ' + xhr.responseText);
+          alert('오류가 발생 했습니다: ' + xhr.responseText);
         }
       });
     }
 
-
-
-    // 학습 끝내기 버튼 클릭 이벤트 처리 (Ajax로 학습 완료 전송)
-    $('#studyFinish-btn').click(function () {
-      if (answeredItems >= totalItems) {  // 모든 항목에 대해 답변이 완료된 경우
+    // 학습 끝내기 버튼 클릭 이벤트 처리 (Ajax 로 학습 완료 전송)
+    $('#studyComplete-btn').click(function () {
+      if (answerWord >= totalWord) {  // 모든 항목에 대해 답변이 완료된 경우
         $.ajax({
           type: 'POST',
-          url: '/study/complete',  // 학습 완료를 처리하는 서버 엔드포인트
+          url: '/study/complete',
           success: function(response) {
-            console.log("서버 응답:", response);
-            // Ajax 응답 후 직접 리다이렉트
             window.location.href = "http://localhost:8888/";
           },
           error: function (xhr, status, error) {
-            console.error("오류 발생:", error);  // 오류 발생 시 로그 출력
-            alert('학습 완료 처리 중 오류가 발생했습니다.');
+            alert('학습 완료 처리 중 오류가 발생 했습니다.');
           }
         });
       }
     });
-
-
   });
 </script>
 
-<button id="studyFinish-btn" disabled>학습 끝내기</button>
+<button id="studyComplete-btn" disabled> 학습 끝내기</button>
 </body>
 </html>

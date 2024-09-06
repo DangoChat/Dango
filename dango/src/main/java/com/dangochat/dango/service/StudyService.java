@@ -9,6 +9,7 @@ import com.dangochat.dango.repository.UserStudyContentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,6 +20,29 @@ public class StudyService {
     private final UserMistakesRepository userMistakesRepository;
     private final StudyRepository studyRepository;
     private static final int LIMIT = 20;
+    private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
+
+    // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
+    public List<StudyEntity> getRandomStudyContentByLevel(String level, int userId) {
+
+        // 1. 0%에서 20% 사이의 랜덤 비율을 결정
+        double randomMistakeRatio = Math.random() * MAX_MISTAKE_RATIO; // 0.0 ~ 0.2 사이의 랜덤 값
+        int mistakeLimit = (int) (LIMIT * randomMistakeRatio); // 가져올 오답 콘텐츠 개수
+
+        // 2. 오답 노트에서 아직 해결되지 않은 학습 콘텐츠 가져 오기 (최대 mistakeLimit 개수)
+        List<StudyEntity> mistakeContent = studyRepository.findMistakesByUserId(userId, mistakeLimit);
+
+        // 3. 나머지는 일반 학습 콘텐츠에서 랜덤하게 가져 오기
+        int generalLimit = LIMIT - mistakeLimit;
+        List<StudyEntity> generalContent = studyRepository.findRandomByLevel(level, generalLimit);
+
+        // 4. 두 리스트를 합친다
+        List<StudyEntity> combinedContent = new ArrayList<>();
+        combinedContent.addAll(mistakeContent);
+        combinedContent.addAll(generalContent);
+
+        return combinedContent;
+    }
 
     // 유저 공부 기록 저장 (O,X 버튼 클릭 시)
     public void recordStudyContent(int studyContentId, int userId, boolean isCorrect) {
@@ -29,42 +53,13 @@ public class StudyService {
         userStudyContentRepository.save(userStudyContent);
     }
 
-    // 오답 노트에도 저장 (X 버튼 클릭 시)
+    // 오답 노트에 저장 (X 버튼 클릭 시)
     public void recordMistake(int userId, int studyContentId) {
         UserMistakesEntity userMistakes = new UserMistakesEntity();
         userMistakes.setUserId(userId);
         userMistakes.setStudyContentId(studyContentId);
         userMistakes.setMistakeResolved(false);
-        userMistakes.setMistakeCounting(1);  // 처음 추가되었을 때 count는 1
+        userMistakes.setMistakeCounting(1);  // 처음 추가 되었을 때 count 는 1
         userMistakesRepository.save(userMistakes);
-    }
-    // 사용자 ID와 레벨에 따라 학습 콘텐츠를 가져 오기
-    public List<StudyEntity> getRandomStudyContentByLevel(String level, int userId) {
-
-        // level에 따른 랜덤한 학습 콘텐츠 limit 개수 만큼 가져 오기
-        List<StudyEntity> studyContent = studyRepository.findRandomByLevel(level, LIMIT);
-
-        for (StudyEntity content : studyContent) {
-            UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
-            userStudyContent.setStudyContentId(content.getStudyContentId());
-            userStudyContent.setUserId(userId);
-            userStudyContent.setRecordIsCorrect(true);  // 기본적 으로 학습한 것으로 기록
-
-            // o, x 클릭 > 유저 공부 기록에 추가
-            userStudyContentRepository.save(userStudyContent);
-
-            // X 클릭 >  오답 노트에도 추가
-            if (!userStudyContent.isRecordIsCorrect()) {
-                UserMistakesEntity newMistake = new UserMistakesEntity();
-                newMistake.setUserId(userId);
-                newMistake.setStudyContentId(content.getStudyContentId());
-                newMistake.setMistakeResolved(false);
-                newMistake.setMistakeCounting(1);  // 첫 오답 이므로 1로 설정
-
-                userMistakesRepository.save(newMistake);
-            }
-        }
-
-        return studyContent;
     }
 }
