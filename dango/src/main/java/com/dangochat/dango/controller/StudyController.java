@@ -30,15 +30,15 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        // 한국어 능력 시험 level 2
+        // 한국어 능력 시험 level 2에서 20개 랜덤으로 가져오기
         List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId);
-        log.debug("========" + studyContent.toString());
+        log.debug("공부 내용 20개" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
         return "StudyView/word";
     }
 
-    // o/x 누르면 유저 공부 기록, 오답 노트 테이블에 저장 되는 거
+    // o 누르면 유저 공부 기록에 저장 / x 누르면 유저 공부 기록, 오답 노트에 저장
     @ResponseBody
     @PostMapping("answer")
     public ResponseEntity<String> answer(
@@ -53,17 +53,17 @@ public class StudyController {
                 studyService.recordMistake(userId, studyContentId);
             }
 
-            return ResponseEntity.ok("정답이 성공적으로 저장 되었습니다.");
+            return ResponseEntity.ok("저장 되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정답 저장 중 오류 발생");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류 발생");
         }
     }
 
-    //학습 끝내기
+    //학습 끝내기 버튼 누르기
     @PostMapping("complete")
     @ResponseBody
     public String completeStudy() {
-        // 학습 완료 처리 로직 (DB 업데이트 등)
+        // 학습 완료 처리 로직 (DB 업데이트)
         return "{\"status\":\"success\"}";
     }
 
