@@ -16,6 +16,7 @@ public class StudyEntity {
     @Column(name = "study_content_id")
     private int studyContentId;
 
+
     @Column(name = "study_content_content", length = 2000, nullable = false)
     private String content;
 
