@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <title>학습 내용</title>
+  <!-- jQuery 라이브러리 추가 -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>학습 내용</h1>
-
 <table>
   <thead>
   <tr>
@@ -22,6 +22,7 @@
   </tr>
   </thead>
   <tbody>
+  <!-- 서버에서 전달된 학습 내용을 동적으로 테이블에 표시 -->
   <tr th:each="content : ${studyContent}" th:data-id="${content.studyContentId}">
     <td th:text="${content.studyContentId}"></td>
     <td th:text="${content.content}"></td>
@@ -30,27 +31,28 @@
     <td th:text="${content.type}"></td>
     <td th:text="${content.level}"></td>
     <td>
+      <!-- answer o/x button -->
       <button class="answer-btn" data-answer="O" th:data-userId="${userId}">O</button>
       <button class="answer-btn" data-answer="X" th:data-userId="${userId}">X</button>
     </td>
   </tr>
   </tbody>
 </table>
-<script th:inline="javascript">
-  $(document).ready(function () {
+
+<script th:inline="javascript"> //th 코드 삽입가능
+$(document).ready(function () {
     let totalWord = 20; // 학습 항목의 총 개수
     let answerWord = 0; // 답변이 완료된 항목 개수
 
-    // 이벤트 위임으로 동적으로 생성된 버튼에 이벤트 처리
+    // 이벤트 위임 방식으로 동적으로 생성된 버튼에 대한 클릭 이벤트 처리
     $('table').on('click', '.answer-btn', function () {
-      let studyContentId = $(this).closest('tr').data('id'); // studyContentId 추출
-      let answer = $(this).data('answer'); // O 또는 X
-      let userId = $(this).data('userid');  // data-userid에서 userId 추출
-      console.log("전송할 데이터:", userId, studyContentId, answer);
-      submitAnswer(studyContentId, answer, userId); // Ajax 요청 보내기
+      let studyContentId = $(this).closest('tr').data('id');       // 해당 행의 학습 단어 아이디 추출
+      let answer = $(this).data('answer');                         // 사용자가 선택한 답변 (O 또는 X)
+      let userId = $(this).data('userid');                         // 사용자 ID 추출
+      submitAnswer(studyContentId, answer, userId);                // Ajax 요청을 통해 서버에 데이터 전송
     });
 
-    // Ajax로 서버에 o/x 를 전송하는 함수
+    // 서버에 사용자의 (O/X) 데이터 전송
     function submitAnswer(studyContentId, answer, userId) {
       $.ajax({
         type: 'POST',
@@ -61,39 +63,38 @@
           answer: answer
         },
         success: function (response) {
-          console.log("서버 응답:", response);
-          alert('정답이 저장되었습니다.');
+          alert('저장 되었습니다.');
 
-          // 정답 버튼을 비활성화하고, 이미 답변한 항목임을 표시
-          let row = $('tr[data-id="' + studyContentId + '"]');
-          row.find('.answer-btn').attr('disabled', true); // 버튼 비활성화
-          row.find('.answer-btn[data-answer="' + answer + '"]').css('background-color', '#d4edda'); // 선택한 답의 색상 변경
+          // 정답을 제출한 버튼을 비활성화하고 이미 답변한 항목 표시
+          let studyContent = $('tr[data-id="' + studyContentId + '"]');
+          studyContent.find('.answer-btn').attr('disabled', true); // 모든 버튼 비활성화
+          studyContent.find('.answer-btn[data-answer="' + answer + '"]').css('background-color', '#d4edda'); // 선택한 답 초록색으로 변경
 
           // 답변한 항목 개수 증가
           answerWord++;
 
           // 모든 항목에 답변이 완료되면 "학습 끝내기" 버튼 활성화
           if (answerWord >= totalWord) {
-            $('#studyComplete-btn').removeAttr('disabled');
+            $('#studyComplete-btn').removeAttr('disabled'); // 학습 완료 버튼 활성화
           }
         },
-        error: function (xhr, status, error) {
-          alert('오류가 발생 했습니다: ' + xhr.responseText);
+        error: function (xhr) {
+          alert('오류가 발생 했습니다: ' + xhr.responseText); // 오류 발생 시 경고창 표시
         }
       });
     }
 
-    // 학습 끝내기 버튼 클릭 이벤트 처리 (Ajax 로 학습 완료 전송)
+    // "학습 끝내기" 버튼 클릭 시
     $('#studyComplete-btn').click(function () {
-      if (answerWord >= totalWord) {  // 모든 항목에 대해 답변이 완료된 경우
+      if (answerWord >= totalWord) {  // 모든 항목에 대해 답변이 완료된 경우만 처리
         $.ajax({
           type: 'POST',
           url: '/study/complete',
-          success: function(response) {
-            window.location.href = "http://localhost:8888/";
+          success: function() {
+            window.location.href = "http://localhost:8888/"; // 학습 완료 후 홈으로
           },
-          error: function (xhr, status, error) {
-            alert('학습 완료 처리 중 오류가 발생 했습니다.');
+          error: function () {
+            alert('오류가 발생 했습니다'); // 학습 완료 처리 실패 시 오류 메시지 표시
           }
         });
       }
@@ -101,6 +102,7 @@
   });
 </script>
 
+<!-- 학습 끝내기 버튼-->
 <button id="studyComplete-btn" disabled> 학습 끝내기</button>
 </body>
 </html>
