@@ -31,7 +31,7 @@ public class StudyController {
         log.debug("로그인 한 유저 아이디" + userId);
 
         // 한국어 능력 시험 level 2
-        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId);
+        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("N2", "단어",userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
@@ -67,4 +67,23 @@ public class StudyController {
         return "{\"status\":\"success\"}";
     }
 
+    
+    
+//    @GetMapping("grammar")
+//    public String grammar(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+//
+//        // 로그인 된 유저 ID(int) 가져 오기
+//        int userId = userDetails.getId();
+//        log.debug("로그인 한 유저 아이디" + userId);
+//
+//        // 한국어 능력 시험 level 2
+//        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("N4", '문법', userId);
+//        log.debug("========" + studyContent.toString());
+//        model.addAttribute("studyContent", studyContent);
+//        model.addAttribute("userId", userId);  // userId를 모델에 추가
+//        return "StudyView/grammar";
+//    }
+    
+    
+    
 }
