@@ -22,7 +22,7 @@ public class StudyService {
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
 
-    // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
+    // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답 노트 최대 20% 포함, 비율은 랜덤)
     public List<StudyEntity> getRandomStudyContentByLevel(String level, int userId) {
 
         // 1. 0%에서 20% 사이의 랜덤 비율을 결정

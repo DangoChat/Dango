@@ -31,8 +31,7 @@ public class StudyController {
         log.debug("로그인 한 유저 아이디" + userId);
 
         // 한국어 능력 시험 level 2에서 20개 랜덤으로 가져오기
-        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId);
-        log.debug("공부 내용 20개" + studyContent.toString());
+        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevel("2", userId, study_content_typ:"");
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
         return "StudyView/word";
