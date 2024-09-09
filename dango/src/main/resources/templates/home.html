@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dango</title>
-</head>
-<body>
-<h1>[ DANGO PROJECT ]</h1>
-<a href="miynnn">미연</a>
-<a href="honeybitterchip">영서</a>
-<a href="leean">안호</a>
-<a href="hyeonmin">현민</a><br><br>
-
-<div sec:authorize="not isAuthenticated()">
+  </head>
+  <body>
+    <h1>[ DANGO PROJECT ]</h1>
+    <a href="miynnn">미연</a>
+    <a href="honeybitterchip">영서</a>
+    <a href="leean">안호</a>
+    <a href="hyeonmin">현민</a><br><br>
+    
+    <div sec:authorize="not isAuthenticated()">
     <p><a th:href="@{/member/join}">회원가입</a></p>
-    <p><a th:href="@{/member/loginForm}">로그인</a></p>
-    <p><a th:href="@{/member/passwordSearch}">비밀번호 찾기</a></p>
-    <p><a th:href="@{/mail/passwordSearch2}">비밀번호 찾기2</a></p>
-</div>
-<div sec:authorize="isAuthenticated()">
-    <p><a th:href="@{/logout}">로그아웃</a></p>
-</div>
+  	<p><a th:href="@{/member/loginForm}">로그인</a></p>
+  	<p><a th:href="@{/member/passwordSearch}">비밀번호 찾기</a></p>
+  	<p><a th:href="@{/mail/passwordSearch2}">비밀번호 찾기2</a></p>
+  	</div>
+  	<div sec:authorize="isAuthenticated()">
+  	<p><a th:href="@{/logout}">로그아웃</a></p>
+  	</div>
 
-<a href="study/word">단어 학습</a><br>
-<a href="study/grammar">문법 학습</a>
+    <a href="study/word">단어 학습</a><br>
+    <a href="study/grammar">문법 학습</a>
 
 
-</body>
+  </body>
 </html>

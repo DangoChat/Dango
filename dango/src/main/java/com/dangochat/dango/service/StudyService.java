@@ -30,11 +30,11 @@ public class StudyService {
         int mistakeLimit = (int) (LIMIT * randomMistakeRatio); // 가져올 오답 콘텐츠 개수
 
         // 2. 오답 노트에서 아직 해결되지 않은 학습 콘텐츠 가져 오기 (최대 mistakeLimit 개수)
-        List<StudyEntity> mistakeContent = studyRepository.findMistakesByUserIdAndType(userId, type, mistakeLimit);
+        List<StudyEntity> mistakeContent = studyRepository.findMistakesByUserId(userId, mistakeLimit);
 
         // 3. 나머지는 일반 학습 콘텐츠에서 랜덤하게 가져 오기
         int generalLimit = LIMIT - mistakeLimit;
-        List<StudyEntity> generalContent = studyRepository.findRandomByLevelAndType(level, type, generalLimit);
+        List<StudyEntity> generalContent = studyRepository.findRandomByLevel(level, generalLimit);
 
         // 4. 두 리스트를 합친다
         List<StudyEntity> combinedContent = new ArrayList<>();
@@ -62,6 +62,4 @@ public class StudyService {
         userMistakes.setMistakeCounting(1);  // 처음 추가 되었을 때 count 는 1
         userMistakesRepository.save(userMistakes);
     }
-
-
 }
