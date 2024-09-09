@@ -62,4 +62,6 @@ public class StudyService {
         userMistakes.setMistakeCounting(1);  // 처음 추가 되었을 때 count 는 1
         userMistakesRepository.save(userMistakes);
     }
+    
+    
 }

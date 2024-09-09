@@ -18,4 +18,6 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     // Native Query로 특정 유저의 오답 노트(해결되지 않은)에서 studyContentId에 해당하는 StudyEntity를 랜덤하게 가져오고, LIMIT 적용
     @Query(value = "SELECT s.* FROM Study_Content s JOIN User_Mistakes m ON s.study_content_id = m.study_content_id WHERE m.user_id = :userId AND m.mistake_resolved = false AND s.study_content_type = :type ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<StudyEntity> findMistakesByUserIdAndType(@Param("userId") int userId, @Param("type") String type, @Param("limit") int limit);
+    
+    
 }
