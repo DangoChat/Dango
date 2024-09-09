@@ -16,7 +16,6 @@ public class StudyEntity {
     @Column(name = "study_content_id")
     private int studyContentId;
 
-
     @Column(name = "study_content_content", length = 2000, nullable = false)
     private String content;
 
@@ -32,6 +31,15 @@ public class StudyEntity {
     @Column(name = "study_content_type", length = 100, nullable = false)
     private String type;
 
-    @Column(name = "study_content_example", length = 2000)
-    private String example;
+    @Column(name = "study_content_example1", length = 2000)
+    private String example1;  // 예문1
+
+    @Column(name = "example_translation1", length = 2000)
+    private String exampleTranslation1;  // 예문 번역1
+
+    @Column(name = "study_content_example2", length = 2000)
+    private String example2;  // 예문2
+
+    @Column(name = "example_translation2", length = 2000)
+    private String exampleTranslation2;  // 예문 번역2
 }

@@ -16,6 +16,9 @@ public class StudyDTO {
     private String pronunciation;
     private String meaning;
     private String type;
-    private String example;
     private String level;
+    private String example1;
+    private String exampleTranslation1;
+    private String example2;
+    private String exampleTranslation2;
 }
