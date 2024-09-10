@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +68,44 @@ public class StudyService {
         userMistakes.setMistakeCounting(1);  // 처음 추가 되었을 때 count 는 1
         userMistakesRepository.save(userMistakes);
     }
+
+
+ // 사용자의 오답과 관련된 학습 콘텐츠 반환
+    public List<StudyEntity> mistakes(int userId) {
+
+        // 사용자 정보를 조회
+        MemberEntity user = memberRepository.findById(userId)
+            .orElseThrow();
+
+        // 사용자의 오답 기록에서 관련된 StudyEntity 리스트 추출
+        List<UserMistakesEntity> mistakes = userMistakesRepository.findByUser(user);
+
+        // UserMistakesEntity에서 StudyEntity로 변환하여 필요한 필드들을 가져옴
+        List<StudyEntity> userMistakes = mistakes.stream()
+            .map(UserMistakesEntity::getStudyContent)
+            .filter(studyContent -> "단어".equals(studyContent.getType()))
+            .collect(Collectors.toList());
+
+        return userMistakes;
+    }
     
+    
+    public List<StudyEntity> mistakes2(int userId) {
+
+        // 사용자 정보를 조회
+        MemberEntity user = memberRepository.findById(userId)
+            .orElseThrow();
+
+        // 사용자의 오답 기록에서 관련된 StudyEntity 리스트 추출
+        List<UserMistakesEntity> mistakes = userMistakesRepository.findByUser(user);
+
+        // UserMistakesEntity에서 StudyEntity로 변환하여 필요한 필드들을 가져옴
+        List<StudyEntity> userMistakes = mistakes.stream()
+            .map(UserMistakesEntity::getStudyContent)
+            .filter(studyContent -> "문법".equals(studyContent.getType()))
+            .collect(Collectors.toList());
+
+        return userMistakes;
+    }
     
 }

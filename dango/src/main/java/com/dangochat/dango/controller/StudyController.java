@@ -86,10 +86,26 @@ public class StudyController {
     
     //오답노트 컨트롤러
     @GetMapping("mistakes")
-    public String mistakes(Model model) {
+    public String mistakes(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
 
+    	// 로그인 된 유저 ID(int) 가져 오기
+        int userId = userDetails.getId();
+        
+    	List<StudyEntity> userMistakes = studyService.mistakes(userId);
+    	model.addAttribute("userMistakes", userMistakes);
        
         return "StudyView/mistakes";
     }
     
+    @GetMapping("mistakes2")
+    public String mistakes2(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
+
+    	// 로그인 된 유저 ID(int) 가져 오기
+        int userId = userDetails.getId();
+        
+    	List<StudyEntity> userMistakes = studyService.mistakes2(userId);
+    	model.addAttribute("userMistakes", userMistakes);
+       
+        return "StudyView/mistakes2";
+    }
 }
