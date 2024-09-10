@@ -6,7 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -63,10 +63,15 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    //비밀번호 암호화를 위한 인코더를 빈으로 등록
+    // //비밀번호 암호화를 위한 인코더를 빈으로 등록
+    // @Bean
+    // public BCryptPasswordEncoder getPasswordEncoder() {
+    //     return new BCryptPasswordEncoder();
+    // }
+
     @Bean
-    public BCryptPasswordEncoder getPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return new AESPasswordEncoder();
     }
 
 }

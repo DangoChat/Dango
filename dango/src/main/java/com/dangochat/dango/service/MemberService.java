@@ -1,5 +1,6 @@
 package com.dangochat.dango.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dangochat.dango.dto.MemberDTO;
@@ -21,12 +22,14 @@ public class MemberService {
 	// EmailService를 주입받음
 	@Resource(name="emailService")
 	private final EmailService emailService;  
+
+    private final PasswordEncoder passwordEncoder;
 	
 	
 	public void join(MemberDTO member) {
 		try {
             // 비밀번호를 AES로 암호화
-            String encryptedPassword = AESUtil.encrypt(member.getUserPassword());
+            String encryptedPassword = passwordEncoder.encode(member.getUserPassword());
 
             // DTO를 Entity로 변환
             MemberEntity memberEntity = MemberEntity.builder()
