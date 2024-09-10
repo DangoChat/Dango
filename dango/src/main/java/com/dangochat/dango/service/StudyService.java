@@ -1,8 +1,10 @@
 package com.dangochat.dango.service;
 
+import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
 import com.dangochat.dango.entity.UserStudyContentEntity;
+import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.repository.UserMistakesRepository;
 import com.dangochat.dango.repository.UserStudyContentRepository;
@@ -18,6 +20,7 @@ public class StudyService {
 
     private final UserStudyContentRepository userStudyContentRepository;
     private final UserMistakesRepository userMistakesRepository;
+    private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
@@ -52,10 +55,15 @@ public class StudyService {
 
     // 오답 노트에 저장 (X 버튼 클릭 시)
     public void recordMistake(int userId, int studyContentId) {
+    	MemberEntity user = memberRepository.findById(userId)
+    	        .orElseThrow();
+    	    StudyEntity studyContent = studyRepository.findById(studyContentId)
+    	        .orElseThrow();
         UserMistakesEntity userMistakes = new UserMistakesEntity();
-        userMistakes.setUserId(userId);
-        userMistakes.setStudyContentId(studyContentId);
+        userMistakes.setUser(user);
+        userMistakes.setStudyContent(studyContent);
         userMistakes.setMistakeResolved(false);
+        
         userMistakes.setMistakeCounting(1);  // 처음 추가 되었을 때 count 는 1
         userMistakesRepository.save(userMistakes);
     }

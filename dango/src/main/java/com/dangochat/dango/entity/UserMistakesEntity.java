@@ -20,13 +20,15 @@ public class UserMistakesEntity {
     @Column(name = "mistake_id", nullable = false)
     private int mistakeId;
 
-    //회원 고유 아이디
-    @Column(name = "user_id", nullable = false, length = 100)
-    private int userId;
+    // 회원 고유 아이디 (외래키)
+    @ManyToOne(fetch = FetchType.LAZY)  // 다대일 관계 설정
+    @JoinColumn(name = "user_id", nullable = false,referencedColumnName = "user_id")
+    private MemberEntity user;
 
-    //공부 내용 고유 아이디
-    @Column(name = "study_content_id", nullable = false)
-    private int studyContentId;
+ // 공부 내용 고유 아이디 (외래키)
+    @ManyToOne(fetch = FetchType.LAZY)  // 다대일 관계 설정
+    @JoinColumn(name = "study_content_id", nullable = false,referencedColumnName = "study_content_id")
+    private StudyEntity studyContent;
 
     //오답 일자
     @Column(name = "user_mistake_date", nullable = false)
