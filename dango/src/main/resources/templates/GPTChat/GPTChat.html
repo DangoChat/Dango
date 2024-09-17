@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Chat</title>
+    <script>
+        // GPT와 대화를 시작하는 함수
+        async function sendMessage() {
+            const prompt = document.getElementById("promptInput").value; // 입력한 값을 가져옴
+            const responseDiv = document.getElementById("response"); // 응답을 출력할 곳
+
+            // 비어 있는 경우 처리
+            if (!prompt.trim()) {
+                responseDiv.innerHTML = "Please enter a prompt!";
+                return;
+            }
+
+            // API 호출을 통해 GPT와 통신
+            try {
+                const response = await fetch(`/gpt/chat?prompt=${encodeURIComponent(prompt)}`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch GPT response");
+                }
+                
+                const result = await response.text(); // 응답 데이터를 텍스트로 가져옴
+                responseDiv.innerHTML = `<strong>GPT:</strong> ${result}`; // 결과를 화면에 출력
+                
+                // 입력창을 비워줌
+                document.getElementById("promptInput").value = "";
+            } catch (error) {
+                responseDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        // 엔터 키를 눌렀을 때도 메시지를 보내도록 이벤트를 설정
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) { // 엔터 키 코드
+                sendMessage();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>[  GPT Chat  ]</h1>
+    
+    <!-- 사용자 입력 폼 -->
+    <div>
+        <label for="promptInput">GPTChat에 질문하기:</label>
+        <input type="text" id="promptInput" placeholder="Say something..." onkeydown="handleKeyPress(event)" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    
+    <!-- GPT 응답을 출력할 영역 -->
+    <div id="response" style="margin-top: 20px; font-size: 1.2em; color: blue;"></div>
+</body>
+</html>
