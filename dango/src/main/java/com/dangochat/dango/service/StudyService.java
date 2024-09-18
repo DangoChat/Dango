@@ -1,5 +1,6 @@
 package com.dangochat.dango.service;
 
+import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
@@ -47,9 +48,14 @@ public class StudyService {
 
     // 유저 공부 기록 저장 (O,X 버튼 클릭 시)
     public void recordStudyContent(int studyContentId, int userId, boolean isCorrect) {
+    	MemberEntity user = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
+    	StudyEntity studyContent = studyRepository.findById(studyContentId)
+                 .orElseThrow(() -> new IllegalArgumentException("Invalid study content ID: " + studyContentId));
+    	 
         UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
-        userStudyContent.setUserId(userId);
-        userStudyContent.setStudyContentId(studyContentId);
+        userStudyContent.setUser(user);
+        userStudyContent.setStudyContent(studyContent);
         userStudyContent.setRecordIsCorrect(isCorrect);
         userStudyContentRepository.save(userStudyContent);
     }
@@ -107,5 +113,26 @@ public class StudyService {
 
         return userMistakes;
     }
-    
+
+
+ // 유저 공부기록 가져오는 서비스
+    public List<String> studyContent(int userId) {
+
+        // 사용자 정보를 조회
+        MemberEntity user = memberRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
+
+        // 사용자의 공부 기록에서 관련된 StudyEntity 리스트 추출
+        List<UserStudyContentEntity> studyContentEntities = userStudyContentRepository.findByUser(user);
+
+        // StudyEntity의 content 필드만 추출하여 String 리스트로 변환
+        List<String> studyContentList = studyContentEntities.stream()
+            .map(userStudyContentEntity -> userStudyContentEntity.getStudyContent().getContent())  // StudyEntity의 content 필드만 추출
+            .collect(Collectors.toList());
+
+        return studyContentList;
+    }
+
+
+	
 }

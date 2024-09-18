@@ -1,8 +1,12 @@
 package com.dangochat.dango.controller;
 
+import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
+import com.dangochat.dango.service.GPTService;
 import com.dangochat.dango.service.StudyService;
+
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -21,6 +26,7 @@ import java.util.List;
 public class StudyController {
 
     private final StudyService studyService;
+    private final GPTService gptService;
 
     //단어 20개 학습 하기
     @GetMapping("word")
@@ -108,4 +114,33 @@ public class StudyController {
        
         return "StudyView/mistakes2";
     }
+    
+    
+    @GetMapping("listening")
+    public String listening(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
+
+        // 로그인 된 유저 ID(int) 가져오기
+        int userId = userDetails.getId();
+
+        // studyContent 가져오기 
+        List<String> studyContent = studyService.studyContent(userId);
+        System.out.println("Study content: " + studyContent);
+
+        // GPT로 문제 생성 (StudyDTO의 content 필드만을 사용하여 문제 생성)
+        List<String> generatedQuestions = gptService.generateQuestions(studyContent);
+
+        // 모델에 추가하여 뷰로 전달
+        model.addAttribute("studyContent", studyContent);
+        System.out.println("Generated Questions: " + generatedQuestions);
+        model.addAttribute("generatedQuestions", generatedQuestions);
+
+        return "StudyView/listening";  // 해당 뷰로 이동
+    }
+
+    
+    
+    
+    //학습한 단어 및 문법 내용 가저오는 컨트롤러
+    
+    
 }

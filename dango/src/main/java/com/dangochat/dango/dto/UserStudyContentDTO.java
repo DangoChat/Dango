@@ -15,4 +15,5 @@ public class UserStudyContentDTO {
     private int userId;
     private java.util.Date recordStudyDate = new java.util.Date();
     private boolean recordIsCorrect;
+    private String content;
 }
