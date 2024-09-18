@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -17,19 +16,22 @@ import java.util.Date;
 @Table(name = "user_study_content")
 public class UserStudyContentEntity {
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // GenerationType.IDENTITY로 변경
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_study_record_id")
     private int userStudyRecordId;
 
-    @Column(name = "study_content_id", nullable = false)
-    private int studyContentId;
+    // Many-to-One 관계 설정 (User)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private MemberEntity user;
 
-    @Column(name = "user_id", nullable = false)
-    private int userId;
+    // Many-to-One 관계 설정 (StudyContent)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_content_id", nullable = false)
+    private StudyEntity studyContent;
 
-    @Column(name = "record_study_date", nullable = false)
+    @Column(name = "record_study_date", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date recordStudyDate;
 
