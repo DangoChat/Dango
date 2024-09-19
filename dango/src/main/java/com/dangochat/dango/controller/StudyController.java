@@ -125,15 +125,15 @@ public class StudyController {
         // studyContent 가져오기 
         List<String> studyContent = studyService.studyContent(userId);
         System.out.println("Study content: " + studyContent);
-
+        
         // GPT로 문제 생성 (StudyDTO의 content 필드만을 사용하여 문제 생성)
         List<String> generatedQuestions = gptService.generateQuestions(studyContent);
-
+        
         // 모델에 추가하여 뷰로 전달
         model.addAttribute("studyContent", studyContent);
         System.out.println("Generated Questions: " + generatedQuestions);
         model.addAttribute("generatedQuestions", generatedQuestions);
-
+        
         return "StudyView/listening";  // 해당 뷰로 이동
     }
 

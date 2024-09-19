@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.dangochat.dango.dto.GPTChatResponse;
 import com.dangochat.dango.dto.GPTRequest;
-import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.Message;
 
 import jakarta.mail.MessagingException;
@@ -49,13 +49,14 @@ public class GPTController {
                 1, 256, 1, 2, 2
         );
 
-        GPTResponse gptResponse = restTemplate.postForObject(
+        // GPT의 응답을 받기 위해 요청
+        GPTChatResponse gptResponse = restTemplate.postForObject(
                 apiUrl,
                 request,
-                GPTResponse.class
+                GPTChatResponse.class
         );
 
-        // GPT의 응답을 대화 기록에 추가
+        // GPT의 응답에서 첫 번째 메시지 추출
         Message gptMessage = gptResponse.getChoices().get(0).getMessage();
         conversationHistory.add(new Message("assistant", gptMessage.getContent()));
 

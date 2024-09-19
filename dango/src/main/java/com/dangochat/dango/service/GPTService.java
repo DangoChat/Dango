@@ -34,15 +34,17 @@ public class GPTService {
         List<String> generatedQuestions = new ArrayList<>();
 
         // studyContent의 각 단어에 대해 개별적으로 GPT에 요청
-        for (String content : studyContent) {
-            if (content != null && !content.trim().isEmpty()) {
+        for (String studycontent : studyContent) {
+            if (studycontent != null && !studycontent.trim().isEmpty()) {
                 // 로그 추가: 현재 처리 중인 단어 출력
-                System.out.println("Processing content: " + content);
+                System.out.println("Processing content: " + studycontent);
 
                 // 각 단어에 대해 GPT 메시지 생성
-                List<Message> messages = List.of(new Message("user","JLPT 수준에서"+content+"이라는 단어를 사용하는 4지선다 "
-                		+ "청해문제를 만들어 주세요. 문제는 모두 일본어로 작성되어야 하고 問題：(문제) 이런식으로 내주세요,문제도 정답도 일본어로 내주세요."
-                		+ "그리고 정답알려줄땐 정답만 알려주세요 예를들어 正解：3 이런식으로"));
+                List<Message> messages = List.of(new Message("user","問題１______ の言葉の読み方として最もよいものを、１・２・３・４から一つ選びなさい。\r\n"
+                		+ "와 같이 JLPT 형식의 문제를 만들꺼에요. 위에 문제는 유형일 뿐이며, 지금부터 만들어줘야하는 문제는"+"\""+studycontent+"\""+"이 단어를 사용한 예문을 보여주고 단어에 밑줄을 쳐주면 됩니다. 문제와 선택지를 모두 일본어로 작성하여 위와 같은 형식의 4지선다 문제를 1문제만 만들어 주세요\r\n"
+                		+ "JSON 형식으로 Return을 해주세요.\r\n"
+                		+ "JSON의 형식은\r\n"
+                		+ "{ \"content\": 문제, \"options\": 4지선다 내용, \"answer\" : 정답 } 입니다."));
 
                 // GPT 요청 생성
                 GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
@@ -51,11 +53,11 @@ public class GPTService {
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {
                     String jsonRequest = objectMapper.writeValueAsString(request);
-                    System.out.println("Serialized JSON Request: " + jsonRequest);  // 요청 로그 출력
+                    System.out.println("gpt한테 질문한걸 json으로 형식으로 정리해서 보여주는 것: " + jsonRequest);  // 요청 로그 출력
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-
+                
                 GPTResponse gptResponse;
                 try {
                     gptResponse = restTemplate.postForObject(apiUrl, request, GPTResponse.class);
@@ -67,16 +69,19 @@ public class GPTService {
                 }
 
                 // GPT 응답이 유효한지 확인 후 질문 수집
-                if (gptResponse != null && gptResponse.getChoices() != null && !gptResponse.getChoices().isEmpty()) {
-                    String generatedQuestion = gptResponse.getChoices().get(0).getMessage().getContent();
-                    System.out.println("Generated question: " + generatedQuestion);  // 생성된 질문 로그 출력
-                    generatedQuestions.add(generatedQuestion);
+                if (gptResponse != null) {
+                    System.out.println("문재 내용: " + gptResponse.getContent());
+                    System.out.println("사지선다 내용: " + gptResponse.getOptions());
+                    System.out.println("정답 번호: " + gptResponse.getAnswer());
+                    
+                    // 만약 generatedQuestions 리스트에 content만 추가하고 싶다면
+                    generatedQuestions.add(gptResponse.getContent());
                 }
             }
         }
 
         // 최종적으로 생성된 질문 리스트 출력
-        System.out.println("Final generated questions: " + generatedQuestions);
+        System.out.println("최종적으로 생성된 질문 리스트 출력: " + generatedQuestions);
 
         return generatedQuestions;
     }
