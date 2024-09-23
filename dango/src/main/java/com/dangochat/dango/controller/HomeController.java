@@ -9,6 +9,10 @@ public class HomeController {
     public String home() {
         return "home";              
     }
+    @GetMapping("/healthcheck")
+    public String healthcheck() {
+        return "OK";
+    }
 
     @GetMapping("/hyeonmin")
     public String hyeonmin() {
