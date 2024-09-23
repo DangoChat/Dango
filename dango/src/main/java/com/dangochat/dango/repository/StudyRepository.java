@@ -22,12 +22,13 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     List<StudyEntity> findMistakesByUserIdAndType(@Param("userId") int userId, @Param("type") String type, @Param("limit") int limit);
 
     //[승급 테스트] - 한 단어 가져 와서 질문 하게 끔 하는 기능을 위해  study_content_content만 랜덤으로 가져오는 쿼리 단어 24개
-    //가타카나 [ァ-ヿ] 가 아닌것만 뽑기
     @Query(value = "SELECT study_content_content\n" +
             "FROM study_content\n" +
-            "WHERE study_content_content NOT REGEXP '[ァ-ヿ]' \n" +
+            "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
+            "AND study_content_content NOT REGEXP '[\\u30A0-\\u30FF]' \n" + // 가타카나 제외
             "ORDER BY RAND() \n" +
-            "LIMIT 24;;", nativeQuery = true)
+            "LIMIT 24;", nativeQuery = true)
     List<String> findRandomContent();
+
 
 }
