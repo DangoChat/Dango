@@ -1,5 +1,6 @@
 package com.dangochat.dango.controller;
 
+import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
@@ -126,8 +127,8 @@ public class StudyController {
         List<String> studyContent = studyService.studyContent(userId);
         System.out.println("Study content: " + studyContent);
         
-        // GPT로 문제 생성 (StudyDTO의 content 필드만을 사용하여 문제 생성)
-        List<String> generatedQuestions = gptService.generateQuestions(studyContent);
+     // GPT로 문제 생성 (StudyDTO의 content 필드만을 사용하여 문제 생성)
+        List<GPTResponse> generatedQuestions = gptService.generateQuestions(studyContent);
         
         // 모델에 추가하여 뷰로 전달
         model.addAttribute("studyContent", studyContent);
