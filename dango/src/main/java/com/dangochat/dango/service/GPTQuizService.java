@@ -18,6 +18,7 @@ import java.util.List;
 /*
  * GPT로 단어문제 만들기
  * */
+
 @Service
 @RequiredArgsConstructor
 public class GPTQuizService {
@@ -36,7 +37,7 @@ public class GPTQuizService {
         String prompt;
         switch (promptType) {
             case 1:
-                prompt = "\"이 단어를 사용한 예문을 일본어로 하나 만들어 주세요.\" +\n" +
+                prompt = content+"이 단어를 사용한 예문을 일본어로 하나 만들어 주세요.\" +\n" +
                         "  \" 이 단어에만 <u>밑줄</u>을 쳐주고, \"\n" +
                         " \"이 단어의 읽는 방법(일본어 히라가나로)을 객관식 4지선다로 보여주세요. \"\n" +
                         " \"JSON 형식으로 다음과 같이 반환해 주세요: \"\n" +
@@ -125,20 +126,23 @@ public class GPTQuizService {
     public List<String> generateQuestions(List<String> contentList, int messageType, int numOfQuestions) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
-        for (int i = 0; i < numOfQuestions; i++) { //만든 문제 수
-            String content = contentList.get(i);  // contentList에서 순차적으로 단어를 가져옴
+        // 만들 문제의 개수
+        for (int i = 0; i < numOfQuestions; i++) {
+
+            // contentList에서 순차적으로 단어를 가져옴
+            String content = contentList.get(i);
+            //null이 아니고 빈 공백문자가 아닌지 확인
             if (content != null && !content.trim().isEmpty()) {
+
                 System.out.println("현재 처리 중인 단어: " + content);
 
-                // 문제 번호에 따라 promptType이 변경되도록 로직 설정
-
-                // gpt에게 보낼 메시지
+                // gpt에게 보낼 메시지 (단어와 문제유형을 messages에 담아서 보냄)
                 List<Message> messages = createMessage(content, messageType);
 
-                // GPT 요청 객체 생성
+                // GPT 요청 객체 생성(3.5gpt와, messages, 등을 보냄)
                 GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
 
-                // request 객체를 JSON 형식의 문자열로 변환
+                // request 객체를 JSON 형식의 문자열로 변환하기 위해
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonRequest;
                 try {

@@ -15,6 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+* startIndex: 지금 보고 있는 페이지의 문제 번호 (예: n번째 문제).
+* targetIndex: 백그라운드에서 생성해야 할 문제 번호 (예: n+2번째 문제).
+* currentIndex: 현재 사용자가 보고 있는 문제의 번호.
+* currentMessageType: 현재 문제의 문제유형(1,2,3,4)을 지정하는 변수
+* count: 생성할 문제의 개수 (예: 한 번에 몇 개의 문제를 생성할지 결정)
+* generatedQuestions: 세션에서 관리하는 만들어진 문제들의 리스트.
+* questionNumber: URL에서 받아온 문제 번호 (사용자가 선택한 문제).
+ * contentList: 데이터베이스에서 가져온 랜덤한 단어 목록 (문제 생성을 위한 데이터).
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Controller
@@ -101,7 +111,7 @@ public class GPTQuizController {
     }
 
     // 초기 문제 3개를 미리 로드하는 메서드
-    private void loadInitialQuestions(HttpSession session, int startIndex, int count) {
+    private void loadInitialQuestions(HttpSession session, int startIndex, int count) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
         List<String> contentList = studyRepository.findRandomContent(); // 24개의 단어를 데이터베이스에서 랜덤하게 가져옴
         List<String> generatedQuestions = new ArrayList<>();
 
@@ -116,12 +126,12 @@ public class GPTQuizController {
     }
 
     // 백그라운드에서 다음 문제를 미리 생성하는 메서드
-    private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex) {
+    private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex) { //targetindex : 지금 생성해야 할 문제 번호 n+2번째 문제
         new Thread(() -> {
             try {
                 List<String> contentList = studyRepository.findRandomContent(); // 24개의 단어를 랜덤하게 가져옴
 
-                // targetIndex에 따라 적절한 messageType을 설정
+                // targetIndex(=1 이면 1번째 문제)에 따라 적절한 messageType(문제 유형)을 설정
                 int messageType;
                 if (targetIndex < 7) {
                     messageType = 1; // 1~6번째 문제는 promptType 1
