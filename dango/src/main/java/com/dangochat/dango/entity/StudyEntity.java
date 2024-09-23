@@ -42,4 +42,5 @@ public class StudyEntity {
 
     @Column(name = "example_translation2", length = 2000)
     private String exampleTranslation2;  // 예문 번역2
+
 }
