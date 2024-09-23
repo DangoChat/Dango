@@ -13,8 +13,8 @@ public class GPTResponse {
     private String content;     // 문제 내용
     private List<String> options;  // 선택지 목록
     private int answer;         // 정답 번호
-    private List<Choice> choices;
 
+    private List<Choice> choices;
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
