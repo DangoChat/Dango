@@ -14,6 +14,8 @@ public class GPTResponse {
     private List<String> options;  // 선택지 목록
     private String answer;         // 정답 번호
     
+   // private int answer;         // 정답 번호
+
     private List<Choice> choices;
     @Data
     @AllArgsConstructor
