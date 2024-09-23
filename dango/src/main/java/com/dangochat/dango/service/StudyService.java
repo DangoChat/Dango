@@ -114,7 +114,7 @@ public class StudyService {
     }
 
 
- // 유저 공부기록 가져오는 서비스
+ // 유저 공부기록 가져와서 청해문제를 gpt로 만든 후 html로 뿌려주는 컨트롤러
     public List<String> studyContent(int userId) {
 
         // 사용자 정보를 조회
