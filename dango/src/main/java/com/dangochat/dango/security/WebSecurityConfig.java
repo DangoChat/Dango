@@ -1,77 +1,86 @@
 package com.dangochat.dango.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    //로그인 없이 접근 가능 경로
+
+    // application.properties 파일에서 주입된 CORS 허용 도메인
+    @Value("${security.cors-allowed-origins}")
+    private String allowedOrigins;
+
     private static final String[] PUBLIC_URLS = {
-            "/"                 //메인화면
-            , "/images/**"      //이미지 파일 페이지
-            , "/css/**"         //css 파일 페이지
-            , "/js/**"         //자바스크립트 페이지
-            ,"/member/joinForm"
-            ,"/member/join"
-            ,"/member/idCheck"
-            ,"/member/passwordSearch"
-            ,"/miynnn"
-            ,"/honeybitterchip"
-            ,"/leean"
-            ,"/hyeonmin"
-            ,"/study/**"
-            ,"/mail/**"    // 메일 관련 경로 추가
+            "/", "/images/**", "/css/**", "/js/**", "/member/joinForm", "/member/join", 
+            "/member/idCheck", "/member/passwordSearch", "/miynnn", "/honeybitterchip", 
+            "/leean", "/hyeonmin", "/study/**", "/mail/**", "/api/member/**"
     };
 
     @Bean
     protected SecurityFilterChain config(HttpSecurity http) throws Exception {
         http
-            //요청에 대한 권한 설정
-            .authorizeHttpRequests(author -> author
-                .requestMatchers(PUBLIC_URLS).permitAll()   //모두 접근 허용
-                .anyRequest().authenticated()               //그 외의 모든 요청은 인증 필요
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(PUBLIC_URLS).permitAll()   // 모두 접근 허용
+                .anyRequest().authenticated()               // 나머지 요청은 인증 필요
             )
-            //HTTP Basic 인증을 사용하도록 설정
-            .httpBasic(Customizer.withDefaults())
-            
-            //폼 로그인 설정
-            .formLogin(formLogin -> formLogin      //수정할거면 따옴표 안에서만 변경
-            		 .loginPage("/member/loginForm")              //로그인폼 페이지 경로
-                     .usernameParameter("userEmail")               //폼의 userEmail 파라미터 이름
-                     .passwordParameter("userPassword")         //폼의 비밀번호 파라미터 이름
-                     .loginProcessingUrl("/member/login")         //로그인폼 제출하여 처리할 경로
-                     .defaultSuccessUrl("/")                      //로그인 성공 시 이동할 경로
-                     .permitAll()                            //로그인 페이지는 모두 접근 허용
-            )
-            //로그아웃 설정
-            .logout(logout -> logout
-                    .logoutUrl("/logout")                   //로그아웃 처리 경로
-                    .logoutSuccessUrl("/")                  //로그아웃 성공 시 이동할 경로
-            );
+            .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
-        http
-            .cors(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable);
+            // 폼 로그인 설정 유지
+            .formLogin(formLogin -> formLogin
+                    .loginPage("/member/loginForm")
+                    .usernameParameter("userEmail")
+                    .passwordParameter("userPassword")
+                    .loginProcessingUrl("/member/login")
+                    .defaultSuccessUrl("/")
+                    .permitAll()
+            )
+            .logout(logout -> logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/")
+            )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/member/**"))  // REST API 경로는 CSRF 비활성화
+            .cors(Customizer.withDefaults());  // CORS 설정 활성화
 
         return http.build();
     }
 
-    // //비밀번호 암호화를 위한 인코더를 빈으로 등록
-    // @Bean
-    // public BCryptPasswordEncoder getPasswordEncoder() {
-    //     return new BCryptPasswordEncoder();
-    // }
+    // CORS 설정
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins)); // 프로파일에 따라 도메인 설정
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true); // 자격 증명 허용
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    // AuthenticationManager를 빈으로 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new AESPasswordEncoder();
     }
-
 }

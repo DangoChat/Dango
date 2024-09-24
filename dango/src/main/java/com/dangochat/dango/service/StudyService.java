@@ -1,6 +1,5 @@
 package com.dangochat.dango.service;
 
-import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
@@ -41,7 +40,7 @@ public class StudyService {
         List<StudyEntity> combinedContent = new ArrayList<>();
         combinedContent.addAll(mistakeContent);
         combinedContent.addAll(generalContent);
-
+        
         return combinedContent;
     }
 
@@ -63,9 +62,9 @@ public class StudyService {
     // 오답 노트에 저장 (X 버튼 클릭 시)
     public void recordMistake(int userId, int studyContentId) {
     	MemberEntity user = memberRepository.findById(userId)
-    	        .orElseThrow();
-    	    StudyEntity studyContent = studyRepository.findById(studyContentId)
-    	        .orElseThrow();
+    	    .orElseThrow();
+    	StudyEntity studyContent = studyRepository.findById(studyContentId)
+    	    .orElseThrow();
         UserMistakesEntity userMistakes = new UserMistakesEntity();
         userMistakes.setUser(user);
         userMistakes.setStudyContent(studyContent);
