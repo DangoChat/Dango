@@ -11,6 +11,7 @@ import com.dangochat.dango.repository.UserMistakesRepository;
 import com.dangochat.dango.repository.UserStudyContentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,22 +116,15 @@ public class StudyService {
     }
 
 
- // 유저 공부기록 가져와서 청해문제를 gpt로 만든 후 html로 뿌려주는 컨트롤러
+    // 유저 공부기록 가져와서 청해문제를 gpt로 만든 후 HTML로 뿌려주는 컨트롤러
+    @Transactional(readOnly = true)
     public List<String> studyContent(int userId) {
-
-        // 사용자 정보를 조회
         MemberEntity user = memberRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
 
-        // 사용자의 공부 기록에서 관련된 StudyEntity 리스트 추출
-        List<UserStudyContentEntity> studyContentEntities = userStudyContentRepository.findByUser(user);
-
-        // StudyEntity의 content 필드만 추출하여 String 리스트로 변환
-        List<String> studyContentList = studyContentEntities.stream()
-            .map(userStudyContentEntity -> userStudyContentEntity.getStudyContent().getContent())  // StudyEntity의 content 필드만 추출
-            .collect(Collectors.toList());
-
-        return studyContentList;
+        return userStudyContentRepository.findByUser(user).stream()
+                .map(userStudyContentEntity -> userStudyContentEntity.getStudyContent().getContent())
+                .collect(Collectors.toList());
     }
 
 
