@@ -127,5 +127,20 @@ public class StudyService {
     }
 
 
+    
+    public List<String> getTodayWordContent(int userId) {
+        List<StudyEntity> wordContentEntities = studyRepository.findTodayWordContentByUserId(userId);
+        return wordContentEntities.stream()
+                                  .map(StudyEntity::getContent)
+                                  .toList();
+    }
+    
 	
+    public List<String> getTodayGrammarContent(int userId) {
+        List<StudyEntity> grammarContentEntities = studyRepository.findTodayGrammarContentByUserId(userId);
+        return grammarContentEntities.stream()
+                                     .map(StudyEntity::getContent)
+                                     .toList();
+    }
+    
 }

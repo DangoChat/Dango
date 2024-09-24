@@ -28,14 +28,14 @@ public class GPTService {
 
     // GPT에 문제 요청하고 응답 받는 메서드
  // GPT에 문제 요청하고 응답 받는 메서드 (매개변수를 List<String>으로 수정)
-    public List<String> generateQuestions2(List<String> contentList) throws IOException {
+    public List<String> generatelistening(List<String> contentList,int typesOfStudy) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         for (String content : contentList) {
             if (content != null && !content.trim().isEmpty()) {
                 // GPT에 보낼 메시지 생성
-                List<Message> messages = createMessages2(content, 1); // messageType을 고정
-
+                List<Message> messages = createMessages2(content, typesOfStudy); // messageType을 고정
+                                                                    // 정수(1) 듣기,정수(2) 단어,정수(3) 문법 관련 문제 gpt한테 요청
                 // GPT 요청 객체 생성
                 GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
                 ObjectMapper objectMapper = new ObjectMapper();

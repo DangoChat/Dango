@@ -30,5 +30,17 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
             "LIMIT 24;", nativeQuery = true)
     List<String> findRandomContent();
 
+    
+ // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일테스트)
+    @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
+    	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
+    	List<StudyEntity> findTodayWordContentByUserId(@Param("userId") int userId);
+
+    
+ // 특정 유저의 '문법' 타입 학습 콘텐츠를 가져오는 쿼리  (일일테스트)
+    @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
+    	       "WHERE usc.user.userId = :userId AND s.type = '문법' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
+    	List<StudyEntity> findTodayGrammarContentByUserId(@Param("userId") int userId);
+
 
 }

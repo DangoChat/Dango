@@ -55,7 +55,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadInitialQuestions(session, 1, 2);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
+        loadInitialQuestions(session, 1, 3);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 화면에 표시
@@ -121,14 +121,14 @@ public class GPTQuizController {
         return "redirect:/quiz/level/" + (currentIndex + 1); // 다음 문제로 리다이렉트
     }
 
-    // 초기 문제 3개를 미리 로드하는 메서드
+    // 초기 문제 3개를 미리 로드하는 메서드                                  1      ,       3
     private void loadInitialQuestions(HttpSession session, int startIndex, int count) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
         List<String> contentList = studyRepository.findRandomContent(); // 24개의 단어를 데이터베이스에서 랜덤하게 가져옴
         List<String> generatedQuestions = new ArrayList<>();
 
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 세션에서 현재 메세지 타입을 가져옴
-            generatedQuestions = gptQuizService.generateQuestions(contentList.subList(startIndex - 1, startIndex - 1 + count), messageType, count); // 여러 문제를 생성하여 리스트에 저장
+            generatedQuestions = gptQuizService.generateQuestions(contentList.subList(startIndex - 1, startIndex - 1 + count), messageType, count); // 여러 문제를 생성하여 리스트에 저장 (문제 생성해주는 서비스)
             session.setAttribute("generatedQuestions", generatedQuestions); // 생성된 문제 리스트를 세션에 저장
             log.info("초기 생성된 {}개의 문제: {}", count, generatedQuestions); //2개, 만둘아진 문제
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class GPTQuizController {
         int userId = userDetails.getId();
         
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());
+        session.setAttribute("generatedQuestions", new ArrayList<String>());  
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
 
@@ -208,7 +208,7 @@ public class GPTQuizController {
         System.out.println("Study content: " + studyContent);
 
         List<String> generatedQuestions = new ArrayList<>();
-
+        int listening = 1; // 서비스에 듣기관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
 
@@ -216,7 +216,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateQuestions2(studyContent.subList(startIndex - 1, endIndex));
+                generatedQuestions = gptService.generatelistening(studyContent.subList(startIndex - 1, endIndex),listening);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -239,12 +239,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 청해 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-
+        
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-
+        
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/listening/" + (currentIndex + 1);
     }
@@ -295,9 +295,6 @@ public class GPTQuizController {
         return "QuizView/listening";
     }
 
-
-
-
     
     
     private void generateNextQuestionInBackground2(HttpSession session, int messageType, int targetIndex, int userId) {
@@ -321,4 +318,183 @@ public class GPTQuizController {
             }
         }).start();
     }
+    
+    
+    
+    
+    
+ // GPT로 일일 단어문제 만드는 controller(이안호)
+    @GetMapping("/dailyWordTest/1")
+    public String dailyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
+        // 로그인 된 유저 ID 가져오기
+        int userId = userDetails.getId();
+        
+        // 세션 초기화 후 첫 번째 문제부터 시작
+        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
+        session.setAttribute("currentMessageType", 1);
+        
+        // 3개의 문제를 미리 생성해서 세션에 저장
+        log.info("초기 3개의 문제 생성 시작.");
+        loadDailyWordQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        log.info("초기 3개의 문제 생성 완료.");
+
+        // 첫 번째 문제를 가져와서 화면에 표시
+        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+        if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
+            String currentQuestion = generatedQuestions.get(0); // 1번째 문제
+            model.addAttribute("question", currentQuestion);
+            model.addAttribute("currentIndex", 1); // 사용자에게는 1번째 문제로 보여줌
+            log.info("첫 번째 청해 문제 표시: {}", currentQuestion);
+        }
+
+        return "QuizView/dailyWordTest";  // 해당 뷰로 이동
+    }
+    
+    
+    // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadDailyWordQuestions(HttpSession session, int startIndex, int count, int userId) {
+        // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
+        List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가저온다
+        System.out.println("Study content: " + studyContent);
+
+        List<String> generatedQuestions = new ArrayList<>();
+        int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
+        try {
+            int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
+            
+            // studyContent의 크기를 확인하여 범위를 조정
+            int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
+            // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
+            if (startIndex - 1 < studyContent.size()) {
+                generatedQuestions = gptService.generatelistening(studyContent.subList(startIndex - 1, endIndex),word);
+            } else {
+                log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
+            }
+            
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
+        } catch (Exception e) {
+            log.error("청해 문제가 생성되지 않았습니다.", e);
+        }
+    }
+    
+    
+    
+    
+    
+ // GPT로 일일 문법문제 만드는 controller(이안호)
+    @GetMapping("/dailyGrammarTest/1")
+    public String dailyGrammarTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
+        // 로그인 된 유저 ID 가져오기
+        int userId = userDetails.getId();
+        
+        // 세션 초기화 후 첫 번째 문제부터 시작
+        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
+        session.setAttribute("currentMessageType", 1);
+        
+        // 3개의 문제를 미리 생성해서 세션에 저장
+        log.info("초기 3개의 문제 생성 시작.");
+        loadDailyGrammarQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        log.info("초기 3개의 문제 생성 완료.");
+
+        // 첫 번째 문제를 가져와서 화면에 표시
+        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+        if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
+            String currentQuestion = generatedQuestions.get(0); // 1번째 문제
+            model.addAttribute("question", currentQuestion);
+            model.addAttribute("currentIndex", 1); // 사용자에게는 1번째 문제로 보여줌
+            log.info("첫 번째 청해 문제 표시: {}", currentQuestion);
+        }
+
+        return "QuizView/dailyGrammarTest";  // 해당 뷰로 이동
+    }
+    
+ // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadDailyGrammarQuestions(HttpSession session, int startIndex, int count, int userId) {
+        // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
+        List<String> studyContent = studyService.getTodayGrammarContent(userId); // '문법' 타입 콘텐츠만 가저온다
+        System.out.println("Study content: " + studyContent);
+
+        List<String> generatedQuestions = new ArrayList<>();
+        int grammar = 3; // 서비스에 단어관련 문제를 요청하는 정수
+        try {
+            int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
+            
+            // studyContent의 크기를 확인하여 범위를 조정
+            int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
+            // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
+            if (startIndex - 1 < studyContent.size()) {
+                generatedQuestions = gptService.generatelistening(studyContent.subList(startIndex - 1, endIndex),grammar);
+            } else {
+                log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
+            }
+            
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
+        } catch (Exception e) {
+            log.error("청해 문제가 생성되지 않았습니다.", e);
+        }
+    }
+    
+    
+    
+    
+ // GPT로 주간 단어문제 만드는 controller(이안호)
+    @GetMapping("/weeklyWordTest/1")
+    public String weeklyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
+        // 로그인 된 유저 ID 가져오기
+        int userId = userDetails.getId();
+        
+        // 세션 초기화 후 첫 번째 문제부터 시작
+        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
+        session.setAttribute("currentMessageType", 1);
+        
+        // 3개의 문제를 미리 생성해서 세션에 저장
+        log.info("초기 3개의 문제 생성 시작.");
+        loadDailyWordQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        log.info("초기 3개의 문제 생성 완료.");
+
+        // 첫 번째 문제를 가져와서 화면에 표시
+        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+        if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
+            String currentQuestion = generatedQuestions.get(0); // 1번째 문제
+            model.addAttribute("question", currentQuestion);
+            model.addAttribute("currentIndex", 1); // 사용자에게는 1번째 문제로 보여줌
+            log.info("첫 번째 청해 문제 표시: {}", currentQuestion);
+        }
+
+        return "QuizView/weeklyWordTest";  // 해당 뷰로 이동
+    }
+    
+    
+    // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadDailyWordQuestions(HttpSession session, int startIndex, int count, int userId) {
+        // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
+        List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가저온다
+        System.out.println("Study content: " + studyContent);
+
+        List<String> generatedQuestions = new ArrayList<>();
+        int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
+        try {
+            int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
+            
+            // studyContent의 크기를 확인하여 범위를 조정
+            int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
+            // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
+            if (startIndex - 1 < studyContent.size()) {
+                generatedQuestions = gptService.generatelistening(studyContent.subList(startIndex - 1, endIndex),word);
+            } else {
+                log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
+            }
+            
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
+        } catch (Exception e) {
+            log.error("청해 문제가 생성되지 않았습니다.", e);
+        }
+    }
+    
 }
