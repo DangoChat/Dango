@@ -54,6 +54,7 @@ public class StudyController {
             @RequestParam("answer") String answer) {
         try {
             boolean isCorrect = "O".equals(answer);
+            
             studyService.recordStudyContent(studyContentId, userId, isCorrect);
 
             if (!isCorrect) {
