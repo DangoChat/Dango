@@ -2,7 +2,6 @@ package com.dangochat.dango.repository;
 
 import com.dangochat.dango.entity.StudyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;  // JpaRepository를 import
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,5 +29,13 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
             "LIMIT 24;", nativeQuery = true)
     List<String> findRandomContent();
 
+    @Query(value = "SELECT *\n" +
+            "FROM study_content\n" +
+            "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
+            "AND study_content_content NOT REGEXP '[\\u30A0-\\u30FF]' \n" + // 가타카나 제외
+            "AND study_content_type = '문법'\n" + 
+            "ORDER BY RAND() \n" +
+            "LIMIT 6;", nativeQuery = true)
+    List<StudyEntity> findRandomGrammerContent();
 
 }

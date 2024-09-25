@@ -1,5 +1,6 @@
 package com.dangochat.dango.service;
 
+import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
@@ -132,6 +133,27 @@ public class StudyService {
         return studyContentList;
     }
 
+    // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기
+    public List<StudyDTO> getGrammerContent(){
+        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerContent();
+        List<StudyDTO> studyDTOList = new ArrayList<>();
 
+        for (StudyEntity entity : studyGrammerContent){
+            StudyDTO dto = new StudyDTO(
+                entity.getStudyContentId(),
+                entity.getContent(),
+                entity.getPronunciation(),
+                entity.getMeaning(),
+                entity.getType(),
+                entity.getLevel(),
+                entity.getExample1(),
+                entity.getExampleTranslation1(),
+                entity.getExample2(),
+                entity.getExampleTranslation2()
+            );
+            studyDTOList.add(dto);
+        }
+        return studyDTOList;
+    }
 	
 }

@@ -1,90 +1,96 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
     <title>회원가입</title>
     <!-- jQuery 파일 불러오기 -->
     <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
     <script>
-    $(document).ready(function() {
+      $(document).ready(function () {
         var emailValid = false;
 
         // 이메일 중복 체크 Ajax
-        $('#userEmail').on('input', function () {
-            var email = $(this).val();
-            if (email != '') {
-                $.ajax({
-                    type: 'POST',
-                    url: '/member/idCheck',
-                    data: { id: email },
-                    success: function(response) {
-                        if (response == 1) {
-                            $('#emailCheckMessage').text('누군가 이 이메일을 사용하고 있어요.').css('color', 'red');
-                            emailValid = false;
-                        } else {
-                            $('#emailCheckMessage').text('사용 가능한 이메일입니다.').css('color', 'green');
-                            emailValid = true;
-                        }
-                    }
-                });
-            } else {
-                $('#emailCheckMessage').text('');
-                emailValid = false;
-            }
+        $("#userEmail").on("input", function () {
+          var email = $(this).val();
+          if (email != "") {
+            $.ajax({
+              type: "POST",
+              url: "/member/idCheck",
+              data: { id: email },
+              success: function (response) {
+                if (response == 1) {
+                  $("#emailCheckMessage")
+                    .text("누군가 이 이메일을 사용하고 있어요.")
+                    .css("color", "red");
+                  emailValid = false;
+                } else {
+                  $("#emailCheckMessage")
+                    .text("사용 가능한 이메일입니다.")
+                    .css("color", "green");
+                  emailValid = true;
+                }
+              },
+            });
+          } else {
+            $("#emailCheckMessage").text("");
+            emailValid = false;
+          }
         });
 
         // 가입 폼 전송 시 이메일 중복 여부 체크
-        $('#joinForm').submit(function () {
-            if (!emailValid) {
-                alert('중복된 이메일입니다. 이메일을 확인하세요.');
-                return false;  // 중복된 이메일일 경우 폼이 제출되지 않음
-            }
+        $("#joinForm").submit(function () {
+          if (!emailValid) {
+            alert("중복된 이메일입니다. 이메일을 확인하세요.");
+            return false; // 중복된 이메일일 경우 폼이 제출되지 않음
+          }
 
-            // 다른 필수 입력값 체크
-            if ($('#userPassword').val() == '') {
-                alert('비밀번호를 입력하세요.');
-                return false;
-            }
-            
-            return true;  // 중복된 이메일이 없을 때만 폼 제출
+          // 다른 필수 입력값 체크
+          if ($("#userPassword").val() == "") {
+            alert("비밀번호를 입력하세요.");
+            return false;
+          }
+
+          return true; // 중복된 이메일이 없을 때만 폼 제출
         });
-    });
+      });
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>[ 회원가입 ]</h1>
 
     <form id="joinForm" th:action="@{/member/join}" method="post">
-        <p>
-            <label>Email</label>
-            <input type="email" name="userEmail" id="userEmail">
-            <span id="emailCheckMessage"></span> <!-- 이메일 중복 체크 결과 표시 -->
-        </p>
-        <p>
-            <label>Password</label>
-            <input type="password" name="userPassword" id="userPassword">
-        </p>
-        <p>
-            <label>Nickname</label>
-            <input type="text" name="nickname" id="nickname">
-        </p>
-        <p>
-            <label>Phone</label>
-            <input type="text" name="userPhone" id="userPhone">
-        </p>
-        <p>
-            <label>Nationality</label>
-            <select name="userNationality" id="userNationality">
-                <option value="Korea">한국</option>
-                <option value="Japan">일본</option>
-            </select>
-        </p>
-        <p>
-            <input type="submit" value="가입">
-        </p>
+      <p>
+        <label>Email</label>
+        <input type="email" name="userEmail" id="userEmail" />
+        <span id="emailCheckMessage"></span>
+        <!-- 이메일 중복 체크 결과 표시 -->
+      </p>
+      <p>
+        <label>Password</label>
+        <input type="password" name="userPassword" id="userPassword" />
+      </p>
+      <p>
+        <label>Nickname</label>
+        <input type="text" name="nickname" id="nickname" />
+      </p>
+      <p>
+        <label>Phone</label>
+        <input type="text" name="userPhone" id="userPhone" />
+      </p>
+      <p>
+        <label>Nationality</label>
+        <select name="userNationality" id="userNationality">
+          <option value="Korea">한국</option>
+          <option value="Japan">일본</option>
+        </select>
+      </p>
+      <p>
+        <input type="submit" value="가입" />
+      </p>
     </form>
-    
-</body>
+  </body>
 </html>
