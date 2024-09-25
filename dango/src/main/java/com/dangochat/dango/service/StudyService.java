@@ -1,6 +1,9 @@
 package com.dangochat.dango.service;
 
+
 import com.dangochat.dango.config.DateUtils;
+
+import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
@@ -131,7 +134,31 @@ public class StudyService {
                 .collect(Collectors.toList());
     }
 
-
+    // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기
+    public List<StudyDTO> getGrammerContent(){
+        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerContent();
+        List<StudyDTO> studyDTOList = new ArrayList<>();
+        
+        for (StudyEntity entity : studyGrammerContent){
+            StudyDTO dto = new StudyDTO(
+                entity.getStudyContentId(),
+                entity.getContent(),
+                entity.getPronunciation(),
+                entity.getMeaning(),
+                entity.getType(),
+                entity.getLevel(),
+                entity.getExample1(),
+                entity.getExampleTranslation1(),
+                entity.getExample2(),
+                entity.getExampleTranslation2()
+            );
+            studyDTOList.add(dto);
+        }
+        return studyDTOList;
+    }
+    
+    
+    
     // repository에 사용자가 하루간 학습한 내용 가저오는 쿼리 요청
     public List<String> getTodayWordContent(int userId) {
         List<StudyEntity> wordContentEntities = studyRepository.findTodayWordContentByUserId(userId);
@@ -177,4 +204,7 @@ public class StudyService {
                                   .map(StudyEntity::getContent)
                                   .toList();
     }
+
+        
+
 }

@@ -26,4 +26,9 @@ public class StudyDTO {
     public StudyDTO(String content) {
         this.content = content;
     }
+
+    public StudyDTO(String content, String meaning) {
+        this.content = content;
+        this.meaning = meaning;
+    }
 }

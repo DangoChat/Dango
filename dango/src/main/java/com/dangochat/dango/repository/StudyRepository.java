@@ -2,7 +2,6 @@ package com.dangochat.dango.repository;
 
 import com.dangochat.dango.entity.StudyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;  // JpaRepository를 import
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -37,6 +36,14 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
     	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
     	List<StudyEntity> findTodayWordContentByUserId(@Param("userId") int userId);
+    @Query(value = "SELECT *\n" +
+            "FROM study_content\n" +
+            "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
+            "AND study_content_content NOT REGEXP '[\\u30A0-\\u30FF]' \n" + // 가타카나 제외
+            "AND study_content_type = '문법'\n" + 
+            "ORDER BY RAND() \n" +
+            "LIMIT 6;", nativeQuery = true)
+    List<StudyEntity> findRandomGrammerContent();
 
     
  // 특정 유저의 '문법' 타입 학습 콘텐츠를 가져오는 쿼리  (일일테스트)
