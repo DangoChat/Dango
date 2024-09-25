@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -31,6 +32,7 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     List<String> findRandomContent();
 
     
+    
  // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일테스트)
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
     	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
@@ -42,5 +44,13 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     	       "WHERE usc.user.userId = :userId AND s.type = '문법' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
     	List<StudyEntity> findTodayGrammarContentByUserId(@Param("userId") int userId);
 
+ // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (주간테스트) 
+    @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
+    	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND usc.recordStudyDate BETWEEN :startDate AND :endDate")
+    	List<StudyEntity> findWeekWordContentByUserId(@Param("userId") int userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
+ // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (주간테스트) 
+    @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
+    	       "WHERE usc.user.userId = :userId AND s.type = '문법' AND usc.recordStudyDate BETWEEN :startDate AND :endDate")
+    	List<StudyEntity> findWeekGrammarContentByUserId(@Param("userId") int userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

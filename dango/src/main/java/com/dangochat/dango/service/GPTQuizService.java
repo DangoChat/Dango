@@ -46,7 +46,7 @@ public class GPTQuizService {
                         "\" 일본어로만 문제와 객관식을 만들어 주세요\"\n" +
                         "\"응답에 한국어나 영어 또는 다른 문자는 절대 포함되지 않도록 주의해 주세요.\";";
                 break;
-
+                
             case 2:
                 prompt = content + "이라는 단어를 사용한 새로운 문제를 만들어 주세요. "
                         + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
@@ -58,9 +58,9 @@ public class GPTQuizService {
                         + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
                         + "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
                         + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요.";
-                break;
-
-
+                break;	
+                
+                
             case 3:
                 prompt =
                         content + "이라는 단어가 포함된 새로운 문제를 만들어 주세요. "
@@ -76,7 +76,7 @@ public class GPTQuizService {
 
                 ;
                 break;
-
+                
             case 4:
                 prompt =
                         content + "일본어 단어를 문제로 제시하고, 보기 문장 속에서 그 단어의 올바른 사용을 고르는 문제를 만들어 주세요. 아래 조건을 지켜 주세요:\n" +
@@ -108,7 +108,7 @@ public class GPTQuizService {
                                 "  \"answer\": \"2\"\n" +
                                 "}\n" +
                                 "위와 같은 형식을 지켜 주세요.";
-
+                
                 ;
                 break;
             default:

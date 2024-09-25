@@ -1,5 +1,6 @@
 package com.dangochat.dango.service;
 
+import com.dangochat.dango.config.DateUtils;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserMistakesEntity;
@@ -9,13 +10,17 @@ import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.repository.UserMistakesRepository;
 import com.dangochat.dango.repository.UserStudyContentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudyService {
@@ -36,7 +41,7 @@ public class StudyService {
         // 나머지 콘텐츠를 일반 학습 콘텐츠에서 랜덤하게 가져오기
         int generalLimit = LIMIT - mistakeLimit;
         List<StudyEntity> generalContent = studyRepository.findRandomByLevelAndType(level, type, generalLimit);
-
+        
         // 두 리스트를 합친다
         List<StudyEntity> combinedContent = new ArrayList<>();
         combinedContent.addAll(mistakeContent);
@@ -127,7 +132,7 @@ public class StudyService {
     }
 
 
-    
+    // repository에 사용자가 하루간 학습한 내용 가저오는 쿼리 요청
     public List<String> getTodayWordContent(int userId) {
         List<StudyEntity> wordContentEntities = studyRepository.findTodayWordContentByUserId(userId);
         return wordContentEntities.stream()
@@ -135,7 +140,7 @@ public class StudyService {
                                   .toList();
     }
     
-	
+    // repository에 사용자가 하루간 학습한 내용 가저오는 쿼리 요청
     public List<String> getTodayGrammarContent(int userId) {
         List<StudyEntity> grammarContentEntities = studyRepository.findTodayGrammarContentByUserId(userId);
         return grammarContentEntities.stream()
@@ -143,4 +148,33 @@ public class StudyService {
                                      .toList();
     }
     
+    
+    // repository에 사용자가 주가동안 학습한 내용 가저오는 쿼리 요청
+    public List<String> getWeekWordContent(int userId) {
+        Date today = new Date();  // 오늘 날짜
+        Date startOfWeek = DateUtils.getStartOfWeek(today);  // 해당 주의 월요일
+        Date endOfWeek = DateUtils.getEndOfWeek(today);  // 해당 주의 일요일
+
+        log.info("Start of week:{} " , startOfWeek);
+        log.info("End of week: {}" ,endOfWeek);
+        List<StudyEntity> wordContentEntities = studyRepository.findWeekWordContentByUserId(userId, startOfWeek, endOfWeek);
+        return wordContentEntities.stream()
+                                  .map(StudyEntity::getContent)
+                                  .toList();
+    }
+    
+    
+    // repository에 사용자가 주가동안 학습한 내용 가저오는 쿼리 요청
+    public List<String> getWeekGrammarContent(int userId) {
+        Date today = new Date();  // 오늘 날짜
+        Date startOfWeek = DateUtils.getStartOfWeek(today);  // 해당 주의 월요일
+        Date endOfWeek = DateUtils.getEndOfWeek(today);  // 해당 주의 일요일
+
+        log.info("Start of week:{} " , startOfWeek);
+        log.info("End of week: {}" ,endOfWeek);
+        List<StudyEntity> wordContentEntities = studyRepository.findWeekGrammarContentByUserId(userId, startOfWeek, endOfWeek);
+        return wordContentEntities.stream()
+                                  .map(StudyEntity::getContent)
+                                  .toList();
+    }
 }

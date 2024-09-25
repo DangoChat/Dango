@@ -54,7 +54,7 @@ public class WebSecurityConfig {
                     .logoutSuccessUrl("/")
             )
             .csrf(AbstractHttpConfigurer::disable)
-            // .csrf(csrf -> csrf.ignoringRequestMatchers("/api/member/**"))  // REST API 경로는 CSRF 비활성화
+//             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/member/**"))  // REST API 경로는 CSRF 비활성화
             .cors(Customizer.withDefaults());  // CORS 설정 활성화
 
         return http.build();

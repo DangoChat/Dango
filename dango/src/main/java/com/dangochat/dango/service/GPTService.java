@@ -28,43 +28,69 @@ public class GPTService {
 
     // GPT에 문제 요청하고 응답 받는 메서드
  // GPT에 문제 요청하고 응답 받는 메서드 (매개변수를 List<String>으로 수정)
-    public List<String> generatelistening(List<String> contentList,int typesOfStudy) throws IOException {
+    public List<String> generateGPTQuestions(List<String> contentList, int messageType, int numOfQuestions) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
-        for (String content : contentList) {
+        // contentList의 크기와 numOfQuestions 중 작은 값을 사용
+        int actualNumOfQuestions = Math.min(numOfQuestions, contentList.size());
+
+        // actualNumOfQuestions만큼 반복하면서 질문을 생성
+        for (int i = 0; i < actualNumOfQuestions; i++) {
+
+            // contentList에서 순차적으로 단어를 가져옴
+            String content = contentList.get(i);
+
+            // null이 아니고 빈 공백 문자가 아닌지 확인
             if (content != null && !content.trim().isEmpty()) {
-                // GPT에 보낼 메시지 생성
-                List<Message> messages = createMessages2(content, typesOfStudy); // messageType을 고정
-                                                                    // 정수(1) 듣기,정수(2) 단어,정수(3) 문법 관련 문제 gpt한테 요청
-                // GPT 요청 객체 생성
+
+                System.out.println("현재 처리 중인 단어: " + content);
+
+                // gpt에게 보낼 메시지 (단어와 문제유형을 messages에 담아서 보냄)
+                List<Message> messages = createMessages(content, messageType);
+
+                // GPT 요청 객체 생성(3.5gpt와, messages, 등을 보냄)
                 GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
+
+                // request 객체를 JSON 형식의 문자열로 변환하기 위해
                 ObjectMapper objectMapper = new ObjectMapper();
+                String jsonRequest;
                 try {
-                    String jsonRequest = objectMapper.writeValueAsString(request);
-                    System.out.println("GPT 요청: " + jsonRequest);
+                    jsonRequest = objectMapper.writeValueAsString(request);
+                    System.out.println("GPT에 보낼 요청: " + jsonRequest);  // 요청 내용을 출력해 확인
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
+                    throw new IOException("JSON 변환 중 오류 발생", e);
                 }
 
+                // GPT API 호출 및 응답 처리
                 GPTResponse gptResponse;
                 try {
-                    gptResponse = restTemplate.postForObject(apiUrl, request, GPTResponse.class);
-                } catch (Exception e) {
-                    throw new IOException("GPT API 통신 중 오류 발생", e);
-                }
+                    gptResponse = restTemplate.postForObject(
+                            apiUrl,   // 요청을 보낼 API의 URL
+                            request,  // POST 요청의 본문에 포함될 데이터 (GPTRequest 객체)
+                            GPTResponse.class // 응답을 변환할 클래스 타입 (GPTResponse 객체)
+                    );
 
-                if (gptResponse != null && gptResponse.getChoices() != null) {
-                    String quizResponse = gptResponse.getChoices().get(0).getMessage().getContent();
-                    generatedQuestions.add(quizResponse);
+                    // GPT 응답에서 문제 파싱
+                    if (gptResponse != null && gptResponse.getChoices() != null) {
+                        String quizResponse = gptResponse.getChoices().get(0).getMessage().getContent();
+                        generatedQuestions.add(quizResponse);
+                    } else {
+                        System.err.println("문제가 생성되지 않았습니다.");
+                    }
+                } catch (Exception e) {
+                    System.err.println("GPT API 통신 중 오류 발생: " + e.getMessage());
+                    throw new IOException("GPT API 통신 중 오류 발생", e);
                 }
             }
         }
-        return generatedQuestions;  
+
+        return generatedQuestions;  // 생성된 질문 리스트 반환
     }
 
 
     // GPT 메시지를 생성하는 메서드
-    private List<Message> createMessages2(String content, int promptType) {
+    private List<Message> createMessages(String content, int promptType) {
         String prompt;
         switch (promptType) {
         case 1:

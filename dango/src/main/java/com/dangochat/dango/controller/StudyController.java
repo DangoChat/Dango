@@ -37,7 +37,7 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        // 한국어 능력 시험 level 2
+        // jlpt n2급 단어 가저오기
         List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevelAndType("N2", "단어",userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
