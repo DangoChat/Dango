@@ -29,11 +29,13 @@
     <td th:text="${content.pronunciation}"></td>
     <td th:text="${content.meaning}"></td>
     <td th:text="${content.type}"></td>
-    <td th:text="${content.level}"></td>
+    <td th:text="${content.level.level}"></td>
     <td>
       <!-- answer o/x button -->
       <button class="answer-btn" data-answer="O" th:data-userId="${userId}">O</button>
+
       <button class="answer-btn" data-answer="X" th:data-userId="${userId}">X</button>
+
     </td>
   </tr>
   </tbody>

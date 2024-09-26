@@ -1,12 +1,12 @@
 package com.dangochat.dango.service;
 
+import lombok.Builder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dangochat.dango.dto.MemberDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.repository.MemberRepository;
-import com.dangochat.dango.security.AESUtil;
 
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
@@ -57,7 +57,11 @@ public class MemberService {
         return exists ? 1 : 0;
 	}
 	
-	
+	public String getUserInfo(int userId){
+		MemberEntity memberEntity = memberRepository.findById(userId).orElse(null);
+		String userLevel = memberEntity.getCurrentLevel();
+		return userLevel;
+	}
 	
 	
 }

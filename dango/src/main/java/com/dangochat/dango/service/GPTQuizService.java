@@ -37,16 +37,19 @@ public class GPTQuizService {
         String prompt;
         switch (promptType) {
             case 1:
-                prompt = content+"이 단어를 사용한 예문을 일본어로 하나 만들어 주세요.\" +\n" +
-                        "  \" 이 단어에만 <u>밑줄</u>을 쳐주고, \"\n" +
-                        " \"이 단어의 읽는 방법(일본어 히라가나로)을 객관식 4지선다로 보여주세요. \"\n" +
+                prompt = content+"이 단어를 사용한 예문을 일본어로 하나 만들어 주세요.\" +\n"
+                        + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "+
+                        "  \" 이 예문중 일본어 한자단어에 <u>밑줄</u>을 쳐주고, \"\n" +
+                        " \"이 일본어 한자단어의 읽는 방법(일본어 히라가나로)을 객관식 4지선다로 보여주세요. \"\n" +
                         " \"JSON 형식으로 다음과 같이 반환해 주세요: \"\n" +
-                        " \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1번\\\", \\\"2번\\\", \\\"3번\\\", \\\"4번\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
+                        " \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
                         " \"반드시 줄바꿈해서 보기 쉽게 보여주세요.\"\n" +
                         "\" 일본어로만 문제와 객관식을 만들어 주세요\"\n" +
-                        "\"응답에 한국어나 영어 또는 다른 문자는 절대 포함되지 않도록 주의해 주세요.\";";
+                        "\"응답에 한국어나 영어 또는 다른 문자는 절대 포함되지 않도록 주의해 주세요.\";"
+                        +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
+                ;
                 break;
-                
+
             case 2:
                 prompt = content + "이라는 단어를 사용한 새로운 문제를 만들어 주세요. "
                         + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
@@ -55,12 +58,13 @@ public class GPTQuizService {
                         + "객관식 예시: 1. 成因  2. 原因  3. 起因  4. 因果 "
                         + "이 형식으로 괄호 `(　　　)`를 사용한 문제를 만들어 주세요. "
                         + "JSON 형식으로 다음과 같이 반환해 주세요: "
-                        + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
-                        + "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
-                        + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요.";
-                break;	
-                
-                
+                        +" \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
+                         "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
+                        + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요."
+                        +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
+                break;
+
+
             case 3:
                 prompt =
                         content + "이라는 단어가 포함된 새로운 문제를 만들어 주세요. "
@@ -70,13 +74,13 @@ public class GPTQuizService {
                                 + "객관식 예시: 1. 奇妙な  2. 複雑な  3. 簡潔な  4. 明確な "
                                 + "이 형식으로 문제를 만들어 주세요. "
                                 + "JSON 형식으로 다음과 같이 반환해 주세요: "
-                                + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
+                                + " \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n"
                                 + "일본어로만 문제와 객관식을 만들어 주세요 "
-                                + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요.";
-
+                                + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요."
+                                +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
                 ;
                 break;
-                
+
             case 4:
                 prompt =
                         content + "일본어 단어를 문제로 제시하고, 보기 문장 속에서 그 단어의 올바른 사용을 고르는 문제를 만들어 주세요. 아래 조건을 지켜 주세요:\n" +
@@ -107,8 +111,8 @@ public class GPTQuizService {
                                 "  ],\n" +
                                 "  \"answer\": \"2\"\n" +
                                 "}\n" +
-                                "위와 같은 형식을 지켜 주세요.";
-
+                                "위와 같은 형식을 지켜 주세요."
+                                +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
                 ;
                 break;
             default:
@@ -139,8 +143,8 @@ public class GPTQuizService {
                 // gpt에게 보낼 메시지 (단어와 문제유형을 messages에 담아서 보냄)
                 List<Message> messages = createMessage(content, messageType);
 
-                // GPT 요청 객체 생성(3.5gpt와, messages, 등을 보냄)
-                GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
+                // GPT 요청 객체 생성(3.5 gpt 와, messages, 등을 보냄)
+                GPTRequest request = new GPTRequest(model, messages, null,1, 256, 1, 2, 2);
 
                 // request 객체를 JSON 형식의 문자열로 변환하기 위해
                 ObjectMapper objectMapper = new ObjectMapper();

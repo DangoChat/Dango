@@ -36,6 +36,12 @@ public class StudyService {
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
     private static final int LIMIT2 = 3;
 
+    public String getUserLevel(int userId) {
+        return memberRepository.findById(userId)
+                .map(MemberEntity::getCurrentLevel)  // 유저의 레벨 정보
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다: " + userId));
+    }
+
     // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
     public List<StudyEntity> getRandomStudyContentByLevelAndType(String level, String type, int userId) {
         // 0~20%의 오답 콘텐츠를 랜덤하게 가져오기

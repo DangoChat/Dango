@@ -56,8 +56,9 @@
   <p th:text="${error}" style="color: red;"></p>
 </div>
 
-<!-- 다음 문제로 이동하는 버튼 -->
+
 <form action="/quiz/next" method="post">
+<!--<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> -->
   <button type="submit">다음 문제</button>
 </form>
 
