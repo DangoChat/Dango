@@ -108,7 +108,7 @@ public class GPTQuizService {
                                 "  \"answer\": \"2\"\n" +
                                 "}\n" +
                                 "위와 같은 형식을 지켜 주세요.";
-                
+
                 ;
                 break;
             default:

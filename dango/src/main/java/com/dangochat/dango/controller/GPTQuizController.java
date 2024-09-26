@@ -438,7 +438,7 @@ public class GPTQuizController {
         
         
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 20) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground3(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
@@ -588,7 +588,7 @@ public class GPTQuizController {
         
         
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 3) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground4(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
