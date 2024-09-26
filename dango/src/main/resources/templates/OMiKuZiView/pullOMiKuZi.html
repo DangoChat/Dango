@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>오미쿠지 HTML</title>
+</head>
+<body>
+    <h1>[ 오미쿠지 뽑기 ]</h1>
+    
+    
+     <!-- 뽑기 버튼 -->
+    <form th:action="@{/OMiKuZi/OmikuziList}" method="post">
+        <br><button type="submit">오미쿠지 뽑기</button>
+    </form>
+
+    <!-- 뽑은 오미쿠지 결과 표시 -->
+    <div th:if="${omikuzi}">
+        <h3>오미쿠지 결과</h3>
+        <p>오미쿠지 결과: <span th:text="${omikuzi.omikuziResult}"></span></p>
+        <p>한국어 설명: <span th:text="${omikuzi.krDescription}"></span></p>
+        <p>일본어 설명: <span th:text="${omikuzi.jpDescription}"></span></p>
+        <p th:if="${omikuzi.omikuziResult == '大吉'}">축하합니다! 마일리지 300점을 획득했습니다!</p>
+    </div><br><br>
+
+    <!-- 오미쿠지 목록 -->
+    <h3>오미쿠지 목록 (확율 비공개)</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>오미쿠지 ID</th>
+                <th>결과</th>
+                <th>한국어 설명</th>
+                <th>일본어 설명</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- omikuziList를 반복하여 출력 -->
+            <tr th:each="omikuzi : ${omikuziList}">
+                <td th:text="${omikuzi.omikuziId}">ID</td>
+                <td th:text="${omikuzi.omikuziResult}">결과</td>
+                <td th:text="${omikuzi.krDescription}">한국어 설명</td>
+                <td th:text="${omikuzi.jpDescription}">일본어 설명</td>
+            </tr>
+        </tbody>
+    </table>
+
+   
+
+</body>
+</html>
