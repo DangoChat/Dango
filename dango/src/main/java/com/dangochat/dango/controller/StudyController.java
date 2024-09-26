@@ -83,8 +83,8 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        // 한국어 능력 시험 level 2
-        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevelAndType("N4",  "문법", userId);
+        
+        List<StudyEntity> studyContent = studyService.getRandomGrammarContentWithMistake("N4",  "문법", userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가

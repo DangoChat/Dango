@@ -34,6 +34,7 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
+    private static final int LIMIT2 = 3;
 
     // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
     public List<StudyEntity> getRandomStudyContentByLevelAndType(String level, String type, int userId) {
@@ -53,6 +54,24 @@ public class StudyService {
         return combinedContent;
     }
 
+ // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
+    public List<StudyEntity> getRandomGrammarContentWithMistake(String level, String type, int userId) {
+       
+    	int mistakeLimit = 1;  // 전날 틀린 문법 1개
+        List<StudyEntity> mistakeContent = studyRepository.findMistakesByUserIdAndType(userId, type, mistakeLimit);  // limit 값 추가
+
+        // 나머지 콘텐츠를 일반 학습 콘텐츠에서 랜덤하게 가져오기
+        int generalLimit = LIMIT2 - mistakeContent.size();
+        List<StudyEntity> generalContent = studyRepository.findRandomByLevelAndType(level, type, generalLimit);
+        
+        // 두 리스트를 합친다
+        List<StudyEntity> combinedContent = new ArrayList<>();
+        combinedContent.addAll(mistakeContent);
+        combinedContent.addAll(generalContent);
+        
+        return combinedContent;
+    }
+    
 
     // 유저 공부 기록 저장 (O,X 버튼 클릭 시)
     public void recordStudyContent(int studyContentId, int userId, boolean isCorrect) {
