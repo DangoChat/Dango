@@ -44,25 +44,27 @@
   $(document).ready(function () {
     let totalWord = 20; // 학습 항목의 총 개수
     let answerWord = 0; // 답변이 완료된 항목 개수
+    let studyType = "grammer"; // 전송할 타입
 
     // 이벤트 위임으로 동적으로 생성된 버튼에 이벤트 처리
     $('table').on('click', '.answer-btn', function () {
       let studyContentId = $(this).closest('tr').data('id'); // studyContentId 추출
       let answer = $(this).data('answer'); // O 또는 X
       let userId = $(this).data('userid');  // data-userid에서 userId 추출
-      console.log("전송할 데이터:", userId, studyContentId, answer);
-      submitAnswer(studyContentId, answer, userId); // Ajax 요청 보내기
+      console.log("전송할 데이터:", userId, studyContentId, answer,studyType);
+      submitAnswer(studyContentId, answer, userId,studyType); // Ajax 요청 보내기
     });
 
     // Ajax로 서버에 o/x 를 전송하는 함수
-    function submitAnswer(studyContentId, answer, userId) {
+    function submitAnswer(studyContentId, answer, userId,studyType) {
       $.ajax({
         type: 'POST',
         url: '/study/answer',
         data: {
           studyContentId: studyContentId,
           userId: userId,
-          answer: answer
+          answer: answer,
+          studyType: studyType
         },
         success: function (response) {
           console.log("서버 응답:", response);

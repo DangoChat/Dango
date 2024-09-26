@@ -45,24 +45,27 @@
 $(document).ready(function () {
     let totalWord = 20; // 학습 항목의 총 개수
     let answerWord = 0; // 답변이 완료된 항목 개수
+    let studyType = "word"; // 전송할 타입
 
     // 이벤트 위임 방식으로 동적으로 생성된 버튼에 대한 클릭 이벤트 처리
     $('table').on('click', '.answer-btn', function () {
       let studyContentId = $(this).closest('tr').data('id');       // 해당 행의 학습 단어 아이디 추출
       let answer = $(this).data('answer');                         // 사용자가 선택한 답변 (O 또는 X)
-      let userId = $(this).data('userid');                         // 사용자 ID 추출
-      submitAnswer(studyContentId, answer, userId);                // Ajax 요청을 통해 서버에 데이터 전송
+      let userId = $(this).data('userid');
+      // 사용자 ID 추출
+      submitAnswer(studyContentId, answer, userId, studyType);                // Ajax 요청을 통해 서버에 데이터 전송
     });
 
     // 서버에 사용자의 (O/X) 데이터 전송
-    function submitAnswer(studyContentId, answer, userId) {
+    function submitAnswer(studyContentId, answer, userId,studyType) {
       $.ajax({
         type: 'POST',
         url: '/study/answer',
         data: {
           studyContentId: studyContentId,
           userId: userId,
-          answer: answer
+          answer: answer,
+          studyType: studyType
         },
         success: function (response) {
           alert('저장 되었습니다.');

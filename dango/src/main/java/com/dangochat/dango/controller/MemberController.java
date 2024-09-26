@@ -1,6 +1,12 @@
 package com.dangochat.dango.controller;
 
+import com.dangochat.dango.entity.MemberEntity;
+import com.dangochat.dango.repository.MemberRepository;
+import com.dangochat.dango.security.AuthenticatedUser;
+import com.dangochat.dango.service.UserMileageService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +28,8 @@ public class MemberController {
 
 	
 	private final MemberService service;
-	
+	private final UserMileageService userMileageService;
+
 	@GetMapping("loginForm")
 	public String loginForm() {
 		return "memberView/loginForm";
@@ -50,6 +57,18 @@ public class MemberController {
         return service.idCheck(email);
 		
 	}
-    
-    
+	//마일리지 점수 확인
+	@GetMapping("/mileage")
+	public String getMileage(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
+
+		//마일리지 서비스에서 로그인된 사용자의 아이디 가져와서 마일리지에 넣기
+		int mileageAmount = userMileageService.getUserMileageAmount(userDetails.getId());
+
+		// 마일리지 정보를 모델에 추가
+		model.addAttribute("mileageAmount", mileageAmount);
+
+		// 마일리지를 보여줄 뷰로 반환 (뷰 이름은 "mileage-view"로 가정)
+		return "Mileage";
+	}
+
 }

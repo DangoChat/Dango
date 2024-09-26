@@ -69,11 +69,13 @@ public class StudyController {
     public ResponseEntity<String> answer(
             @RequestParam("studyContentId") int studyContentId,
             @RequestParam("userId") Integer userId,
-            @RequestParam("answer") String answer) {
+            @RequestParam("answer") String answer,
+            @RequestParam("studyType") String studyType) {
+
         try {
             boolean isCorrect = "O".equals(answer);
 
-            studyService.recordStudyContent(studyContentId, userId, isCorrect);
+            studyService.recordStudyContent(studyContentId, userId, isCorrect,studyType);
 
             if (!isCorrect) {
                 studyService.recordMistake(userId, studyContentId);
