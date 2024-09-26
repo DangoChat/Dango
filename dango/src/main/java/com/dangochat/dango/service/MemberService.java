@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.dangochat.dango.dto.MemberDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.repository.MemberRepository;
-import com.dangochat.dango.security.AESUtil;
 
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
