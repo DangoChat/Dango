@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>청해 학습</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <title>청해 학습</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>[ 청해 학습 문제 ]</h1>
@@ -19,17 +19,17 @@
 
 <!-- 생성된 문제를 출력할 테이블 -->
 <table>
-  <thead>
+    <thead>
     <tr>
-      <th>문제</th>
+        <th>문제</th>
     </tr>
-  </thead>
-  <tbody>
+    </thead>
+    <tbody>
     <!-- 청해 학습 문제 출력 (Thymeleaf 사용) -->
     <tr th:each="question : ${generatedQuestions}">
-      <td th:text="${question}" class="question"></td> <!-- GPT에서 생성된 문제 출력 -->
+        <td th:text="${question}" class="question"></td> <!-- GPT에서 생성된 문제 출력 -->
     </tr>
-  </tbody>
+    </tbody>
 </table>
 <script>
     function speak(text, opt_prop) {
@@ -42,11 +42,11 @@
         const prop = opt_prop || {}
 
         const speechMsg = new SpeechSynthesisUtterance()
-        speechMsg.rate = prop.rate || 0.7 // 속도: 0.1 ~ 10      
+        speechMsg.rate = prop.rate || 0.7 // 속도: 0.1 ~ 10
         speechMsg.pitch = prop.pitch || 1.2 // 음높이: 0 ~ 2
         speechMsg.lang = prop.lang || "ko-KR"
         speechMsg.text = text
-        
+
         // SpeechSynthesisUtterance에 저장된 내용을 바탕으로 음성합성 실행
         window.speechSynthesis.speak(speechMsg)
     }

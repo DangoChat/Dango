@@ -25,8 +25,9 @@ public class StudyEntity {
     @Column(name = "study_content_meaning", length = 200)
     private String meaning;
 
-    @Column(name = "level", length = 200)
-    private String level;
+    @ManyToOne //levels 외래키 참조
+    @JoinColumn(name = "level", referencedColumnName = "level", nullable = false)
+    private LevelsEntity level;
 
     @Column(name = "study_content_type", length = 100, nullable = false)
     private String type;

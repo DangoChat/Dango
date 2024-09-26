@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT 청해 문제</title>
+  <style>
+    .quiz-item {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .quiz-options button {
+      margin-right: 10px;
+      padding: 10px 20px;
+    }
+
+    .question-number {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .tts-controls {
+      margin-top: 20px;
+    }
+
+    .tts-controls button {
+      padding: 10px 20px;
+      margin-right: 10px;
+    }
+
+    select {
+      margin-bottom: 20px;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<h1>GPT 청해 문제</h1>
+
+<!-- 몇 번째 문제인지 표시 -->
+<div class="question-number">
+  <p th:text="'현재의 문제: ' + ${currentIndex} + '번째 문제'"></p>
+</div>
+
+<!-- 언어 선택 및 읽기 버튼 -->
+<div class="tts-controls">
+  <select id="select-lang">
+    <option value="ko-KR">한국어</option>
+    <option value="ja-JP" selected>일본어</option>
+    <option value="en-US">영어</option>
+  </select>
+  <button id="btn-read">문제 읽기</button>
+</div>
+
+<!-- 생성된 퀴즈 표시 -->
+<h2>생성된 퀴즈</h2>
+<div th:if="${question}">
+  <div class="quiz-item">
+    <!-- 문제 표시 (HTML 태그를 인식할 수 있도록 th:utext 사용) -->
+    <p class="question" th:utext="${question}"></p>
+
+    <!-- 선택지 버튼 -->
+    <div class="quiz-options">
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>4</button>
+    </div>
+  </div>
+</div>
+
+<!-- 오류 메시지 표시 -->
+<div th:if="${error}">
+  <p th:text="${error}" style="color: red;"></p>
+</div>
+
+<!-- 다음 문제로 이동하는 버튼 -->
+<form action="/quiz/listening/next" method="post">
+  <button type="submit">다음 문제</button>
+</form>
+
+<script>
+  function speak(text, opt_prop) {
+    if (typeof SpeechSynthesisUtterance === "undefined" || typeof window.speechSynthesis === "undefined") {
+      alert("이 브라우저는 음성 합성을 지원하지 않습니다.");
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // 현재 읽고있다면 초기화
+
+    const prop = opt_prop || {};
+    const speechMsg = new SpeechSynthesisUtterance();
+    speechMsg.rate = prop.rate || 1; // 속도: 0.1 ~ 10
+    speechMsg.pitch = prop.pitch || 1; // 음높이: 0 ~ 2
+    speechMsg.lang = prop.lang || "ja-JP"; // 기본 언어는 일본어로 설정
+    speechMsg.text = text;
+
+    // SpeechSynthesisUtterance에 저장된 내용을 바탕으로 음성합성 실행
+    window.speechSynthesis.speak(speechMsg);
+  }
+
+  // 이벤트 영역
+  const selectLang = document.getElementById("select-lang");
+  const btnRead = document.getElementById("btn-read");
+
+  btnRead.addEventListener("click", e => {
+    // 화면에 있는 문제의 텍스트를 가져와서 읽기
+    const questionText = document.querySelector(".question").textContent;
+
+    speak(questionText, {
+      rate: 1,
+      pitch: 1,
+      lang: selectLang.options[selectLang.selectedIndex].value  // 선택된 언어
+    });
+  });
+</script>
+
+</body>
+</html>

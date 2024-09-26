@@ -1,5 +1,6 @@
 package com.dangochat.dango.controller;
 
+import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -36,9 +38,26 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        // 한국어 능력 시험 level 2
-        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevelAndType("N2", "단어",userId);
-        log.debug("========" + studyContent.toString());
+        String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨을 가져오는 서비스 메서드 호출
+
+        // StudyEntity를 StudyDTO로 변환하여 리스트로 저장
+        List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
+                .stream()
+                .map(studyEntity -> StudyDTO.builder()
+                        .studyContentId(studyEntity.getStudyContentId())
+                        .content(studyEntity.getContent())
+                        .pronunciation(studyEntity.getPronunciation())
+                        .meaning(studyEntity.getMeaning())
+                        .type(studyEntity.getType())
+                        .level(studyEntity.getLevel())
+                        .example1(studyEntity.getExample1())
+                        .exampleTranslation1(studyEntity.getExampleTranslation1())
+                        .example2(studyEntity.getExample2())
+                        .exampleTranslation2(studyEntity.getExampleTranslation2())
+                        .build())
+                .collect(Collectors.toList());
+
+        // jlpt n2급 단어 가저오기
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
         return "StudyView/word";
@@ -53,7 +72,7 @@ public class StudyController {
             @RequestParam("answer") String answer) {
         try {
             boolean isCorrect = "O".equals(answer);
-            
+
             studyService.recordStudyContent(studyContentId, userId, isCorrect);
 
             if (!isCorrect) {
@@ -82,66 +101,40 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        // 한국어 능력 시험 level 2
         List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevelAndType("N4",  "문법", userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
         return "StudyView/grammar";
     }
-    
-    
+
+
     //오답노트 컨트롤러
     @GetMapping("mistakes")
     public String mistakes(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
 
-    	// 로그인 된 유저 ID(int) 가져 오기
+        // 로그인 된 유저 ID(int) 가져 오기
         int userId = userDetails.getId();
-        
-    	List<StudyEntity> userMistakes = studyService.mistakes(userId);
-    	model.addAttribute("userMistakes", userMistakes);
-       
+
+        List<StudyEntity> userMistakes = studyService.mistakes(userId);
+        model.addAttribute("userMistakes", userMistakes);
+
         return "StudyView/mistakes";
     }
-    
+
     @GetMapping("mistakes2")
     public String mistakes2(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
 
-    	// 로그인 된 유저 ID(int) 가져 오기
+        // 로그인 된 유저 ID(int) 가져 오기
         int userId = userDetails.getId();
-        
-    	List<StudyEntity> userMistakes = studyService.mistakes2(userId);
-    	model.addAttribute("userMistakes", userMistakes);
-       
+
+        List<StudyEntity> userMistakes = studyService.mistakes2(userId);
+        model.addAttribute("userMistakes", userMistakes);
+
         return "StudyView/mistakes2";
     }
-    
-    
-    @GetMapping("listening")
-    public String listening(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
 
-        // 로그인 된 유저 ID(int) 가져오기
-        int userId = userDetails.getId();
 
-        // studyContent 가져오기 
-        List<String> studyContent = studyService.studyContent(userId);
-        System.out.println("Study content: " + studyContent);
-        
-        // GPT로 문제 생성 (StudyDTO의 content 필드만을 사용하여 문제 생성)
-        List<String> generatedQuestions = gptService.generateQuestions(studyContent);
-        
-        // 모델에 추가하여 뷰로 전달
-        model.addAttribute("studyContent", studyContent);
-        System.out.println("Generated Questions: " + generatedQuestions);
-        model.addAttribute("generatedQuestions", generatedQuestions);
-        
-        return "StudyView/listening";  // 해당 뷰로 이동
-    }
 
-    
-    
-    
-    //학습한 단어 및 문법 내용 가저오는 컨트롤러
-    
-    
+
 }

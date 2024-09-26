@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GPT 퀴즈</title>
+  <title>일간 문법 테스트</title>
   <style>
     .quiz-item {
       margin-bottom: 20px;
@@ -22,24 +22,36 @@
       font-size: 18px;
       margin-bottom: 10px;
     }
+
+    .tts-controls {
+      margin-top: 20px;
+    }
+
+    .tts-controls button {
+      padding: 10px 20px;
+      margin-right: 10px;
+    }
+
+    select {
+      margin-bottom: 20px;
+    }
   </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
-<h1>GPT 퀴즈</h1>
+<h1>GPT 청해 문제</h1>
 
 <!-- 몇 번째 문제인지 표시 -->
 <div class="question-number">
-  <!-- currentIndex 값을 사용하여 n번째 문제 표시 -->
   <p th:text="'현재의 문제: ' + ${currentIndex} + '번째 문제'"></p>
 </div>
-
 <!-- 생성된 퀴즈 표시 -->
 <h2>생성된 퀴즈</h2>
 <div th:if="${question}">
   <div class="quiz-item">
     <!-- 문제 표시 (HTML 태그를 인식할 수 있도록 th:utext 사용) -->
-    <p th:utext="${question}"></p>
+    <p class="question" th:utext="${question}"></p>
 
     <!-- 선택지 버튼 -->
     <div class="quiz-options">
@@ -56,12 +68,9 @@
   <p th:text="${error}" style="color: red;"></p>
 </div>
 
-
-<form action="/quiz/next" method="post">
-<!--<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> -->
+<!-- 다음 문제로 이동하는 버튼 -->
+<form action="/quiz/dailyGrammarTest/next" method="post">
   <button type="submit">다음 문제</button>
 </form>
-
-
 </body>
 </html>
