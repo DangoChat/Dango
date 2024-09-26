@@ -2,6 +2,7 @@ package com.dangochat.dango.controller;
 
 import com.dangochat.dango.service.GPTQuizService;
 import com.dangochat.dango.service.GPTService;
+import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.StudyService;
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.repository.StudyRepository;
@@ -25,13 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
-* startIndex: 지금 보고 있는 페이지의 문제 번호 (예: n번째 문제).
-* targetIndex: 백그라운드에서 생성해야 할 문제 번호 (예: n+2번째 문제).
-* currentIndex: 현재 사용자가 보고 있는 문제의 번호.
-* currentMessageType: 현재 문제의 문제유형(1,2,3,4)을 지정하는 변수
-* count: 생성할 문제의 개수 (예: 한 번에 몇 개의 문제를 생성할지 결정)
-* generatedQuestions: 세션에서 관리하는 만들어진 문제들의 리스트.
-* questionNumber: URL에서 받아온 문제 번호 (사용자가 선택한 문제).
+ * startIndex: 지금 보고 있는 페이지의 문제 번호 (예: n번째 문제).
+ * targetIndex: 백그라운드에서 생성해야 할 문제 번호 (예: n+2번째 문제).
+ * currentIndex: 현재 사용자가 보고 있는 문제의 번호.
+ * currentMessageType: 현재 문제의 문제유형(1,2,3,4)을 지정하는 변수
+ * count: 생성할 문제의 개수 (예: 한 번에 몇 개의 문제를 생성할지 결정)
+ * generatedQuestions: 세션에서 관리하는 만들어진 문제들의 리스트.
+ * questionNumber: URL에서 받아온 문제 번호 (사용자가 선택한 문제).
  * contentList: 데이터베이스에서 가져온 랜덤한 단어 목록 (문제 생성을 위한 데이터).
  */
 @Slf4j
@@ -44,19 +45,24 @@ public class GPTQuizController {
     private final StudyRepository studyRepository;
     private final StudyService studyService; //안호꺼(그날 배운 학습내용 가저오는 메서드)
     private final GPTService gptService; //안호꺼(청해gpt문제 만드는 메서그)
+    private final MemberService memberService;
 
     // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
     @GetMapping("/level/1")
-    public String levelupquiz(Model model, HttpSession session) {
+    public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+
+        int userId = userDetails.getId();
+        String level = memberService.getUserInfo(userId);
+        session.setAttribute("level", level);
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>()); // 생성된 문제들을 저장하는 리스트 초기화
-        session.setAttribute("currentIndex", 1); // 현재 문제 번호 1로 설정
-        session.setAttribute("currentMessageType", 1); // 현재 메세지 타입 1로 설정 (1번 프로미프트)
+        session.setAttribute("currentIndex", 1);                          // 현재 문제 번호 1로 설정
+        session.setAttribute("currentMessageType", 1);                   // 현재 메세지 타입 1로 설정 (1번 프로미프트)
 
         // 3개의 문제를 미리 생성해서 세션에 저장
-        log.info("초기 3개의 문제 생성 시작.");
-        loadInitialQuestions(session, 1, 3);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
-        log.info("초기 3개의 문제 생성 완료.");
+        log.info("초기 2개의 문제 생성 시작.");
+        loadInitialQuestions(session, 1, 2, level);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
+        log.info("초기 2개의 문제 생성 완료.");
 
         // 첫 번째 문제를 화면에 표시
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
@@ -72,7 +78,8 @@ public class GPTQuizController {
 
     // 문제 번호를 URL로 받아 해당 문제를 출력하는 메서드
     @GetMapping("/level/{questionNumber}")
-    public String levelupquizWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session) {
+    public String levelupquizWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions"); // 세션에서 생성된 문제 리스트를 가져옴
         Integer currentIndex = (Integer) session.getAttribute("currentIndex"); // 세션에서 현재 문제 번호를 가져옴
 
@@ -90,10 +97,13 @@ public class GPTQuizController {
             log.info("현재 문제 표시: {}번째 문제 - {}", questionNumber, currentQuestion); // 문제 번호와 문제 내용 로그 출력
         }
 
+        String level = session.getAttribute("level").toString();
+        log.info("user level: {}", level );
+
         // n번째 문제를 풀 때, n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 24) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground(session, (Integer) session.getAttribute("currentMessageType"), questionNumber + 2); // n+2번째 문제를 백그라운드에서 생성
+            generateNextQuestionInBackground(session, (Integer) session.getAttribute("currentMessageType"), questionNumber + 2, level); // n+2번째 문제를 백그라운드에서 생성
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -122,8 +132,15 @@ public class GPTQuizController {
     }
 
     // 초기 문제 3개를 미리 로드하는 메서드                                  1      ,       3
-    private void loadInitialQuestions(HttpSession session, int startIndex, int count) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
-        List<String> contentList = studyRepository.findRandomContent(); // 24개의 단어를 데이터베이스에서 랜덤하게 가져옴
+    private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
+        List<String> contentList = studyRepository.findByLevelContainingRandom(level);
+
+        // 24개의 단어를 로그에 출력
+        log.info("가져온 단어 목록:");
+        for (int i = 0; i < contentList.size(); i++) {
+            log.info("단어 {}: {}", (i + 1), contentList.get(i));
+        }
+
         List<String> generatedQuestions = new ArrayList<>();
 
         try {
@@ -137,10 +154,10 @@ public class GPTQuizController {
     }
 
     // 백그라운드에서 다음 문제를 미리 생성하는 메서드
-    private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex) { //targetindex : 지금 생성해야 할 문제 번호 n+2번째 문제
+    private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex, String level) { //targetindex : 지금 생성해야 할 문제 번호 n+2번째 문제
         new Thread(() -> {
             try {
-                List<String> contentList = studyRepository.findRandomContent(); // 24개의 단어를 랜덤하게 가져옴
+                List<String> contentList = studyRepository.findByLevelContainingRandom(level); // 24개의 단어를 랜덤하게 가져옴
 
                 // targetIndex(=1 이면 1번째 문제)에 따라 적절한 messageType(문제 유형)을 설정
                 int messageType;
@@ -169,18 +186,18 @@ public class GPTQuizController {
             }
         }).start(); // 백그라운드 스레드에서 실행
     }
-    
-    
- //       ======================================================================================================= 
-    
- // GPT로 청해문제 만드는 controller(이안호)
+
+
+    //       =======================================================================================================
+
+    // GPT로 청해문제 만드는 controller(이안호)
     @GetMapping("/listening/1")
     public String listeningLevel1(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-        
+
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
 
@@ -201,7 +218,7 @@ public class GPTQuizController {
         return "QuizView/listening";  // 해당 뷰로 이동
     }
 
-    
+
     private void loadInitialListeningQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.studyContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
@@ -239,12 +256,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 청해 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-        
+
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-        
+
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/listening/" + (currentIndex + 1);
     }
@@ -283,8 +300,8 @@ public class GPTQuizController {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
 
-        
-        
+
+
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 23) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
@@ -295,8 +312,8 @@ public class GPTQuizController {
         return "QuizView/listening";
     }
 
-    
-    
+
+
     private void generateNextQuestionInBackground2(HttpSession session, int messageType, int targetIndex, int userId) {
         new Thread(() -> {
             try {
@@ -318,22 +335,22 @@ public class GPTQuizController {
             }
         }).start();
     }
-    
-    
-    
-    
-    
- // GPT로 일일 단어문제 만드는 controller(이안호)
+
+
+
+
+
+    // GPT로 일일 단어문제 만드는 controller(이안호)
     @GetMapping("/dailyWordTest/1")
     public String dailyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-        
+
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
-        
+
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
         loadDailyWordTestQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
@@ -350,8 +367,8 @@ public class GPTQuizController {
 
         return "QuizView/dailyWordTest";  // 해당 뷰로 이동
     }
-    
-    
+
+
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
     private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
@@ -362,7 +379,7 @@ public class GPTQuizController {
         int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
-            
+
             // studyContent의 크기를 확인하여 범위를 조정
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
@@ -371,16 +388,16 @@ public class GPTQuizController {
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
-            
+
             session.setAttribute("generatedQuestions", generatedQuestions);
             log.info("초기 생성된 {}개의 단어 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
             log.error("단어 문제가 생성되지 않았습니다.", e);
         }
     }
-    
-    
-    
+
+
+
     @PostMapping("/dailyWordTest/next")
     public String nextDailyWordTestQuestion(HttpSession session) {
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
@@ -391,12 +408,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 단어 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-        
+
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-        
+
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/dailyWordTest/" + (currentIndex + 1);
     }
@@ -435,10 +452,10 @@ public class GPTQuizController {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
 
-        
-        
+
+
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 20) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground3(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
@@ -447,7 +464,7 @@ public class GPTQuizController {
         return "QuizView/dailyWordTest";
     }
 
-    
+
     // 백그라운드에서 '단어'관련 문제를 만들어주는 메서드
     private void generateNextQuestionInBackground3(HttpSession session, int messageType, int targetIndex, int userId) {
         new Thread(() -> {
@@ -471,20 +488,20 @@ public class GPTQuizController {
             }
         }).start();
     }
-    
-    
-    
- // GPT로 일일 문법문제 만드는 controller(이안호)
+
+
+
+    // GPT로 일일 문법문제 만드는 controller(이안호)
     @GetMapping("/dailyGrammarTest/1")
     public String dailyGrammarTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-        
+
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
-        
+
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
         loadDailyGrammarQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
@@ -501,8 +518,8 @@ public class GPTQuizController {
 
         return "QuizView/dailyGrammarTest";  // 해당 뷰로 이동
     }
-    
- // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+
+    // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
     private void loadDailyGrammarQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getTodayGrammarContent(userId); // '문법' 타입 콘텐츠만 가저온다
@@ -512,7 +529,7 @@ public class GPTQuizController {
         int grammar = 3; // 서비스에 문법관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
-            
+
             // studyContent의 크기를 확인하여 범위를 조정
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
@@ -521,16 +538,16 @@ public class GPTQuizController {
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
-            
+
             session.setAttribute("generatedQuestions", generatedQuestions);
             log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
             log.error("청해 문제가 생성되지 않았습니다.", e);
         }
     }
-    
-    
-    
+
+
+
     @PostMapping("/dailyGrammarTest/next")
     public String nextDailyGrammarTestQuestion(HttpSession session) {
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
@@ -541,12 +558,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 단어 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-        
+
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-        
+
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/dailyGrammarTest/" + (currentIndex + 1);
     }
@@ -585,10 +602,10 @@ public class GPTQuizController {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
 
-        
-        
+
+
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 3) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground4(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
@@ -597,7 +614,7 @@ public class GPTQuizController {
         return "QuizView/dailyGrammarTest";
     }
 
-    
+
     // 백그라운드에서 '문법'관련 문제를 만들어주는 메서드
     private void generateNextQuestionInBackground4(HttpSession session, int messageType, int targetIndex, int userId) {
         new Thread(() -> {
@@ -621,21 +638,21 @@ public class GPTQuizController {
             }
         }).start();
     }
-    
-    
-    
-    
- // GPT로 주간 단어문제 만드는 controller(이안호)
+
+
+
+
+    // GPT로 주간 단어문제 만드는 controller(이안호)
     @GetMapping("/weeklyWordTest/1")
     public String weeklyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-        
+
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
-        
+
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
         loadWeeklyWordQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
@@ -652,8 +669,8 @@ public class GPTQuizController {
 
         return "QuizView/weeklyWordTest";  // 해당 뷰로 이동
     }
-    
-    
+
+
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
     private void loadWeeklyWordQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
@@ -664,7 +681,7 @@ public class GPTQuizController {
         int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
-            
+
             // studyContent의 크기를 확인하여 범위를 조정
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
@@ -673,15 +690,15 @@ public class GPTQuizController {
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
-            
+
             session.setAttribute("generatedQuestions", generatedQuestions);
             log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
             log.error("청해 문제가 생성되지 않았습니다.", e);
         }
     }
-    
-    
+
+
     @PostMapping("/weeklyWordTest/next")
     public String nextWeeklyWordTestQuestion(HttpSession session) {
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
@@ -692,12 +709,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 단어 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-        
+
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-        
+
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/weeklyWordTest/" + (currentIndex + 1);
     }
@@ -736,8 +753,8 @@ public class GPTQuizController {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
 
-        
-        
+
+
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 23) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
@@ -748,7 +765,7 @@ public class GPTQuizController {
         return "QuizView/dailyWordTest";
     }
 
-    
+
     // 백그라운드에서 '단어'관련 문제를 만들어주는 메서드
     private void generateNextQuestionInBackground5(HttpSession session, int messageType, int targetIndex, int userId) {
         new Thread(() -> {
@@ -772,21 +789,21 @@ public class GPTQuizController {
             }
         }).start();
     }
-    
-    
-    
-    
- // GPT로 주간 단어문제 만드는 controller(이안호)
+
+
+
+
+    // GPT로 주간 단어문제 만드는 controller(이안호)
     @GetMapping("/weeklyGrammarTest/1")
     public String weeklyGrammarTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-        
+
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>());  
+        session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
-        
+
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
         loadWeeklyGrammarQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
@@ -803,8 +820,8 @@ public class GPTQuizController {
 
         return "QuizView/weeklyGrammarTest";  // 해당 뷰로 이동
     }
-    
-    
+
+
     // '문법'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
     private void loadWeeklyGrammarQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
@@ -815,7 +832,7 @@ public class GPTQuizController {
         int grammar = 3; // 서비스에 문법관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
-            
+
             // studyContent의 크기를 확인하여 범위를 조정
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
@@ -824,15 +841,15 @@ public class GPTQuizController {
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
-            
+
             session.setAttribute("generatedQuestions", generatedQuestions);
             log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
             log.error("청해 문제가 생성되지 않았습니다.", e);
         }
     }
-    
-    
+
+
     @PostMapping("/weeklyGrammarTest/next")
     public String nextWeeklyGrammarTestQuestion(HttpSession session) {
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
@@ -843,12 +860,12 @@ public class GPTQuizController {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 단어 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
-        
+
         // 마지막 문제일 때는 첫 번째 문제로 돌아가거나 홈으로 리다이렉트
         if (currentIndex != null && currentIndex >= generatedQuestions.size()) {
             return "redirect:/";  // 예시로 첫 문제로 돌아가도록 설정
         }
-        
+
         // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
         return "redirect:/quiz/weeklyGrammarTest/" + (currentIndex + 1);
     }
@@ -887,8 +904,8 @@ public class GPTQuizController {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
 
-        
-        
+
+
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 23) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
@@ -899,7 +916,7 @@ public class GPTQuizController {
         return "QuizView/weeklyGrammarTest";
     }
 
-    
+
     // 백그라운드에서 '문법'관련 문제를 만들어주는 메서드
     private void generateNextQuestionInBackground6(HttpSession session, int messageType, int targetIndex, int userId) {
         new Thread(() -> {
@@ -923,5 +940,5 @@ public class GPTQuizController {
             }
         }).start();
     }
-    
+
 }
