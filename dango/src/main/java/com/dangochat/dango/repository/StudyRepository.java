@@ -42,6 +42,7 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
     	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
     	List<StudyEntity> findTodayWordContentByUserId(@Param("userId") int userId);
+    
     @Query(value = "SELECT *\n" +
             "FROM study_content\n" +
             "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외

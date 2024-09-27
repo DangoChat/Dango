@@ -214,7 +214,7 @@ public class GPTQuizController {
             model.addAttribute("currentIndex", 1); // 사용자에게는 1번째 문제로 보여줌
             log.info("첫 번째 청해 문제 표시: {}", currentQuestion);
         }
-
+        
         return "QuizView/listening";  // 해당 뷰로 이동
     }
 
@@ -756,7 +756,7 @@ public class GPTQuizController {
 
 
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 20) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground5(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
@@ -907,7 +907,7 @@ public class GPTQuizController {
 
 
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 23) {
+        if (questionNumber + 2 <= 21) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground6(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);

@@ -47,7 +47,7 @@ public class StudyService {
         // 0~20%의 오답 콘텐츠를 랜덤하게 가져오기
         int mistakeLimit = (int) (LIMIT * Math.random() * MAX_MISTAKE_RATIO);
         List<StudyEntity> mistakeContent = studyRepository.findMistakesByUserIdAndType(userId, type, mistakeLimit);  // limit 값 추가
-
+        
         // 나머지 콘텐츠를 일반 학습 콘텐츠에서 랜덤하게 가져오기
         int generalLimit = LIMIT - mistakeLimit;
         List<StudyEntity> generalContent = studyRepository.findRandomByLevelAndType(level, type, generalLimit);

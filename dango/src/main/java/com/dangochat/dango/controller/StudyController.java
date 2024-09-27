@@ -36,7 +36,7 @@ public class StudyController {
 
         // 로그인 된 유저 ID(int) 가져 오기
         int userId = userDetails.getId();
-        log.debug("로그인 한 유저 아이디" + userId);
+        log.debug("로그인 한 유저 아이디: " + userId);
 
         String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨을 가져오는 서비스 메서드 호출
 
