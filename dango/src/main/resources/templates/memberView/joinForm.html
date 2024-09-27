@@ -1,10 +1,6 @@
 <!DOCTYPE html>
-<html
-  lang="ko"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
->
-  <head>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
     <meta charset="UTF-8" />
     <title>회원가입</title>
     <!-- jQuery 파일 불러오기 -->
@@ -58,8 +54,8 @@
         });
       });
     </script>
-  </head>
-  <body>
+</head>
+<body>
     <h1>[ 회원가입 ]</h1>
 
     <form id="joinForm" th:action="@{/member/join}" method="post">
@@ -78,10 +74,6 @@
         <input type="text" name="nickname" id="nickname" />
       </p>
       <p>
-        <label>Phone</label>
-        <input type="text" name="userPhone" id="userPhone" />
-      </p>
-      <p>
         <label>Nationality</label>
         <select name="userNationality" id="userNationality">
           <option value="Korea">한국</option>
@@ -89,8 +81,13 @@
         </select>
       </p>
       <p>
+        <label>성별</label>
+        <input type="radio" name="userSex" value="true" /> 남자
+        <input type="radio" name="userSex" value="false" /> 여자
+      </p>
+      <p>
         <input type="submit" value="가입" />
       </p>
     </form>
-  </body>
+</body>
 </html>
