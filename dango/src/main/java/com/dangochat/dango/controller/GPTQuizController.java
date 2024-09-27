@@ -52,8 +52,8 @@ public class GPTQuizController {
     public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
 
         int userId = userDetails.getId();
-        String level = memberService.getUserInfo(userId);
-        session.setAttribute("level", level);
+        String currentLevel = memberService.getUserCurrentLevel(userId);
+        session.setAttribute("level", currentLevel);
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>()); // 생성된 문제들을 저장하는 리스트 초기화
         session.setAttribute("currentIndex", 1);                          // 현재 문제 번호 1로 설정
@@ -61,7 +61,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 2개의 문제 생성 시작.");
-        loadInitialQuestions(session, 1, 2, level);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
+        loadInitialQuestions(session, 1, 2, currentLevel);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
         log.info("초기 2개의 문제 생성 완료.");
 
         // 첫 번째 문제를 화면에 표시
