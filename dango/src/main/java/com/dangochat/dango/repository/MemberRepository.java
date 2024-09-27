@@ -25,4 +25,5 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Integer> {
     @Modifying
     @Query("UPDATE MemberEntity m SET m.userMileage = m.userMileage + :points WHERE m.userId = :userId")
     void addMileage(@Param("userId") Integer userId, @Param("points") int points);
+
 }
