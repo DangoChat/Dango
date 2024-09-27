@@ -50,9 +50,11 @@ public class OMiKuZiController {
         // 세션에 저장
         session.setAttribute("selectedOmikuzi", selectedOmikuzi);
         
-        // '大吉'이면 마일리지 추가
+        // '大吉'이거나 "大凶"이면 마일리지 추가
         if ("大吉".equals(selectedOmikuzi.getOmikuziResult())) {
-            omikuziService.addMileage(userDetails.getId(), 300);
+            omikuziService.addMileage(userDetails.getId(), 10);
+        }else if("大凶".equals(selectedOmikuzi.getOmikuziResult())) {
+        	omikuziService.addMileage(userDetails.getId(), 50);
         }
 
         // 뽑은 결과와 오미쿠지 리스트를 모델에 추가하여 페이지로 전달
