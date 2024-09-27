@@ -4,14 +4,8 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.config.DateUtils;
 
 import com.dangochat.dango.dto.StudyDTO;
-import com.dangochat.dango.entity.MemberEntity;
-import com.dangochat.dango.entity.StudyEntity;
-import com.dangochat.dango.entity.UserMistakesEntity;
-import com.dangochat.dango.entity.UserStudyContentEntity;
-import com.dangochat.dango.repository.MemberRepository;
-import com.dangochat.dango.repository.StudyRepository;
-import com.dangochat.dango.repository.UserMistakesRepository;
-import com.dangochat.dango.repository.UserStudyContentRepository;
+import com.dangochat.dango.entity.*;
+import com.dangochat.dango.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +26,8 @@ public class StudyService {
     private final UserMistakesRepository userMistakesRepository;
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
+    private final UserMileageService userMileageService;
+
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
     private static final int LIMIT2 = 3;
@@ -80,7 +76,7 @@ public class StudyService {
     
 
     // 유저 공부 기록 저장 (O,X 버튼 클릭 시)
-    public void recordStudyContent(int studyContentId, int userId, boolean isCorrect) {
+    public void recordStudyContent(int studyContentId, int userId, boolean isCorrect, String studyType) {
     	MemberEntity user = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
     	StudyEntity studyContent = studyRepository.findById(studyContentId)
@@ -91,6 +87,20 @@ public class StudyService {
         userStudyContent.setStudyContent(studyContent);
         userStudyContent.setRecordIsCorrect(isCorrect);
         userStudyContentRepository.save(userStudyContent);
+
+        // 마일리지를 처리하는 서비스 호출
+        if ("grammer".equalsIgnoreCase(studyType)) {
+            if (isCorrect) {
+                // 문법 학습에서 정답일 경우 +3 마일리지
+                userMileageService.addMileage(user, 3);
+            } else {
+                // 문법 학습에서 오답일 경우 +1 마일리지
+                userMileageService.addMileage(user, 1);
+            }
+        }
+        else if("word".equalsIgnoreCase(studyType) && isCorrect) {
+            userMileageService.addMileage(user, 1);
+        }
     }
 
     // 오답 노트에 저장 (X 버튼 클릭 시)
