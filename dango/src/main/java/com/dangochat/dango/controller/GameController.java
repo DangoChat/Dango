@@ -21,7 +21,7 @@ public class GameController {
 
         try {
             // 게임 점수만큼 마일리지 추가
-            userMileageService.addMileage(user, gameScore);
+            userMileageService.addMileage(user.getUserId(), gameScore);
 
             return ResponseEntity.ok("게임 결과가 성공적으로 처리되었습니다. 마일리지: " + gameScore);
         } catch (Exception e) {
