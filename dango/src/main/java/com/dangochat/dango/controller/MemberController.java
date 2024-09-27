@@ -71,4 +71,15 @@ public class MemberController {
 		return "Mileage";
 	}
 
+	
+	// 유저 레벨 변경 컨트롤러
+	@GetMapping("levelSetting")
+	public String levelSetting( ) {
+		
+		
+		
+        return "memberView/levelSetting";
+		
+	}
+	
 }
