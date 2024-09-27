@@ -1,6 +1,5 @@
 package com.dangochat.dango.service;
 
-import lombok.Builder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +35,11 @@ public class MemberService {
                     .userEmail(member.getUserEmail())
                     .userPassword(encryptedPassword)  // 암호화된 비밀번호 저장
                     .nickname(member.getNickname())
-                    .userPhone(member.getUserPhone())
                     .userNationality(member.getUserNationality())
                     .currentLevel(null)  // 초기에는 null 또는 기본값 설정
+                    .originalLevel(null)
                     .userMileage(0)      // 초기 마일리지는 0으로 설정
+                    .userSex(member.getUserSex())
                     .build();
 
             // 데이터베이스에 회원 정보 저장

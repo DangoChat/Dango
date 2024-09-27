@@ -33,18 +33,18 @@ public class MemberEntity {
     @Column(name = "nickname", length = 200, nullable = false)
     private String nickname;
 
-    @Column(name = "user_phone", length = 200, nullable = false)
-    private String userPhone;
-
     @Column(name = "user_nationality", length = 20, nullable = false)
     private String userNationality;
 
     @Column(name = "current_level", length = 50, nullable = true)
     private String currentLevel;
 
+    @Column(name = "original_level", length = 50, nullable = true)
+    private String originalLevel;
+
     @Column(name = "user_mileage", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int userMileage;
 
-    @Column(name = "token", length = 200, nullable = true)
-    private String token;
+    @Column(name = "user_sex")
+    private Boolean userSex;
 }
