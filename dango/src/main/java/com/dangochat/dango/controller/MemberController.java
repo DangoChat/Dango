@@ -80,9 +80,19 @@ public class MemberController {
 	
 	
 	@GetMapping("levelSetting")
-	public String levelSetting() {
-		return"memberView/levelSetting";
+	public String getLevelSettingPage(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
+	    // 현재 사용자 레벨 정보를 가져옴
+	    String currentLevel = service.getUserCurrentLevel(userDetails.getId());
+	    String originalLevel = service.getOriginalLevel(userDetails.getId());
+
+	    // 모델에 현재 레벨 정보와 originalLevel을 추가
+	    model.addAttribute("currentLevel", currentLevel);
+	    model.addAttribute("originalLevel", originalLevel);
+
+	    // "levelSetting.html"로 이동
+	    return "memberView/levelSetting";
 	}
+
 	
 	
 	@PostMapping("levelSetting")                               // 키값이 String 벨류값이 Object
