@@ -1,12 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>유저 레벨 셋팅</title>
+    <meta charset="UTF-8">
+    <title>유저 레벨 셋팅</title>
+    <!-- CSRF 토큰 설정 -->
+    <meta name="_csrf" content="${_csrf.token}">
+    <meta name="_csrf_header" content="${_csrf.headerName}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 버튼을 클릭하면 해당 레벨을 서버로 전송
+    function updateLevel(level, updateBoth) {
+        $.ajax({
+            url: '/member/levelSetting',
+            type: 'POST',
+            data: JSON.stringify({
+                level: level,
+                updateBoth: updateBoth // true면 current_level과 original_level 둘 다 업데이트
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="_csrf"]').attr('content')  // CSRF 토큰 설정
+            },   // 공격방지??
+            success: function(response) {
+                alert('레벨이 성공적으로 업데이트되었습니다.');
+            },
+            error: function(xhr) {
+                if (xhr.status === 403) {
+                    alert('original_level보다 하위로만 이동할 수 있습니다.');
+                } else {
+                    alert('레벨 업데이트 중 문제가 발생했습니다.');
+                }
+            }
+        });
+    }
+</script>
 </head>
 <body>
-	<h1>[  유저 레벨 셋팅  ]</h1>
-	
-	
+    <h1>[ 유저 레벨 셋팅 ]</h1>
+    
+    <!-- 첫 번째 줄: current_level과 original_level 둘 다 변경 -->
+    <h3>레벨테스트, 승급테스트 기능</h3>
+    <div>
+        <button onclick="updateLevel('N5', true)">N5</button>
+        <button onclick="updateLevel('N4', true)">N4</button>
+        <button onclick="updateLevel('N3', true)">N3</button>
+        <button onclick="updateLevel('N2', true)">N2</button>
+        <button onclick="updateLevel('N1', true)">N1</button>
+    </div>
+    
+    <br>
+    
+    <!-- 두 번째 줄: current_level만 변경 -->
+    <h3>사용자가 원하는 레벨 설정 가능</h3>
+    <div>
+        <button onclick="updateLevel('N5', false)">N5</button>
+        <button onclick="updateLevel('N4', false)">N4</button>
+        <button onclick="updateLevel('N3', false)">N3</button>
+        <button onclick="updateLevel('N2', false)">N2</button>
+        <button onclick="updateLevel('N1', false)">N1</button>
+    </div>
 </body>
 </html>

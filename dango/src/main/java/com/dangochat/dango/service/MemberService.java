@@ -1,5 +1,6 @@
 package com.dangochat.dango.service;
 
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,11 +58,39 @@ public class MemberService {
         return exists ? 1 : 0;
 	}
 	
-	public String getUserInfo(int userId){
+	
+	
+	
+	
+	// 유저 CurrentLevel정보 가저오는 메서드
+	public String getUserCurrentLevel(int userId){
 		MemberEntity memberEntity = memberRepository.findById(userId).orElse(null);
 		String userLevel = memberEntity.getCurrentLevel();
 		return userLevel;
 	}
+
+	// original_level 가져오기
+    public String getOriginalLevel(int userId) {
+        MemberEntity member = memberRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return member.getOriginalLevel();
+    }
+	
+	// current_level과 original_level 둘 다 업데이트
+    public void updateUserLevels(Integer userId, String currentLevel, String originalLevel) {
+        MemberEntity member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        member.setCurrentLevel(currentLevel);
+        member.setOriginalLevel(originalLevel);
+        memberRepository.save(member);
+    }
+
+ // current_level만 업데이트
+    public void updateCurrentLevel(Integer userId, String currentLevel) {
+        MemberEntity member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        member.setCurrentLevel(currentLevel);
+        memberRepository.save(member);
+    }
+
 	
 	
 }
