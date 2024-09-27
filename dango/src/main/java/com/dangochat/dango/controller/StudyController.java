@@ -69,11 +69,13 @@ public class StudyController {
     public ResponseEntity<String> answer(
             @RequestParam("studyContentId") int studyContentId,
             @RequestParam("userId") Integer userId,
-            @RequestParam("answer") String answer) {
+            @RequestParam("answer") String answer,
+            @RequestParam("studyType") String studyType) {
+
         try {
             boolean isCorrect = "O".equals(answer);
 
-            studyService.recordStudyContent(studyContentId, userId, isCorrect);
+            studyService.recordStudyContent(studyContentId, userId, isCorrect,studyType);
 
             if (!isCorrect) {
                 studyService.recordMistake(userId, studyContentId);
@@ -101,7 +103,8 @@ public class StudyController {
         int userId = userDetails.getId();
         log.debug("로그인 한 유저 아이디" + userId);
 
-        List<StudyEntity> studyContent = studyService.getRandomStudyContentByLevelAndType("N4",  "문법", userId);
+        
+        List<StudyEntity> studyContent = studyService.getRandomGrammarContentWithMistake("N4",  "문법", userId);
         log.debug("========" + studyContent.toString());
         model.addAttribute("studyContent", studyContent);
         model.addAttribute("userId", userId);  // userId를 모델에 추가
