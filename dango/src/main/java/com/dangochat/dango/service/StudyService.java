@@ -88,7 +88,7 @@ public class StudyService {
         userStudyContentRepository.save(userStudyContent);
 
         // 마일리지를 처리하는 로직 (MemberEntity의 userMileage 필드 직접 수정)
-        if ("grammer".equalsIgnoreCase(studyType)) {
+        if ("grammar".equalsIgnoreCase(studyType)) {
             if (isCorrect) {
                 // 문법 학습에서 정답일 경우 +3 마일리지
                 user.setUserMileage(user.getUserMileage() + 3);
@@ -122,7 +122,7 @@ public class StudyService {
 
 
     // 사용자의 오답과 관련된 학습 콘텐츠 반환
-    public List<StudyEntity> mistakes(int userId) {
+    public List<StudyEntity> wordMistakes(int userId) {
 
         // 사용자 정보를 조회
         MemberEntity user = memberRepository.findById(userId)
@@ -141,7 +141,7 @@ public class StudyService {
     }
 
 
-    public List<StudyEntity> mistakes2(int userId) {
+    public List<StudyEntity> grammarMistakes(int userId) {
 
         // 사용자 정보를 조회
         MemberEntity user = memberRepository.findById(userId)

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>오답 노트</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>오답 노트</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>내용</th>
+        <th>발음</th>
+        <th>의미</th>
+        <th>타입</th>
+        <th>레벨</th>
+
+    </tr>
+    </thead>
+    <tbody id="wordMistakes-content-table">
+    <!-- 서버에서 전달된 오답 노트 내용을 동적으로 테이블에 표시 -->
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        // 오답 노트 데이터를 가져옴
+        getMistakesContent();
+
+        // 서버에서 오답 노트 데이터를 가져오는 함수
+        function getMistakesContent() {
+            $.ajax({
+                type: 'GET',  // GET 요청으로 오답 노트 데이터를 서버에서 가져옴
+                url: '/api/study/wordMistakes',
+                success: function (mistakesContent) {
+                    renderMistakesContent(mistakesContent); // 데이터를 테이블에 표시
+                },
+                error: function (xhr) {
+                    alert('오류가 발생 했습니다: ' + xhr.responseText); // 오류 발생 시 경고창 표시
+                }
+            });
+        }
+
+        // 가져온 오답 노트 데이터를 테이블에 표시하는 함수
+        function renderMistakesContent(mistakesContent) {
+            let contentHtml = '';
+            mistakesContent.forEach(function(content) {
+                contentHtml += `
+                    <tr data-id="${content.studyContentId}">
+                        <td>${content.studyContentId}</td>
+                        <td>${content.content}</td>
+                        <td>${content.pronunciation || ''}</td>
+                        <td>${content.meaning}</td>
+                        <td>${content.type}</td>
+                        <td>${content.level.level}</td>
+                    </tr>
+                `;
+            });
+            $('#wordMistakes-content-table').html(contentHtml); // 테이블의 내용을 동적으로 변경
+        }
+    });
+</script>
+
+</body>
+</html>

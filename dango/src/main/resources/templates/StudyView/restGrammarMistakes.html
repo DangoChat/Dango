@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>오답 노트</title>
+    <!-- jQuery 라이브러리 추가 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>오답 노트</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>내용</th>
+        <th>발음</th>
+        <th>의미</th>
+        <th>타입</th>
+        <th>레벨</th>
+        <th>예문</th>
+        <th>예문 번역</th>
+    </tr>
+    </thead>
+    <tbody id="grammarMistakes-content-table">
+    <!-- 서버에서 전달된 오답 노트 내용을 동적으로 테이블에 표시 -->
+    </tbody>
+</table>
+
+<!-- 학습 완료 버튼 -->
+<button id="studyComplete-btn" disabled>학습 끝내기</button>
+
+<script>
+    $(document).ready(function () {
+        // 오답 노트 데이터 가져오기
+        getMistakesContent(); // 페이지 로드 시 오답 데이터를 가져옴
+
+        // 서버에서 오답 데이터를 가져오는 함수
+        function getMistakesContent() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/study/grammarMistakes',  // 서버에서 오답 노트 데이터를 가져옴
+                success: function (mistakeContent) {
+                    renderMistakesContent(mistakeContent); // 데이터를 화면에 표시
+                },
+                error: function (xhr) {
+                    alert('오류가 발생했습니다: ' + xhr.responseText);
+                }
+            });
+        }
+
+        // 가져온 오답 데이터를 테이블에 표시하는 함수
+        function renderMistakesContent(mistakeContent) {
+            let contentHtml = '';
+            mistakeContent.forEach(function(content) {
+                contentHtml += `
+                    <tr data-id="${content.studyContentId}">
+                        <td>${content.studyContentId}</td>
+                        <td>${content.content}</td>
+                        <td>${content.pronunciation || ''}</td>
+                        <td>${content.meaning}</td>
+                        <td>${content.type}</td>
+                        <td>${content.level.level}</td>
+                        <td>${content.example1 || ''}</td>
+                        <td>${content.exampleTranslation1 || ''}</td>
+                    </tr>
+                `;
+            });
+            $('#grammarMistakes-content-table').html(contentHtml); // 테이블의 내용을 동적으로 변경
+        }
+    });
+</script>
+
+</body>
+</html>

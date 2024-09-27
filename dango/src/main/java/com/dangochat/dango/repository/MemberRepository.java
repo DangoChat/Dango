@@ -15,9 +15,6 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Integer> {
 	 // 이메일로 회원을 찾는 메서드
     MemberEntity findByUserEmail(String userEmail);
 
-    // 토큰으로 회원을 찾는 메서드
-    MemberEntity findByToken(String token);
-
     // 이메일로 회원을 찾는 메서드
     boolean existsByUserEmail(String userEmail);
     
