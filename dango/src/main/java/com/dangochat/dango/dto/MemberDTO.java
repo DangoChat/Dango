@@ -15,9 +15,9 @@ public class MemberDTO {
     private String userEmail;
     private String userPassword;
     private String nickname;
-    private String userPhone;
     private String currentLevel;
+    private String originalLevel;
     private int userMileage;
     private String userNationality;
-    private String token;
+    private Boolean userSex;
 }
