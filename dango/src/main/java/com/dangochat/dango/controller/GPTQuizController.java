@@ -221,7 +221,7 @@ public class GPTQuizController {
 
     private void loadInitialListeningQuestions(HttpSession session, int startIndex, int count, int userId) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
-        List<String> studyContent = studyService.studyContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
+        List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
         System.out.println("Study content: " + studyContent);
 
         List<String> generatedQuestions = new ArrayList<>();
@@ -275,7 +275,7 @@ public class GPTQuizController {
         if (generatedQuestions == null || questionNumber > generatedQuestions.size() || questionNumber < 1) {
             return "redirect:/listening/1"; // 범위를 벗어나면 첫 문제로 리다이렉트
         }
-
+        
         if (generatedQuestions != null && questionNumber <= generatedQuestions.size()) {
             String currentQuestion = generatedQuestions.get(questionNumber - 1); // 1-based index
             model.addAttribute("question", currentQuestion);
@@ -318,7 +318,7 @@ public class GPTQuizController {
         new Thread(() -> {
             try {
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
-                List<String> studyContent = studyService.studyContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
+                List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
                 List<String> nextQuestion = gptQuizService.generateQuestions(studyContent.subList(targetIndex - 1, endIndex), messageType, 1); // targetIndex번째 문제 생성
 

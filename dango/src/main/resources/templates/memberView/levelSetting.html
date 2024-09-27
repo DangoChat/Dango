@@ -7,37 +7,47 @@
     <meta name="_csrf" content="${_csrf.token}">
     <meta name="_csrf_header" content="${_csrf.headerName}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    // 버튼을 클릭하면 해당 레벨을 서버로 전송
-    function updateLevel(level, updateBoth) {
-        $.ajax({
-            url: '/member/levelSetting',
-            type: 'POST',
-            data: JSON.stringify({
-                level: level,
-                updateBoth: updateBoth // true면 current_level과 original_level 둘 다 업데이트
-            }),
-            contentType: 'application/json',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="_csrf"]').attr('content')  // CSRF 토큰 설정
-            },   // 공격방지??
-            success: function(response) {
-                alert('레벨이 성공적으로 업데이트되었습니다.');
-            },
-            error: function(xhr) {
-                if (xhr.status === 403) {
-                    alert('original_level보다 하위로만 이동할 수 있습니다.');
-                } else {
-                    alert('레벨 업데이트 중 문제가 발생했습니다.');
+    <script>
+        // 버튼을 클릭하면 해당 레벨을 서버로 전송
+        function updateLevel(level, updateBoth) {
+            $.ajax({
+                url: '/member/levelSetting',
+                type: 'POST',
+                data: JSON.stringify({
+                    level: level,
+                    updateBoth: updateBoth
+                }),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="_csrf"]').attr('content')
+                },
+                success: function(response) {
+                    alert(response.message);  // 성공 메시지 출력
+                    
+                    // AJAX 응답에서 새로운 currentLevel과 originalLevel을 받아와서 화면에 표시
+                    $('#currentLevel').text(response.currentLevel);
+                    $('#originalLevel').text(response.originalLevel);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert(xhr.responseJSON.error);  // 에러 메시지 출력
+                    } else {
+                        alert('레벨 업데이트 중 문제가 발생했습니다.');
+                    }
                 }
-            }
-        });
-    }
-</script>
+            });
+        }
+    </script>
 </head>
 <body>
     <h1>[ 유저 레벨 셋팅 ]</h1>
-    
+
+    <!-- 페이지가 로드될 때 서버에서 전달된 레벨 정보를 표시 -->
+    <div>
+        <p>현재 레벨: <span id="currentLevel" th:text="${currentLevel}">N/A</span></p>
+        <p>Original 레벨: <span id="originalLevel" th:text="${originalLevel}">N/A</span></p>
+    </div>
+
     <!-- 첫 번째 줄: current_level과 original_level 둘 다 변경 -->
     <h3>레벨테스트, 승급테스트 기능</h3>
     <div>

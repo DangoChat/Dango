@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -160,16 +163,21 @@ public class StudyService {
     }
 
 
-    // 유저 공부기록 가져와서 청해문제를 gpt로 만든 후 HTML로 뿌려주는 컨트롤러
+ // 유저의 오늘 공부 기록을 가져와서 청해 문제로 만드는 서비스 메서드
     @Transactional(readOnly = true)
-    public List<String> studyContent(int userId) {
+    public List<String> studyContentForToday(int userId) {
         MemberEntity user = memberRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
 
-        return userStudyContentRepository.findByUser(user).stream()
+        // 오늘의 시작 시각 (00:00:00)과 끝 시각 (23:59:59)을 구하기
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfToday = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+
+        return userStudyContentRepository.findByUserAndRecordStudyDateBetween(user, startOfToday, endOfToday).stream()
                 .map(userStudyContentEntity -> userStudyContentEntity.getStudyContent().getContent())
                 .collect(Collectors.toList());
     }
+
 
     // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기
     public List<StudyDTO> getGrammerContent(){
