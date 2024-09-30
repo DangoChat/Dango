@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>학습 내용</title>
+    <!-- jQuery 라이브러리 추가 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>학습 내용</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>내용</th>
+        <th>발음</th>
+        <th>의미</th>
+        <th>타입</th>
+        <th>레벨</th>
+        <th>정답</th>
+    </tr>
+    </thead>
+    <tbody id="study-content-table">
+    <!-- 서버에서 전달된 학습 내용을 동적으로 테이블에 표시 -->
+    </tbody>
+</table>
+
+<script th:inline="javascript">
+    $(document).ready(function () {
+        getWooooords(); // 페이지 로드 시 학습 내용을 불러옴
+
+        let studyType = "word"; // 전송할 타입
+
+        // 이벤트 위임 방식으로 동적으로 생성된 버튼에 대한 클릭 이벤트 처리
+        $('table').on('click', '.answer-btn', function () {
+            let studyContentId = $(this).closest('tr').data('id');  // 해당 행의 학습 단어 아이디 추출
+            let answer = $(this).data('answer');                    // 사용자가 선택한 답변 (O 또는 X)
+
+            // Ajax 요청을 통해 서버에 데이터 전송
+            submitAnswer(studyContentId, answer, studyType);
+        });
+
+        function getWooooords() {
+            $.ajax({
+                type: 'POST',
+                url: '/api/study/word',
+                success: function (studyContent) {
+                    renderStudyContent(studyContent); // 데이터를 화면에 표시
+                },
+                error: function (xhr) {
+                    alert('오류가 발생 했습니다: ' + xhr.responseText); // 오류 발생 시 경고창 표시
+                }
+            });
+        }
+
+        function renderStudyContent(studyContent) {
+            let contentHtml = '';
+            studyContent.forEach(function(content) {
+                contentHtml += `
+                    <tr data-id="${content.studyContentId}">
+                        <td>${content.studyContentId}</td>
+                        <td>${content.content}</td>
+                        <td>${content.pronunciation}</td>
+                        <td>${content.meaning}</td>
+                        <td>${content.type}</td>
+                        <td>${content.level.level}</td>
+                        <td>
+                            <button class="answer-btn" data-answer="O">O</button>
+                            <button class="answer-btn" data-answer="X">X</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#study-content-table').html(contentHtml); // 테이블의 내용을 동적으로 변경
+        }
+
+        function submitAnswer(studyContentId, answer, studyType) {
+            $.ajax({
+                type: 'POST',
+                url: '/api/study/answer',
+                data: JSON.stringify({
+                    studyContentId: studyContentId,
+                    answer: answer,
+                    studyType: studyType
+                }),
+                contentType: 'application/json',
+                success: function (response) {
+                    console.log("답변이 성공적으로 제출되었습니다.");
+                },
+                error: function (xhr) {
+                    alert('답변 제출 중 오류가 발생했습니다: ' + xhr.responseText);
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,114 +30,21 @@ public class StudyController {
     private final StudyService studyService;
     private final GPTService gptService;
 
-    //단어 20개 학습 하기
-    @GetMapping("word")
-    public String studyWord(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        // 로그인 된 유저 ID(int) 가져 오기
-        int userId = userDetails.getId();
-        log.debug("로그인 한 유저 아이디: " + userId);
-
-        String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨을 가져오는 서비스 메서드 호출
-
-        // StudyEntity를 StudyDTO로 변환하여 리스트로 저장
-        List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
-                .stream()
-                .map(studyEntity -> StudyDTO.builder()
-                        .studyContentId(studyEntity.getStudyContentId())
-                        .content(studyEntity.getContent())
-                        .pronunciation(studyEntity.getPronunciation())
-                        .meaning(studyEntity.getMeaning())
-                        .type(studyEntity.getType())
-                        .level(studyEntity.getLevel())
-                        .example1(studyEntity.getExample1())
-                        .exampleTranslation1(studyEntity.getExampleTranslation1())
-                        .example2(studyEntity.getExample2())
-                        .exampleTranslation2(studyEntity.getExampleTranslation2())
-                        .build())
-                .collect(Collectors.toList());
-
-        // jlpt n2급 단어 가저오기
-        model.addAttribute("studyContent", studyContent);
-        model.addAttribute("userId", userId);  // userId를 모델에 추가
-        return "StudyView/word";
+    @GetMapping("/word")
+    public String studyRestWord() {
+        return "StudyView/restWord";
     }
-
-    // o/x 누르면 유저 공부 기록, 오답 노트 테이블에 저장 되는 거
-    @ResponseBody
-    @PostMapping("answer")
-    public ResponseEntity<String> answer(
-            @RequestParam("studyContentId") int studyContentId,
-            @RequestParam("userId") Integer userId,
-            @RequestParam("answer") String answer,
-            @RequestParam("studyType") String studyType) {
-
-        try {
-            boolean isCorrect = "O".equals(answer);
-
-            studyService.recordStudyContent(studyContentId, userId, isCorrect,studyType);
-
-            if (!isCorrect) {
-                studyService.recordMistake(userId, studyContentId);
-            }
-
-            return ResponseEntity.ok("정답이 성공적으로 저장 되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정답 저장 중 오류 발생");
-        }
+    @GetMapping("/grammar")
+    public String studyRestGrammar() {
+        return "StudyView/restGrammar";
     }
-
-    //학습 끝내기
-    @PostMapping("complete")
-    @ResponseBody
-    public String completeStudy() {
-        // 학습 완료 처리 로직 (DB 업데이트 등)
-        return "{\"status\":\"success\"}";
+    @GetMapping("/wordMistakes")
+    public String studyRestWordMistakes() {
+        return "StudyView/restWordMistakes";
     }
-
-    // 문법 20개 학습 하기
-    @GetMapping("grammar")
-    public String grammar(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        // 로그인 된 유저 ID(int) 가져 오기
-        int userId = userDetails.getId();
-        log.debug("로그인 한 유저 아이디" + userId);
-
-        
-        List<StudyEntity> studyContent = studyService.getRandomGrammarContentWithMistake("N4",  "문법", userId);
-        log.debug("========" + studyContent.toString());
-        model.addAttribute("studyContent", studyContent);
-        model.addAttribute("userId", userId);  // userId를 모델에 추가
-        return "StudyView/grammar";
+    @GetMapping("/grammarMistakes")
+    public String studyRestGrammarMistakes() {
+        return "StudyView/restGrammarMistakes";
     }
-
-
-    //오답노트 컨트롤러
-    @GetMapping("mistakes")
-    public String mistakes(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        // 로그인 된 유저 ID(int) 가져 오기
-        int userId = userDetails.getId();
-
-        List<StudyEntity> userMistakes = studyService.mistakes(userId);
-        model.addAttribute("userMistakes", userMistakes);
-
-        return "StudyView/mistakes";
-    }
-
-    @GetMapping("mistakes2")
-    public String mistakes2(Model model,@AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        // 로그인 된 유저 ID(int) 가져 오기
-        int userId = userDetails.getId();
-
-        List<StudyEntity> userMistakes = studyService.mistakes2(userId);
-        model.addAttribute("userMistakes", userMistakes);
-
-        return "StudyView/mistakes2";
-    }
-
-
-
 
 }
