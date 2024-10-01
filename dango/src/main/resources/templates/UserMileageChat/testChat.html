@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마일리지 테스트 채팅</title>
+    <script>
+        function decreaseMileage() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/userChat/TestMileageChat", true); // 경로를 /decreaseMileage로 설정
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    alert(xhr.responseText === "success" ? "마일리지가 5포인트 감소했습니다." : "마일리지가 부족합니다.");
+                }
+            };
+            xhr.send();  // userId는 필요하지 않음
+        }
+
+        function sendMessage() {
+            var userInput = document.getElementById("userInput").value;
+            if (userInput.trim() !== "") {
+                document.getElementById("chatDisplay").innerHTML += "<p>" + userInput + "</p>";
+                document.getElementById("userInput").value = ""; // 입력 필드 초기화
+
+                // 마일리지 감소 호출
+                decreaseMileage();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>[ 마일리지 테스트 ]</h1>
+
+    <!-- 유저 입력 폼 -->
+    <input type="text" id="userInput" placeholder="여기에 글을 입력하세요">
+    <button type="button" onclick="sendMessage()">전송</button>
+
+    <!-- 입력한 내용을 보여줄 영역 -->
+    <div id="chatDisplay" style="margin-top: 20px; border: 1px solid #000; padding: 10px; width: 300px; height: 200px; overflow-y: scroll;">
+        <!-- 여기에 사용자가 입력한 내용이 표시됩니다 -->
+    </div>
+</body>
+</html>

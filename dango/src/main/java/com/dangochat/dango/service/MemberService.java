@@ -91,6 +91,14 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    public MemberEntity findById(int userId) {
+        return memberRepository.findById(userId).orElse(null);
+    }
+
+    public void save(MemberEntity member) {
+        memberRepository.save(member);
+    }
+
 	
 	
 }
