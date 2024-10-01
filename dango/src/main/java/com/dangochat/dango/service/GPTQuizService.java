@@ -59,7 +59,7 @@ public class GPTQuizService {
                         + "이 형식으로 괄호 `(　　　)`를 사용한 문제를 만들어 주세요. "
                         + "JSON 형식으로 다음과 같이 반환해 주세요: "
                         +" \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
-                         "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
+                        "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
                         + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요."
                         +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
                 break;

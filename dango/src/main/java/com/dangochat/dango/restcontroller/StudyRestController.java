@@ -23,8 +23,6 @@ public class StudyRestController {
 
     private final StudyService studyService;
 
-
-
     @ResponseBody
     @PostMapping("word")
     public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
@@ -80,9 +78,6 @@ public class StudyRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정답 저장 중 오류 발생");
         }
     }
-
-
-
 
     // 문법 20개 학습하기
     @ResponseBody
