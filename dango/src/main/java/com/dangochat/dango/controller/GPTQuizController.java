@@ -7,8 +7,10 @@ import com.dangochat.dango.service.StudyService;
 import com.dangochat.dango.service.userQuizQuestionReviewService;
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.UserQuizQuestionReviewDTO;
+import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.QuizType;
 import com.dangochat.dango.entity.StudyEntity;
+import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.security.AuthenticatedUser;
 
@@ -55,6 +57,7 @@ public class GPTQuizController {
     private final GPTService gptService; //안호꺼(청해 gpt 문제 만드는 메서그)
     private final MemberService memberService;
     private final userQuizQuestionReviewService userQuizQuestionReviewService;
+    private final MemberRepository memberRepository;
 
     // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
     @GetMapping("/level/1")
@@ -203,12 +206,13 @@ public class GPTQuizController {
         session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
         session.setAttribute("currentMessageType", 1);
+        
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
         loadInitialListeningQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
-
+        
         // 첫 번째 문제를 가져와서 화면에 표시
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
@@ -250,10 +254,23 @@ public class GPTQuizController {
 
 
     @PostMapping("/listening/next")
-    public String nextListeningQuestion(HttpSession session) {
+    public String nextListeningQuestion(HttpSession session, @RequestParam("staytus") boolean staytus, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    	
+    	 // 현재 로그인된 사용자의 ID를 가져오기 (마일리지 추가를위한 로직)
+        int userId = userDetails.getId(); // AuthenticatedUser에서 userId를 가져옴
+        MemberEntity user = memberRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
+    	
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
 
+        if(!staytus) {
+        	user.setUserMileage(user.getUserMileage() + 1);
+        }else {
+        	user.setUserMileage(user.getUserMileage() + 3);
+        }
+        memberRepository.save(user);
+        
         // 다음 문제로 인덱스 증가
         if (currentIndex != null && generatedQuestions != null && currentIndex < generatedQuestions.size()) {
             session.setAttribute("currentIndex", currentIndex + 1);
