@@ -35,7 +35,8 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
 //            "LIMIT 24;", nativeQuery = true)
 //    List<String> findRandomContent(@Param("userId") int userId);
 
-    @Query(value = "SELECT se.study_content_content FROM study_content se WHERE se.level LIKE %:level% ORDER BY RAND() LIMIT 24", nativeQuery = true)
+    //[승급테스트] 단어 문제
+    @Query(value = "SELECT se.study_content_content FROM study_content se WHERE se.level LIKE :level ORDER BY RAND() LIMIT 24", nativeQuery = true)
     List<String> findByLevelContainingRandom(@Param("level") String level);
 
 

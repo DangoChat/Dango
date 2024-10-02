@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korean Level-up Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .question-number {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .quiz-options button:hover {
+      background-color: #45a049;
+    }
+    .next-button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h1>한국어 레벨업 퀴즈</h1>
+
+  <!-- 몇 번째 문제인지 표시 -->
+  <div class="question-number">
+    <!-- currentIndex 값을 사용하여 n번째 문제 표시 -->
+    <p th:text="'현재의 문제: ' + ${currentIndex} + '번째 문제'"></p>
+  </div>
+
+  <!-- 생성된 퀴즈 표시 -->
+  <div class="question" th:text="${question}">
+    <!-- 문제 텍스트 -->
+  </div>
+
+  <!-- 선택지 버튼들 -->
+  <div class="quiz-options">
+    <button type="button">1</button>
+    <button type="button">2</button>
+    <button type="button">3</button>
+    <button type="button">4</button>
+  </div>
+
+  <!-- 다음 문제로 이동하는 버튼 -->
+  <form action="/quiz/levelup/kor/next" method="post" class="next-button">
+    <button type="submit">다음 문제로 이동</button>
+  </form>
+</div>
+
+</body>
+</html>

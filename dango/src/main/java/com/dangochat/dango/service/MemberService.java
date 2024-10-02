@@ -1,6 +1,5 @@
 package com.dangochat.dango.service;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +47,6 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 	}
 	
 	// 아이디 중복 체크 관련 서비스
@@ -57,10 +55,6 @@ public class MemberService {
         boolean exists = memberRepository.existsByUserEmail(email);
         return exists ? 1 : 0;
 	}
-	
-	
-	
-	
 	
 	// 유저 CurrentLevel정보 가저오는 메서드
 	public String getUserCurrentLevel(int userId){
@@ -99,6 +93,20 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-	
+	public MemberDTO getMemberInfo(String memberEmail){
+        MemberEntity entity = memberRepository.findByUserEmail(memberEmail);
+        MemberDTO dto = MemberDTO.builder()
+            .userEmail(entity.getUserEmail())
+            .userId(entity.getUserId())
+            .userMileage(entity.getUserMileage())
+            .userNationality(entity.getUserNationality())
+            .userPassword(entity.getUserPassword())
+            .currentLevel(entity.getCurrentLevel())
+            .originalLevel(entity.getOriginalLevel())
+            .nickname(entity.getNickname())
+            .userSex(entity.getUserSex())
+            .build();
+        return dto;
+    }
 	
 }
