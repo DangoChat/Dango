@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,11 +35,33 @@ public class StudyService {
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
     private static final int LIMIT2 = 3;
 
+    //유저의 커린트레벨을 가저오는 메서드
     public String getUserLevel(int userId) {
         return memberRepository.findById(userId)
                 .map(MemberEntity::getCurrentLevel)  // 유저의 레벨 정보
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다: " + userId));
     }
+    //유저의 오리지날 레벨을 가저오는 메서드
+    public String getOriginalLevel(int userId) {
+        return memberRepository.findById(userId)
+                .map(MemberEntity::getOriginalLevel)  // 유저의 originalLevel 정보 가져오기
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자 ID입니다: " + userId));
+    }
+    
+    //오리지날 레벨과 커렌트 레벨을 비교하기 위해 필요한 메서드
+    public boolean isInvalidHigherLevelChange(String originalLevel, String currentLevel) {
+        Map<String, Integer> levelMap = Map.of(
+            "N1", 1,  // 가장 높은 레벨
+            "N2", 2,
+            "N3", 3,
+            "N4", 4,
+            "N5", 5   // 가장 낮은 레벨
+        );
+        // originalLevel이 currentLevel보다 높은 경우 true 반환 (즉, 레벨을 하향하면 true)
+        return levelMap.get(originalLevel) < levelMap.get(currentLevel);
+    }
+
+
 
     // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
     public List<StudyEntity> getRandomStudyContentByLevelAndType(String level, String type, int userId) {
@@ -90,7 +113,18 @@ public class StudyService {
         userStudyContent.setRecordIsCorrect(isCorrect);
         userStudyContentRepository.save(userStudyContent);
 
-        // 마일리지를 처리하는 로직 (MemberEntity의 userMileage 필드 직접 수정)
+        // 레벨 비교 로직 추가
+        String currentLevel = getUserLevel(userId);  // 현재 레벨
+        String originalLevel = getOriginalLevel(userId);  // 오리지널 레벨
+        System.out.println(currentLevel+originalLevel);
+
+        // 만약 현재 레벨이 오리지널 레벨보다 낮으면 마일리지 지급 중단
+        if (isInvalidHigherLevelChange(originalLevel, currentLevel)) {
+            log.info("현재 레벨이 original 레벨보다 낮아 마일리지가 지급되지 않습니다.");
+            return;  // 마일리지 지급 중지
+        }
+
+        // 마일리지 로직 (레벨 비교 후)
         if ("grammar".equalsIgnoreCase(studyType)) {
             if (isCorrect) {
                 // 문법 학습에서 정답일 경우 +3 마일리지
@@ -99,14 +133,15 @@ public class StudyService {
                 // 문법 학습에서 오답일 경우 +1 마일리지
                 user.setUserMileage(user.getUserMileage() + 1);
             }
-        }
-        else if("word".equalsIgnoreCase(studyType) && isCorrect) {
+        } else if ("word".equalsIgnoreCase(studyType) && isCorrect) {
             user.setUserMileage(user.getUserMileage() + 1);
         }
 
         // 변경된 마일리지 정보 저장
         memberRepository.save(user);
     }
+
+
 
     // 오답 노트에 저장 (X 버튼 클릭 시)
     public void recordMistake(int userId, int studyContentId) {

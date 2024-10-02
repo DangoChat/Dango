@@ -19,7 +19,8 @@
         <p>오미쿠지 결과: <span th:text="${omikuzi.omikuziResult}"></span></p>
         <p>한국어 설명: <span th:text="${omikuzi.krDescription}"></span></p>
         <p>일본어 설명: <span th:text="${omikuzi.jpDescription}"></span></p>
-        <p th:if="${omikuzi.omikuziResult == '大吉'}">축하합니다! 마일리지 300점을 획득했습니다!</p>
+        <p th:if="${omikuzi.omikuziResult == '大吉'}">축하합니다! 마일리지 10점을 획득했습니다!</p>
+         <p th:if="${omikuzi.omikuziResult == '大凶'}">축하합니다! 마일리지 50점을 획득했습니다!</p>
     </div><br><br>
 
     <!-- 오미쿠지 목록 -->

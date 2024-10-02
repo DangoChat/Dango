@@ -59,7 +59,6 @@ public class StudyRestController {
             int studyContentId = Integer.parseInt(payload.get("studyContentId").toString());
             String answer = (String) payload.get("answer");
             String studyType = (String) payload.get("studyType");
-
             int userId = userDetails.getId();  // @AuthenticationPrincipal을 통해 userId 가져오기
 
             boolean isCorrect = "O".equals(answer);
