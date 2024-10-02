@@ -70,7 +70,7 @@ public class GPTService {
                             request,  // POST 요청의 본문에 포함될 데이터 (GPTRequest 객체)
                             GPTResponse.class // 응답을 변환할 클래스 타입 (GPTResponse 객체)
                     );
-
+                    
                     // GPT 응답에서 문제 파싱
                     if (gptResponse != null && gptResponse.getChoices() != null) {
                         String quizResponse = gptResponse.getChoices().get(0).getMessage().getContent();

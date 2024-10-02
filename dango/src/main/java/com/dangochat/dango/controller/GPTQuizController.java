@@ -4,7 +4,11 @@ import com.dangochat.dango.service.GPTQuizService;
 import com.dangochat.dango.service.GPTService;
 import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.StudyService;
+import com.dangochat.dango.service.userQuizQuestionReviewService;
 import com.dangochat.dango.dto.GPTResponse;
+import com.dangochat.dango.dto.UserQuizQuestionReviewDTO;
+import com.dangochat.dango.entity.QuizType;
+import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.security.AuthenticatedUser;
 
@@ -20,10 +24,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
  * startIndex: 지금 보고 있는 페이지의 문제 번호 (예: n번째 문제).
@@ -46,6 +54,7 @@ public class GPTQuizController {
     private final StudyService studyService; //안호꺼(그날 배운 학습내용 가저오는 메서드)
     private final GPTService gptService; //안호꺼(청해gpt문제 만드는 메서그)
     private final MemberService memberService;
+    private final userQuizQuestionReviewService userQuizQuestionReviewService;
 
     // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
     @GetMapping("/level/1")
@@ -328,7 +337,7 @@ public class GPTQuizController {
                     generatedQuestions.addAll(nextQuestion);
                     log.info("대기 중인 문제 추가: {}번째 문제 - {}", targetIndex, nextQuestion.get(0));
                 }
-
+                
                 session.setAttribute("generatedQuestions", generatedQuestions);
             } catch (Exception e) {
                 log.error("백그라운드에서 문제 생성 중 오류 발생: ", e);
@@ -339,8 +348,7 @@ public class GPTQuizController {
 
 
 
-
-    // GPT로 일일 단어문제 만드는 controller(이안호)
+ // GPT로 일일 단어문제 만드는 controller(이안호)
     @GetMapping("/dailyWordTest/1")
     public String dailyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
@@ -488,6 +496,8 @@ public class GPTQuizController {
             }
         }).start();
     }
+
+
 
 
 
@@ -903,11 +913,11 @@ public class GPTQuizController {
         } else {
             session.setAttribute("userId", userId); // 세션에 userId 저장
         }
-
-
-
+        
+        
+        
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 21) {
+        if (questionNumber + 2 <= 7) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
             generateNextQuestionInBackground6(session, messageType, questionNumber + 2, userId);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
@@ -941,4 +951,118 @@ public class GPTQuizController {
         }).start();
     }
 
+    
+    
+    
+// ================   user_quiz_question_review에 시험본 정보 넣는 로직
+    
+    @PostMapping("/dailyWordTest/save")
+    @ResponseBody  // Ajax 응답을 위해 추가
+    public Map<String, Object> saveQuizQuestion(@RequestParam("quizContent") String quizContent, 
+                                                @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // DTO 생성
+            UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
+            reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
+            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
+            reviewDTO.setQuizStatus(true);  // 상태 설정
+
+            // 서비스 호출하여 퀴즈 저장
+            userQuizQuestionReviewService.saveUserQuizQuestion(reviewDTO);
+
+            response.put("status", "success");
+            response.put("message", "퀴즈가 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("퀴즈 저장 중 오류 발생", e);
+            response.put("status", "error");
+            response.put("message", "퀴즈 저장 중 오류가 발생했습니다.");
+        }
+        return response;  // JSON 형식으로 응답
+    }
+    
+    
+    
+    @PostMapping("/dailyGrammarTest/save")
+    @ResponseBody
+    public Map<String, Object> saveQuizQuestion2(@RequestParam("quizContent") String quizContent, 
+                                                @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // DTO 생성
+            UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
+            reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
+            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
+            reviewDTO.setQuizStatus(true);  // 상태 설정
+
+            // 서비스 호출하여 퀴즈 저장
+            userQuizQuestionReviewService.saveUserQuizQuestion(reviewDTO);
+
+            response.put("status", "success");
+            response.put("message", "퀴즈가 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("퀴즈 저장 중 오류 발생: {}", e.getMessage(), e);  // 예외 메시지와 스택 트레이스를 로그에 출력
+            response.put("status", "error");
+            response.put("message", "퀴즈 저장 중 오류가 발생했습니다: " + e.getMessage());  // 클라이언트에 좀 더 구체적인 메시지를 전달
+        }
+        return response;  // JSON 형식으로 응답
+    }
+
+    
+    
+    @PostMapping("/weeklyWordTest/save")
+    @ResponseBody  // Ajax 응답을 위해 추가
+    public Map<String, Object> saveQuizQuestion3(@RequestParam("quizContent") String quizContent, 
+                                                @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // DTO 생성
+            UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
+            reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
+            reviewDTO.setQuizType(QuizType.WEEKLY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
+            reviewDTO.setQuizStatus(true);  // 상태 설정
+
+            // 서비스 호출하여 퀴즈 저장
+            userQuizQuestionReviewService.saveUserQuizQuestion(reviewDTO);
+
+            response.put("status", "success");
+            response.put("message", "퀴즈가 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("퀴즈 저장 중 오류 발생", e);
+            response.put("status", "error");
+            response.put("message", "퀴즈 저장 중 오류가 발생했습니다.");
+        }
+        return response;  // JSON 형식으로 응답
+    }
+    
+    
+    
+    @PostMapping("/weeklyGrammarTest/save")
+    @ResponseBody
+    public Map<String, Object> saveQuizQuestion4(@RequestParam("quizContent") String quizContent, 
+                                                @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // DTO 생성
+            UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
+            reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
+            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
+            reviewDTO.setQuizStatus(true);  // 상태 설정
+
+            // 서비스 호출하여 퀴즈 저장
+            userQuizQuestionReviewService.saveUserQuizQuestion(reviewDTO);
+
+            response.put("status", "success");
+            response.put("message", "퀴즈가 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            log.error("퀴즈 저장 중 오류 발생: {}", e.getMessage(), e);  // 예외 메시지와 스택 트레이스를 로그에 출력
+            response.put("status", "error");
+            response.put("message", "퀴즈 저장 중 오류가 발생했습니다: " + e.getMessage());  // 클라이언트에 좀 더 구체적인 메시지를 전달
+        }
+        return response;  // JSON 형식으로 응답
+    }
 }

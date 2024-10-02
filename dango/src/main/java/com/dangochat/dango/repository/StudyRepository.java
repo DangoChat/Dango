@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
@@ -67,4 +68,6 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
     	       "WHERE usc.user.userId = :userId AND s.type = '문법' AND usc.recordStudyDate BETWEEN :startDate AND :endDate")
     	List<StudyEntity> findWeekGrammarContentByUserId(@Param("userId") int userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+
 }
