@@ -32,7 +32,7 @@ public class GPTQuizService {
 
     private final RestTemplate restTemplate;  //JSON 응답을 Java 객체로 변환하거나, Java 객체를 JSON 형식으로 변환해 API에 보낼 수 있음
 
-    // GPT 요청 메시지를 생성하는 메서드
+// [승급 테스트 JLPT ] 사용자의 현재 레벨에 맞는 단어를 선택하여 GPT에게 문제를 생성 요청하는 기능
     private List<Message> createMessage(String content, String currentLevel) {
         String questionPrompt = String.format(
                 "You must create a JLPT " + currentLevel + " level multiple-choice question where the correct word is chosen to fill the blank '(　　　)'. "
@@ -50,7 +50,7 @@ public class GPTQuizService {
     }
 
 
-    // GPT에 문제 요청하고 응답 받는 메서드
+    // GPT에 문제 요청하고 만들어진 문제들
     public List<String> generateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 

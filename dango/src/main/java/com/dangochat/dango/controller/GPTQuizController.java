@@ -43,8 +43,8 @@ public class GPTQuizController {
 
     private final GPTQuizService gptQuizService;
     private final StudyRepository studyRepository;
-    private final StudyService studyService; //안호꺼(그날 배운 학습내용 가저오는 메서드)
-    private final GPTService gptService; //안호꺼(청해gpt문제 만드는 메서그)
+    private final StudyService studyService; //안호꺼(그 날 배운 학습 내용 가저오는 메서드)
+    private final GPTService gptService; //안호꺼(청해 gpt 문제 만드는 메서그)
     private final MemberService memberService;
 
     // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
@@ -162,7 +162,6 @@ public class GPTQuizController {
                 int messageType;
                 if (targetIndex < 25) {
                     messageType = 2;
-
 
                 }
 
