@@ -67,9 +67,9 @@ public class MemberRestController {
             // 인증 성공 시 SecurityContext에 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
             AuthenticatedUser userDetails = (AuthenticatedUser) authentication.getPrincipal();
-
+            MemberDTO userInfo = memberService.getMemberInfo(userDetails.getEmail());
             // 로그인 성공 응답
-            return ResponseEntity.ok(userDetails);
+            return ResponseEntity.ok(userInfo);
 
         } catch (AuthenticationException e) {
             // 인증 실패 시 401 Unauthorized 응답
