@@ -1,49 +1,132 @@
 <!DOCTYPE html>
-<html
-        lang="ko"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
->
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dango</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dango Project</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .button {
+      display: inline-block;
+      background-color: white; /* 버튼 배경 하얀색 */
+      color: grey; /* 글씨 회색 */
+      padding: 5px 10px; /* 작은 크기 */
+      margin: 5px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 12px; /* 글씨 크기를 작게 */
+      border: 1px solid black; /* 검정 테두리 */
+      border-radius: 5px; /* 라운드 테두리 */
+    }
+    .button:hover {
+      background-color: #f0f0f0; /* 마우스를 올렸을 때 약간 어두운 배경 */
+    }
+    .button-container {
+      white-space: nowrap; /* 버튼을 옆으로 나열하기 위한 속성 */
+      overflow-x: auto; /* 버튼이 화면을 넘어갈 경우 가로 스크롤 */
+    }
+  </style>
 </head>
 <body>
 <h1>[ DANGO PROJECT ]</h1>
-<a href="miynnn">미연</a>
-<a href="honeybitterchip">영서</a>
-<a href="leean">안호</a>
-<a href="hyeonmin">현민</a><br /><br />
 
-<div sec:authorize="not isAuthenticated()">
-  <p><a th:href="@{/member/join}">회원가입</a></p>
-  <p><a th:href="@{/member/loginForm}">로그인</a></p>
-  <p><a th:href="@{/member/passwordSearch}">비밀번호 찾기</a></p>
-  <p><a th:href="@{/mail/passwordSearch2}">비밀번호 찾기2</a></p>
-</div>
-<div sec:authorize="isAuthenticated()">
-  <p><a th:href="@{/logout}">로그아웃</a></p>
+<!-- 프로젝트 멤버 링크 버튼들 -->
+<div class="button-container">
+  <a href="sungjun" class="button">성준</a>
+  <a href="honeybitterchip" class="button">영서</a>
+  <a href="hyeonmin" class="button">현민</a>
+  <a href="leean" class="button">あの。。</a>
+  <a href="miynnn" class="button">미연</a>
 </div>
 
-<a href="member/levelSetting">유저 레벨 변경</a><br><br>
+<table>
+  <!-- 로그인 관련 -->
+  <tr>
+    <th>로그인 [완료] </th>
+    <td>
+      <div class="button-container" sec:authorize="not isAuthenticated()">
+        <a href="@{/member/join}" class="button">회원가입</a>
+        <a href="@{/member/loginForm}" class="button">로그인</a>
+        <a href="@{/member/passwordSearch}" class="button">비밀번호 찾기</a>
+        <a href="@{/mail/passwordSearch2}" class="button">비밀번호 찾기2</a>
+      </div>
+      <div sec:authorize="isAuthenticated()">
+        <a href="@{/logout}" class="button">로그아웃</a>
+      </div>
+    </td>
+  </tr>
 
-<a href="study/word">단어 학습</a><br>
-<a href="study/grammar">문법 학습</a><br><br>
-<a href="quiz/listening/1">청해 테스트</a><br>
-<a href="quiz/dailyWordTest/1">단어 일간 테스트</a><br>
-<a href="quiz/dailyGrammarTest/1">문업 일간 테스트</a><br>
-<a href="quiz/weeklyWordTest/1">단어 주간 테스트</a><br>
-<a href="quiz/weeklyGrammarTest/1">문법 주간 테스트</a><br><br>
-<a href="study/wordMistakes">단어 오답노트</a><br>
-<a href="study/grammarMistakes">문법 오답노트</a><br><br>
-<a href="gptChat/gptChat">GPTChat</a><br><br>
+  <!-- 학습 관련 -->
+  <tr>
+    <th>학습 [완료]</th>
+    <td>
+      <div class="button-container">
+        <a href="study/word" class="button">단어 학습</a>
+        <a href="study/grammar" class="button">문법 학습</a>
+        <a href="quiz/listening/1" class="button">청해 학습</a>
+      </div>
+    </td>
+  </tr>
 
-<a href="tts/ttsTest">tts 테스트</a><br />
-<a href="OMiKuZi/OmikuziList">오미쿠치</a><br />
-<a href="sungjun">성준 GPT</a><br />
-<a href="member/mileage">마일리지</a><br />
-<a href="userChat/TestMileageChat">마일리지채팅 테스트</a><br />
+  <!-- 오답노트 관련 -->
+  <tr>
+    <th>오답노트 [완료]</th>
+    <td>
+      <div class="button-container">
+        <a href="study/wordMistakes" class="button">단어 오답노트</a>
+        <a href="study/grammarMistakes" class="button">문법 오답노트</a>
+      </div>
+    </td>
+  </tr>
 
+  <!-- 기타 관련 -->
+  <tr>
+    <th>기타</th>
+    <td>
+      <div class="button-container">
+        <a href="gptChat/gptChat" class="button">GPTChat</a>
+        <a href="tts/ttsTest" class="button">TTS 테스트</a>
+        <a href="OMiKuZi/OmikuziList" class="button">오미쿠치</a>
+        <a href="member/mileage" class="button">마일리지</a>
+        <a href="userChat/TestMileageChat" class="button">마일리지 채팅 테스트</a>
+        <a href="member/levelSetting" class="button">유저 레벨 변경</a>
+      </div>
+    </td>
+  </tr>
+
+  <!-- 테스트 관련 -->
+  <tr>
+    <th>테스트</th>
+    <td>
+      <div class="button-container">
+        <a href="quiz/dailyWordTest/1" class="button">단어 일간 테스트</a>
+        <a href="quiz/dailyGrammarTest/1" class="button">문법 일간 테스트</a>
+        <a href="quiz/weeklyWordTest/1" class="button">단어 주간 테스트</a>
+        <a href="quiz/weeklyGrammarTest/1" class="button">문법 주간 테스트</a>
+      </div>
+    </td>
+  </tr>
+
+  <!-- 승급 테스트 관련 -->
+  <tr>
+    <th>승급 테스트</th>
+    <td>
+      <div class="button-container">
+        <a href="quiz/levelup/jlpt/1" class="button">JLPT 단어 승급 테스트</a>
+        <a href="/quiz/levelup/kor/1" class="button">한능검 승급 테스트</a>
+        <a href="sungjun" class="button">성준 GPT</a>
+      </div>
+    </td>
+  </tr>
+
+</table>
 </body>
 </html>
