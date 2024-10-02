@@ -108,5 +108,10 @@ public class MemberService {
             .build();
         return dto;
     }
+
+	public String getUserNationality(int id) {
+		
+		return memberRepository.findUserNationalityById(id);
+	}
 	
 }

@@ -263,7 +263,7 @@ public class GPTQuizController {
     	
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
-
+        
         if(!staytus) {
         	user.setUserMileage(user.getUserMileage() + 1);
         }else {
