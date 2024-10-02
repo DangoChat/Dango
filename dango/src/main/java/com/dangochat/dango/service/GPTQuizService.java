@@ -17,7 +17,7 @@ import java.util.List;
 
 /*
  * GPT로 단어문제 만들기
- * */
+ */
 
 @Service
 @RequiredArgsConstructor
@@ -33,101 +33,25 @@ public class GPTQuizService {
     private final RestTemplate restTemplate;  //JSON 응답을 Java 객체로 변환하거나, Java 객체를 JSON 형식으로 변환해 API에 보낼 수 있음
 
     // GPT 요청 메시지를 생성하는 메서드
-    private List<Message> createMessage(String content, int promptType) {
-        String prompt;
-        switch (promptType) {
-            case 1:
-                prompt = content+"이 단어를 사용한 예문을 일본어로 하나 만들어 주세요.\" +\n"
-                        + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "+
-                        "  \" 이 예문중 일본어 한자단어에 <u>밑줄</u>을 쳐주고, \"\n" +
-                        " \"이 일본어 한자단어의 읽는 방법(일본어 히라가나로)을 객관식 4지선다로 보여주세요. \"\n" +
-                        " \"JSON 형식으로 다음과 같이 반환해 주세요: \"\n" +
-                        " \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
-                        " \"반드시 줄바꿈해서 보기 쉽게 보여주세요.\"\n" +
-                        "\" 일본어로만 문제와 객관식을 만들어 주세요\"\n" +
-                        "\"응답에 한국어나 영어 또는 다른 문자는 절대 포함되지 않도록 주의해 주세요.\";"
-                        +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
-                ;
-                break;
-
-            case 2:
-                prompt = content + "이라는 단어를 사용한 새로운 문제를 만들어 주세요. "
-                        + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
-                        + "JLPT 스타일로 (　　　)부분에 들어갈 단어를 고르는 4지선다 문제를 만들어 주세요. "
-                        + "문제 예시: \"今回の飛行機事故のそもそもの (　　　) はまだ分かっていません。\" "
-                        + "객관식 예시: 1. 成因  2. 原因  3. 起因  4. 因果 "
-                        + "이 형식으로 괄호 `(　　　)`를 사용한 문제를 만들어 주세요. "
-                        + "JSON 형식으로 다음과 같이 반환해 주세요: "
-                        +" \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n" +
-                         "괄호 (　　　)를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요."
-                        + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요."
-                        +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
-                break;
+    private List<Message> createMessage(String content, String currentLevel) {
+        String questionPrompt = String.format(
+                "You must create a JLPT " + currentLevel + " level multiple-choice question where the correct word is chosen to fill the blank '(　　　)'. "
+                        + "The sentence must be grammatically correct and meaningful in Japanese, and it should be a well-formed sentence that is appropriate for the JLPT " + currentLevel + " level."
+                        + "The response must be in the following exact JSON format: "
+                        + "{ \"content\": \"question\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"correct_option_number\" }"
+                        + "Example question: { \"content\": \"彼は昨日詐欺罪で (　　　) されました。\", \"options\": [ \"1. 訴訟\", \"2. 告発\", \"3. 調査\", \"4. 逮捕\" ], \"answer\": \"4\" }"
+                        + "Important: Only one of the options must be the correct answer, which is \"" + content + "\". The remaining three options must be incorrect but plausible distractors."
+                        + "Ensure the question is a natural and well-formed sentence, and the correct answer is placed in one of the options, assigned to the \"answer\" field as a single number (e.g., \"1\", \"2\", \"3\", or \"4\")."
+                        + "All text, including the question and options, must be written entirely in Japanese."
+                        + "The response must strictly follow the provided JSON format. Do not include any explanations, comments, or additional information outside of the specified format.");
 
 
-            case 3:
-                prompt =
-                        content + "이라는 단어가 포함된 새로운 문제를 만들어 주세요. "
-                                + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
-                                + "밑줄의 단어의 의미와 가장 가까운 것을 고르는 JLPT 스타일의 4지선다 문제를 만들어 주세요. "
-                                + "문제 예시: \"子供向けの絵本に<u>ややこしい</u>説明はない。\" "
-                                + "객관식 예시: 1. 奇妙な  2. 複雑な  3. 簡潔な  4. 明確な "
-                                + "이 형식으로 문제를 만들어 주세요. "
-                                + "JSON 형식으로 다음과 같이 반환해 주세요: "
-                                + " \"{ \\\"content\\\": \\\"문제\\\", \\\"options\\\": [\\\"1\\\", \\\"2\\\", \\\"3\\\", \\\"4\\\"], \\\"answer\\\": \\\"정답인것의 숫자만 표시\\\" } \"\n"
-                                + "일본어로만 문제와 객관식을 만들어 주세요 "
-                                + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요."
-                                +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
-                ;
-                break;
-
-            case 4:
-                prompt =
-                        content + "일본어 단어를 문제로 제시하고, 보기 문장 속에서 그 단어의 올바른 사용을 고르는 문제를 만들어 주세요. 아래 조건을 지켜 주세요:\n" +
-                                "1. 제시된 단어는 일본어로 제공됩니다.\n" +
-                                "2. 보기 문장은 모두 일본어로 작성해야 합니다.\n" +
-                                "3. 보기 문장은 총 4개이며, 각 문장에는 모두 문제에 나온 단어가 포함되어야 합니다.\n" +
-                                "4. 보기 문장 중 1개만 단어가 올바르게 사용된 문장이고, 나머지 3개는 단어가 잘못된 방식으로 사용된 문장이어야 합니다.\n" +
-                                "5. 문제에 제시된 단어만 보기 문장에서 '<u>단어</u>' 형식으로 밑줄을 쳐 주세요. 다른 단어에는 밑줄을 치지 말아 주세요.\n" +
-                                "6. 결과는 반드시 다음과 같은 JSON 형식으로 반환해 주세요:\n" +
-                                "{\n" +
-                                "  \"content\": \"문제 단어\",\n" +
-                                "  \"options\": [\n" +
-                                "    \"1. 보기 문장 1\",\n" +
-                                "    \"2. 보기 문장 2\",\n" +
-                                "    \"3. 보기 문장 3\",\n" +
-                                "    \"4. 보기 문장 4\"\n" +
-                                "  ],\n" +
-                                "  \"answer\": \"정답인 숫자만 표시\"\n" +
-                                "}\n" +
-                                "7. 예시는 다음과 같아야 합니다:\n" +
-                                "{\n" +
-                                "  \"content\": \"約束\",\n" +
-                                "  \"options\": [\n" +
-                                "    \"1. 明日は友達と<u>約束</u>を飲みに行きます。\",\n" +
-                                "    \"2. 私は今日<u>約束</u>を忘れてしまいました。\",\n" +
-                                "    \"3. 彼女はいつも<u>約束</u>に乗って学校に行きます。\",\n" +
-                                "    \"4. 父は毎朝<u>約束</u>で公園を走ります。\"\n" +
-                                "  ],\n" +
-                                "  \"answer\": \"2\"\n" +
-                                "}\n" +
-                                "위와 같은 형식을 지켜 주세요."
-                                +   "Since you want to generate questions similar to JLPT, please ensure that all answers are provided entirely in Japanese.\n";
-                ;
-                break;
-            default:
-                throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
-        }
-
-        System.out.println("현재 prompt: " + promptType + " - " + prompt); // 로그 출력
-
-
-        return List.of(new Message("user", prompt)); //프롬프트 내용들
+        return List.of(new Message("user", questionPrompt));
     }
 
 
     // GPT에 문제 요청하고 응답 받는 메서드
-    public List<String> generateQuestions(List<String> contentList, int messageType, int numOfQuestions) throws IOException {
+    public List<String> generateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         // 만들 문제의 개수
@@ -137,11 +61,10 @@ public class GPTQuizService {
             String content = contentList.get(i);
             //null이 아니고 빈 공백문자가 아닌지 확인
             if (content != null && !content.trim().isEmpty()) {
-
                 System.out.println("현재 처리 중인 단어: " + content);
 
                 // gpt에게 보낼 메시지 (단어와 문제유형을 messages에 담아서 보냄)
-                List<Message> messages = createMessage(content, messageType);
+                List<Message> messages = createMessage(content, currentLevel);
 
                 // GPT 요청 객체 생성(3.5 gpt 와, messages, 등을 보냄)
                 GPTRequest request = new GPTRequest(model, messages, null,1, 256, 1, 2, 2);
