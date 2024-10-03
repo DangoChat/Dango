@@ -39,12 +39,12 @@ public class GPTService {
 
             // contentList에서 순차적으로 단어를 가져옴
             String content = contentList.get(i);
-
+            
             // null이 아니고 빈 공백 문자가 아닌지 확인
             if (content != null && !content.trim().isEmpty()) {
 
                 System.out.println("현재 처리 중인 단어: " + content);
-                System.out.println("국적2 !!!!!!!!!!!!!!!!!!!!!"+userNationality);
+                
                 // user_nationality에 따라 다르게 메시지 생성
                 List<Message> messages;
                 if ("Korea".equalsIgnoreCase(userNationality)) {

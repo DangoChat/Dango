@@ -389,7 +389,6 @@ public class GPTQuizController {
         // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
         String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
         
-        System.out.println("국적1 !!!!!!!!!!!!!!!!!!!!!"+userNationality);
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
@@ -418,7 +417,7 @@ public class GPTQuizController {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가저온다
         System.out.println("Study content: " + studyContent);
-
+        
         List<String> generatedQuestions = new ArrayList<>();
         int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
         try {

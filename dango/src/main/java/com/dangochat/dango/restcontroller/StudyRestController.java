@@ -28,9 +28,8 @@ public class StudyRestController {
     public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
         log.debug("로그인한 유저 아이디: " + userId);
-
+        
         String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
-
         // StudyEntity를 StudyDTO로 변환하여 리스트로 저장
         List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
                 .stream()
@@ -60,9 +59,7 @@ public class StudyRestController {
             String answer = (String) payload.get("answer");
             String studyType = (String) payload.get("studyType");
             int userId = userDetails.getId();  // @AuthenticationPrincipal을 통해 userId 가져오기
-
             boolean isCorrect = "O".equals(answer);
-
             // 학습 내용 기록
             studyService.recordStudyContent(studyContentId, userId, isCorrect, studyType);
 
