@@ -28,7 +28,7 @@ public class GPTService {
 
     // GPT에 문제 요청하고 응답 받는 메서드
  // GPT에 문제 요청하고 응답 받는 메서드 (매개변수를 List<String>으로 수정)
-    public List<String> generateGPTQuestions(List<String> contentList, int messageType, int numOfQuestions) throws IOException {
+    public List<String> generateGPTQuestions(List<String> contentList, int messageType, int numOfQuestions,String userNationality) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         // contentList의 크기와 numOfQuestions 중 작은 값을 사용
@@ -44,9 +44,16 @@ public class GPTService {
             if (content != null && !content.trim().isEmpty()) {
 
                 System.out.println("현재 처리 중인 단어: " + content);
-
-                // gpt에게 보낼 메시지 (단어와 문제유형을 messages에 담아서 보냄)
-                List<Message> messages = createMessages(content, messageType);
+                System.out.println("국적2 !!!!!!!!!!!!!!!!!!!!!"+userNationality);
+                // user_nationality에 따라 다르게 메시지 생성
+                List<Message> messages;
+                if ("Korea".equalsIgnoreCase(userNationality)) {
+                    messages = createMessagesJP(content, messageType);
+                } else if ("Japan".equalsIgnoreCase(userNationality)) {
+                    messages = createMessagesKR(content, messageType);
+                } else {
+                    throw new IllegalArgumentException("지원되지 않는 국적입니다: " + userNationality);
+                }
 
                 // GPT 요청 객체 생성(3.5gpt와, messages, 등을 보냄)
                 GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
@@ -90,7 +97,7 @@ public class GPTService {
 
 
     // GPT 메시지를 생성하는 메서드
-    private List<Message> createMessages(String content, int promptType) {
+    private List<Message> createMessagesJP(String content, int promptType) {
         String prompt;
         
         switch (promptType) {
@@ -148,4 +155,67 @@ public class GPTService {
 
     return List.of(new Message("user", prompt)); //프롬프트 내용들
 }
+    
+    
+ // GPT 메시지를 생성하는 메서드
+    private List<Message> createMessagesKR(String content, int promptType) {
+        String prompt;
+        
+        switch (promptType) {
+            case 1:
+                prompt =  content + "이라는 단어를 사용한 **새로운** 문제를 만들어 주세요. "
+                        + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
+                        + "JLPT 청해 스타일로 문제를 만들고 사용자는 그 문제를 듣고 보기에서 다음에 말해야하는 것을 보기에서 고르는 4지선다 문제를 만들어 주세요. "
+                        + "문제 예시: \"風邪をひいて大変なんです\" "
+                        + "객관식 예시: 1. お大事に  2. お疲れ様でした  3. 頑張ってください  4. 死んでください "
+                        + "이 형식으로 만들어주고"
+                        + "JSON 형식으로 다음과 같이 반환해 주세요: "
+                        + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"1\" } "
+                        + "반드시 줄바꿈해서 보기 쉽게 보여주세요. "
+                        + "문제와 객관식은 일본어로만 작성해 주세요.** "
+                        + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요. 그리고 다시한번 말하는데 지문에 '"+content+"'라는 단어를 사용해야 합니다.";
+                break;
+                
+        case 2:
+            prompt =  content + "이라는 단어를 사용한 **새로운** 문제를 만들어 주세요. "
+                    + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
+                    + "JLPT 스타일로 (　　　)부분에 들어갈 단어를 고르는 4지선다 문제를 만들어 주세요. "
+                    + "문제 예시: \"今回の飛行機事故のそもそもの (　　　) はまだ分かっていません。\" "
+                    + "객관식 예시: 1. 成因  2. 原因  3. 起因  4. 因果 "
+                    + "이 형식으로 괄호 `(　　　)`를 사용한 문제를 만들어 주세요. "
+                    + "JSON 형식으로 다음과 같이 반환해 주세요: "
+                    + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
+                    + "반드시 줄바꿈해서 보기 쉽게 보여주세요. "
+                    + "괄호 `(　　　)`를 사용하고, 문제와 객관식은 일본어로만 작성해 주세요.** "
+                    + "응답에 한국어나 영어가 절대 포함되지 않도록 주의해 주세요. 그리고 다시한번 말하는데 지문에 '"+content+"'라는 단어 꼭 써야해";     //단어        
+            break;
+
+
+        case 3:
+            prompt =
+                    content + "이라는 문법을 사용한 **새로운** 문제를 만들어 주세요. "
+                            + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
+                            + "밑줄의 단어의 의미와 가장 가까운 것을 고르는 JLPT 스타일의 4지선다 문제를 만들어 주세요. "
+                            + "문제 예시: \"子供向けの絵本に<u>ややこしい</u>説明はない。\" "
+                            + "객관식 예시: 1. 奇妙な  2. 複雑な  3. 簡潔な  4. 明確な "
+                            + "이 형식으로 문제를 만들어 주세요. "
+                            + "JSON 형식으로 다음과 같이 반환해 주세요: "
+                            + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
+                            + "반드시 줄바꿈해서 보기 쉽게 보여주세요."
+                            + " **일본어로만 문제와 객관식을 만들어 주세요** "
+                            + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요.";        //문법
+
+            ;
+            break;
+
+        
+
+        default:
+            throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
+    }
+
+    return List.of(new Message("user", prompt)); //프롬프트 내용들
+}
+    
+    
 }

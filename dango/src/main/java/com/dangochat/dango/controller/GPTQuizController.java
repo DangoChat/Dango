@@ -201,7 +201,11 @@ public class GPTQuizController {
     public String listeningLevel1(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-
+        MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+        
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
@@ -210,7 +214,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadInitialListeningQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        loadInitialListeningQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
         
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -226,7 +230,7 @@ public class GPTQuizController {
     }
 
 
-    private void loadInitialListeningQuestions(HttpSession session, int startIndex, int count, int userId) {
+    private void loadInitialListeningQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
         System.out.println("Study content: " + studyContent);
@@ -240,7 +244,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),listening,count);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),listening,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -288,7 +292,12 @@ public class GPTQuizController {
 
     @GetMapping("/listening/{questionNumber}")
     public String listeningLevelWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+    	MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+    	
+    	List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
 
         // 유효한 문제 번호인지 확인
@@ -374,7 +383,12 @@ public class GPTQuizController {
     public String dailyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-
+        MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+        
+        System.out.println("국적1 !!!!!!!!!!!!!!!!!!!!!"+userNationality);
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
@@ -382,7 +396,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadDailyWordTestQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        loadDailyWordTestQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -399,7 +413,7 @@ public class GPTQuizController {
 
 
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
-    private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId) {
+    private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가저온다
         System.out.println("Study content: " + studyContent);
@@ -413,7 +427,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -449,7 +463,12 @@ public class GPTQuizController {
 
     @GetMapping("/dailyWordTest/{questionNumber}")
     public String dailyWordTestLevelWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+    	MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+    	
+    	List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
 
         // 유효한 문제 번호인지 확인
@@ -486,7 +505,7 @@ public class GPTQuizController {
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 20) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground3(session, messageType, questionNumber + 2, userId);
+            generateNextQuestionInBackground3(session, messageType, questionNumber + 2, userId,userNationality);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -495,14 +514,14 @@ public class GPTQuizController {
 
 
     // 백그라운드에서 '단어'관련 문제를 만들어주는 메서드
-    private void generateNextQuestionInBackground3(HttpSession session, int messageType, int targetIndex, int userId) {
+    private void generateNextQuestionInBackground3(HttpSession session, int messageType, int targetIndex, int userId,String userNationality) {
         new Thread(() -> {
             try {
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
                 List<String> studyContent = studyService.getTodayWordContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
                 int word = 2;
-                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), word, 1); // targetIndex번째 문제 생성
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), word, 1,userNationality); // targetIndex번째 문제 생성
 
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
 
@@ -526,7 +545,10 @@ public class GPTQuizController {
     @GetMapping("/dailyGrammarTest/1")
     public String dailyGrammarTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
-        int userId = userDetails.getId();
+        int userId = userDetails.getId();MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationalityString userNationality = userDetails.getUserNationality(); // user_nationality 가져오기
 
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
@@ -535,7 +557,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadDailyGrammarQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        loadDailyGrammarQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -551,7 +573,7 @@ public class GPTQuizController {
     }
 
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
-    private void loadDailyGrammarQuestions(HttpSession session, int startIndex, int count, int userId) {
+    private void loadDailyGrammarQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getTodayGrammarContent(userId); // '문법' 타입 콘텐츠만 가저온다
         System.out.println("Study content: " + studyContent);
@@ -565,7 +587,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),grammar,count);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),grammar,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -601,7 +623,12 @@ public class GPTQuizController {
 
     @GetMapping("/dailyGrammarTest/{questionNumber}")
     public String dailyGrammarTestLevelWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+    	MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+    	
+    	List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
 
         // 유효한 문제 번호인지 확인
@@ -638,7 +665,7 @@ public class GPTQuizController {
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 3) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground4(session, messageType, questionNumber + 2, userId);
+            generateNextQuestionInBackground4(session, messageType, questionNumber + 2, userId,userNationality);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -647,14 +674,14 @@ public class GPTQuizController {
 
 
     // 백그라운드에서 '문법'관련 문제를 만들어주는 메서드
-    private void generateNextQuestionInBackground4(HttpSession session, int messageType, int targetIndex, int userId) {
+    private void generateNextQuestionInBackground4(HttpSession session, int messageType, int targetIndex, int userId,String userNationality) {
         new Thread(() -> {
             try {
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
                 List<String> studyContent = studyService.getTodayGrammarContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
                 int grammar = 3;
-                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), grammar, 1); // targetIndex번째 문제 생성
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), grammar, 1,userNationality); // targetIndex번째 문제 생성
 
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
 
@@ -678,7 +705,11 @@ public class GPTQuizController {
     public String weeklyWordTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
-
+        MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+        
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
         session.setAttribute("currentIndex", 1); // 첫 번째 문제로 설정
@@ -686,7 +717,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadWeeklyWordQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        loadWeeklyWordQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -703,7 +734,7 @@ public class GPTQuizController {
 
 
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
-    private void loadWeeklyWordQuestions(HttpSession session, int startIndex, int count, int userId) {
+    private void loadWeeklyWordQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getWeekWordContent(userId); // '단어' 타입 콘텐츠만 가저온다 (주간)
         System.out.println("Study content: " + studyContent);
@@ -717,7 +748,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -752,7 +783,12 @@ public class GPTQuizController {
 
     @GetMapping("/weeklyWordTest/{questionNumber}")
     public String weeklyWordTestLevelWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+    	MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+    	
+    	List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
 
         // 유효한 문제 번호인지 확인
@@ -789,7 +825,7 @@ public class GPTQuizController {
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 20) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground5(session, messageType, questionNumber + 2, userId);
+            generateNextQuestionInBackground5(session, messageType, questionNumber + 2, userId,userNationality);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -798,14 +834,14 @@ public class GPTQuizController {
 
 
     // 백그라운드에서 '단어'관련 문제를 만들어주는 메서드
-    private void generateNextQuestionInBackground5(HttpSession session, int messageType, int targetIndex, int userId) {
+    private void generateNextQuestionInBackground5(HttpSession session, int messageType, int targetIndex, int userId,String userNationality) {
         new Thread(() -> {
             try {
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
                 List<String> studyContent = studyService.getWeekWordContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
                 int word = 2;
-                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), word, 1); // targetIndex번째 문제 생성
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), word, 1,userNationality); // targetIndex번째 문제 생성
 
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
 
@@ -829,6 +865,10 @@ public class GPTQuizController {
     public String weeklyGrammarTest(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException, MessagingException {
         // 로그인 된 유저 ID 가져오기
         int userId = userDetails.getId();
+        MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
 
         // 세션 초기화 후 첫 번째 문제부터 시작
         session.setAttribute("generatedQuestions", new ArrayList<String>());
@@ -837,7 +877,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadWeeklyGrammarQuestions(session, 1, 3, userId);  // 첫 번째 문제에서 3개의 문제 생성
+        loadWeeklyGrammarQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -854,7 +894,7 @@ public class GPTQuizController {
 
 
     // '문법'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
-    private void loadWeeklyGrammarQuestions(HttpSession session, int startIndex, int count, int userId) {
+    private void loadWeeklyGrammarQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
         List<String> studyContent = studyService.getWeekGrammarContent(userId); // '문법' 타입 콘텐츠만 가저온다
         System.out.println("Study content: " + studyContent);
@@ -868,7 +908,7 @@ public class GPTQuizController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),grammar,count);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),grammar,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -903,7 +943,12 @@ public class GPTQuizController {
 
     @GetMapping("/weeklyGrammarTest/{questionNumber}")
     public String weeklyGrammarTestLevelWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
+    	MemberEntity member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // 가져온 MemberEntity에서 user_nationality 값을 사용합니다.
+        String userNationality = member.getUserNationality();  // 데이터베이스에서 가져온 user_nationality
+    	
+    	List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
 
         // 유효한 문제 번호인지 확인
@@ -940,7 +985,7 @@ public class GPTQuizController {
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 7) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground6(session, messageType, questionNumber + 2, userId);
+            generateNextQuestionInBackground6(session, messageType, questionNumber + 2, userId,userNationality);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -949,14 +994,14 @@ public class GPTQuizController {
 
 
     // 백그라운드에서 '문법'관련 문제를 만들어주는 메서드
-    private void generateNextQuestionInBackground6(HttpSession session, int messageType, int targetIndex, int userId) {
+    private void generateNextQuestionInBackground6(HttpSession session, int messageType, int targetIndex, int userId,String userNationality) {
         new Thread(() -> {
             try {
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
                 List<String> studyContent = studyService.getWeekGrammarContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
                 int grammar = 3;
-                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), grammar, 1); // targetIndex번째 문제 생성
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, targetIndex), grammar, 1,userNationality); // targetIndex번째 문제 생성
 
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
 
