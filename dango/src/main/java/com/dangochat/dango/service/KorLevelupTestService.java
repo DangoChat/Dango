@@ -18,69 +18,53 @@ import java.util.List;
 /*
  * GPT로 단어문제 만들기
  */
-
 @Service
 @RequiredArgsConstructor
 public class KorLevelupTestService {
     private final StudyRepository studyRepository;
 
-    @Value("${gpt.model}") //gpt-3.5-turbo
+    @Value("${gpt.model}")
     private String model;
 
-    @Value("${gpt.api.url}") //https://api.openai.com/v1/chat/completions
+    @Value("${gpt.api.url}")
     private String apiUrl;
 
-    private final RestTemplate restTemplate;  // JSON 응답을 Java 객체로 변환하거나, Java 객체를 JSON 형식으로 변환해 API에 보낼 수 있음
+    private final RestTemplate restTemplate;
 
-    // [승급 테스트] 사용자의 현재 레벨에 맞는 단어를 선택하여 GPT에게 문제를 생성 요청하는 기능
+    // GPT에 보낼 메시지 생성
     private List<Message> korCreateMessage(String content, String currentLevel) {
         String questionPrompt = String.format(
-                "한국어 능력시험" +currentLevel+ "에 맞게 객관식 문제를 만들어야 합니다. \n" +
-                        "정답으로 선택될 단어는 ' "+content+" '라는 단어 이어야 합니다." +
-                        "예시 문제:\n" +
-                        "{\n" +
-                        "  \"content\": \"그는 어제 경찰에 (　　　) 되었다.\",\n" +
-                        "  \"options\": [ \"1. 체포\", \"2. 증언\", \"3. 감시\", \"4. 조사\" ],\n" +
-                        "  \"answer\": \"1\"\n" +
-                        "}\n" +
-                        " 이며 그는 어제 경찰에 (　체포　) 되었다 처럼 문장이 어색함없이 잘 구성 되게 해주세요" +
-                        "응답은 다음과 같은 정확한 JSON 형식으로 제공되어야 합니다:\n" +
-                        "{\n" +
-                        "  \"content\": \"문제\",\n" +
-                        "  \"options\": [ \"1. 선택지1\", \"2. 선택지2\", \"3. 선택지3\", \"4. 선택지4\" ],\n" +
-                        "  \"answer\": \"정답 번호\"\n" +
-                        "}\n" +"지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요."+
-
-                        "중요: 선택지 중 하나만 정답이어야 하며, 그 정답은"+ content+ "이어야 합니다 나머지 세 개의 선택지는 오답이어야합니다.\n" +
-                        "문제는 자연스럽고 잘 구성된 문장이어야 하며, 정답은 선택지 중 하나에 배치되어야 하고, \"answer\" 필드에 번호(예: \"1\", \"2\", \"3\", 또는 \"4\")로 지정되어야 합니다.\n" +
-                        "\n" +
-                        "모든 텍스트, 즉 문제와 선택지는 한국어로 작성되어야 합니다.\n"
-
+                "한국어능력시험 스타일의 객관식 문제를 1개만 생성해주세요." +
+                        "한국어능력시험 " + currentLevel + " 수준으로 내주세요." +
+                        "먼저 ()에 들어갈 말이 " + content + "이어야 합니다. " +
+                        "이 " + content + "을 넣었을 때 문장이 문법적으로나 문맥상으로 완벽해야 합니다." +
+                        "이 문제는 ()가 있는 형식으로, ()에 들어갈 알맞은 정답을 선택하는 문제입니다. 정답은 반드시 " + content + "이어야 합니다." +
+                        "2. 각 문제에는 네 개의 선택지가 포함되어야 합니다. 그 중 하나는 " + content + "이며, 이것이 정답입니다. " +
+                        "나머지 세 가지 오답은 문맥상 매우 어색한 단어들이어야 합니다. " +
+                        "즉, 오답들이 ()에 들어갔을 때 문장이 어색하고 맞지 않아야 합니다." +
+                        "3. 아래와 같은 JSON 형식으로 출력해주세요:\n" +
+                        "{ \"content\": \"문장\", \"options\": [ \"1. 오답1\", \"2. 오답2\", \"3. 정답\", \"4. 오답3\" ], \"answer\": \"정답의 번호\" }\n" +
+                        "answer는 정답의 번호를 숫자로만 표기해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요."
         );
-
         return List.of(new Message("user", questionPrompt));
     }
 
-    // GPT에 문제 요청하고 만들어진 문제들
+    // GPT에 문제 요청하고 만들어진 문제들을 반환하는 메서드
     public List<String> korGenerateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
-        // 만들 문제의 개수
+        // numOfQuestions 만큼 반복하여 contentList에서 순차적으로 단어를 가져옴
         for (int i = 0; i < numOfQuestions; i++) {
-
-            // contentList에서 순차적으로 단어를 가져옴
-            String content = contentList.get(i);
-            // null이 아니고 빈 공백문자가 아닌지 확인
+            String content = contentList.get(i);  // contentList의 i번째 단어를 사용
             if (content != null && !content.trim().isEmpty()) {
                 System.out.println("현재 처리 중인 단어: " + content);
 
-                // GPT에게 보낼 메시지
+                // GPT에게 보낼 메시지 생성
                 List<Message> korMessages = korCreateMessage(content, currentLevel);
 
                 // GPT 요청 객체 생성
                 GPTRequest request = new GPTRequest(model, korMessages, null, 1, 256, 1, 2, 2);
 
-                // request 객체를 JSON 형식의 문자열로 변환하기 위해
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonRequest;
                 try {
@@ -114,6 +98,6 @@ public class KorLevelupTestService {
             }
         }
 
-        return generatedQuestions;  // 생성된 문제 리스트 반환
+        return generatedQuestions;
     }
 }

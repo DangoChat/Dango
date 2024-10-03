@@ -59,6 +59,7 @@ public class GPTQuizController {
     private final userQuizQuestionReviewService userQuizQuestionReviewService;
     private final MemberRepository memberRepository;
 
+    // [승급테스트 기능] 실제로는 사용 x >> JLPT / Kor 따로 분리해 놨어요 이거지우면 밑에 다 바꿔야 해서 안지움 ]
     // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
     @GetMapping("/level/1")
     public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
@@ -145,7 +146,7 @@ public class GPTQuizController {
 
     // 초기 문제 3개를 미리 로드하는 메서드                                  1      ,       3
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
-        List<String> contentList = studyRepository.findByLevelContainingRandom(level);
+        List<String> contentList = studyRepository.findByJLPTWord(level);
 
         // 24개의 단어를 로그에 출력
         log.info("가져온 단어 목록:");
@@ -169,7 +170,7 @@ public class GPTQuizController {
     private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex, String level) { //targetindex : 지금 생성해야 할 문제 번호 n+2번째 문제
         new Thread(() -> {
             try {
-                List<String> contentList = studyRepository.findByLevelContainingRandom(level); // 24개의 단어를 랜덤하게 가져옴
+                List<String> contentList = studyRepository.findByJLPTWord(level); // 24개의 단어를 랜덤하게 가져옴
 
                 int messageType;
                 if (targetIndex < 25) {

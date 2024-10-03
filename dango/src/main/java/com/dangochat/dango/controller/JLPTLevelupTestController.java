@@ -26,6 +26,7 @@ import java.util.List;
  */
 
 @Slf4j
+
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/quiz/levelup/jlpt") // JLPT로 변경
@@ -118,7 +119,7 @@ public class JLPTLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void jlptLoadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = studyRepository.findByLevelContainingRandom(level);
+        List<String> contentList = studyRepository.findByJLPTWord(level);
 
         // 배열 형식으로 단어들을 로그에 출력
         log.info("뽑힌 단어 = {}", contentList);
@@ -138,7 +139,7 @@ public class JLPTLevelupTestController {
     private void jlptGenerateNextQuestionInBackground(HttpSession session, int targetIndex, String level) {
         new Thread(() -> {
             try {
-                List<String> contentList = studyRepository.findByLevelContainingRandom(level);
+                List<String> contentList = studyRepository.findByJLPTWord(level);
 
                 if (targetIndex < 25) {
                     List<String> nextQuestion = jlptLevelupTestService.generateJLPTQuestions(contentList.subList(targetIndex - 1, targetIndex), 1, level);

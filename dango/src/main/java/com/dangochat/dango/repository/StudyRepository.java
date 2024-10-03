@@ -35,12 +35,24 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
 //            "LIMIT 24;", nativeQuery = true)
 //    List<String> findRandomContent(@Param("userId") int userId);
 
-    //[승급테스트] 단어 문제
-    @Query(value = "SELECT se.study_content_content FROM study_content se WHERE se.level LIKE :level ORDER BY RAND() LIMIT 24", nativeQuery = true)
-    List<String> findByLevelContainingRandom(@Param("level") String level);
+    // [ 승급 테스트 JLPT ]  단어 문제 -  level 똑같은 단어 24개 뽑기
+    @Query(value = "SELECT se.study_content_content " +
+            "FROM study_content se " +
+            "WHERE se.level LIKE :level " +
+            "AND study_content_type = '단어' " +
+            "AND se.study_content_content REGEXP '^[\u4E00-\u9FFF]+$' " +
+            "ORDER BY RAND() LIMIT 24", nativeQuery = true)
+    List<String> findByJLPTWord(@Param("level") String level);
 
+    // [ 승급 테스트 한국어능력시험 ] 단어 문제 - level 똑같은 단어 3개 뽑기
+    @Query(value = "SELECT se.study_content_content FROM study_content se WHERE se.level LIKE :level AND study_content_type = '단어' AND se.study_content_content REGEXP '^[\uAC00-\uD7A3]+$' AND se.study_content_content NOT LIKE '%다' ORDER BY RAND() LIMIT 3", nativeQuery = true)
+    List<String> findByKorWordStart(@Param("level") String level);
 
-    // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일테스트)
+    // [ 승급 테스트 한국어능력시험 ] 단어 문제 - level 똑같은 단어 3개 뽑기
+    @Query(value = "SELECT se.study_content_content FROM study_content se WHERE se.level LIKE :level AND study_content_type = '단어' AND se.study_content_content REGEXP '^[\uAC00-\uD7A3]+$' AND se.study_content_content NOT LIKE '%다' ORDER BY RAND() LIMIT 21", nativeQuery = true)
+    List<String> findByKorWordBack(@Param("level") String level);
+
+    // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일 테스트)
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +
     	       "WHERE usc.user.userId = :userId AND s.type = '단어' AND DATE(usc.recordStudyDate) = CURRENT_DATE")
     	List<StudyEntity> findTodayWordContentByUserId(@Param("userId") int userId);
