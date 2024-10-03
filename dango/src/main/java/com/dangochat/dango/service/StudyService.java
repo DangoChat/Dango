@@ -30,6 +30,7 @@ public class StudyService {
     private final UserMistakesRepository userMistakesRepository;
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
+    private final UserQuizQuestionReviewRepository userQuizQuestionReviewRepository;
 
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
@@ -283,6 +284,11 @@ public class StudyService {
         return wordContentEntities.stream()
                 .map(StudyEntity::getContent)
                 .toList();
+    }
+    
+    
+    public List<UserQuizQuestionReviewEntity> findQuizByTypeAndUserId(QuizType quizType, int userId) {
+        return userQuizQuestionReviewRepository.findByQuizTypeAndUserId(quizType, userId);
     }
 
 }

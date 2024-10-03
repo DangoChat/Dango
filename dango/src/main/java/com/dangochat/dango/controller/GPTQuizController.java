@@ -981,12 +981,13 @@ public class GPTQuizController {
     @ResponseBody  // Ajax 응답을 위해 추가
     public Map<String, Object> saveQuizQuestion(@RequestParam("quizContent") String quizContent, 
                                                 @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    	
         Map<String, Object> response = new HashMap<>();
         try {
             // DTO 생성
             UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
             reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
-            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizType(QuizType.daily);  // 퀴즈 타입 설정
             reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
             reviewDTO.setQuizStatus(true);  // 상태 설정
 
@@ -1014,7 +1015,7 @@ public class GPTQuizController {
             // DTO 생성
             UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
             reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
-            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizType(QuizType.daily);  // 퀴즈 타입 설정
             reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
             reviewDTO.setQuizStatus(true);  // 상태 설정
 
@@ -1042,7 +1043,7 @@ public class GPTQuizController {
             // DTO 생성
             UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
             reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
-            reviewDTO.setQuizType(QuizType.WEEKLY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizType(QuizType.weekly);  // 퀴즈 타입 설정
             reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
             reviewDTO.setQuizStatus(true);  // 상태 설정
 
@@ -1070,7 +1071,7 @@ public class GPTQuizController {
             // DTO 생성
             UserQuizQuestionReviewDTO reviewDTO = new UserQuizQuestionReviewDTO();
             reviewDTO.setUserId(userDetails.getId());  // 현재 사용자 ID 설정
-            reviewDTO.setQuizType(QuizType.DAILY);  // 퀴즈 타입 설정
+            reviewDTO.setQuizType(QuizType.daily);  // 퀴즈 타입 설정
             reviewDTO.setQuizContent(quizContent);  // 퀴즈 내용 설정
             reviewDTO.setQuizStatus(true);  // 상태 설정
 
