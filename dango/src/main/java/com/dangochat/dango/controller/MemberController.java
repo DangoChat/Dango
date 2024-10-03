@@ -85,15 +85,19 @@ public class MemberController {
 	    // 현재 사용자 레벨 정보를 가져옴
 	    String currentLevel = service.getUserCurrentLevel(userDetails.getId());
 	    String originalLevel = service.getOriginalLevel(userDetails.getId());
-
+	    
+	    // 유저의 nationality 정보 가져오기
+	    String userNationality = service.getUserNationality(userDetails.getId());
+	    
 	    // 모델에 현재 레벨 정보와 originalLevel을 추가
 	    model.addAttribute("currentLevel", currentLevel);
 	    model.addAttribute("originalLevel", originalLevel);
-
+	    model.addAttribute("userNationality", userNationality);     //HTML에 유저 국적을 알려주는 모델. 나중에 해당 국적이 아니면 버튼이 안보이게 가능
+	    
 	    // "levelSetting.html"로 이동
 	    return "memberView/levelSetting";
 	}
-
+	
 	
 	
 	@PostMapping("levelSetting")                              
@@ -111,7 +115,7 @@ public class MemberController {
 	        responseBody.put("error", "original_level보다 하위로만 이동할 수 없습니다.");
 	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseBody);
 	    }
-
+	    
 	    // 레벨 업데이트
 	    if (updateBoth) {
 	        // 첫 번째 줄 버튼: current_level과 original_level 둘 다 업데이트 (제한 없음)

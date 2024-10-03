@@ -21,5 +21,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Integer> {
     @Modifying
     @Query("UPDATE MemberEntity m SET m.userMileage = m.userMileage + :points WHERE m.userId = :userId")
     void addMileage(@Param("userId") Integer userId, @Param("points") int points);
-
+    
+    
+    // 사용자 ID로 user_nationality를 조회하는 메서드
+    @Query("SELECT m.userNationality FROM MemberEntity m WHERE m.userId = :id")
+    String findUserNationalityById(@Param("id") int id);
 }

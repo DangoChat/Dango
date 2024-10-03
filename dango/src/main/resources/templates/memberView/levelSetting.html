@@ -46,6 +46,7 @@
     <div>
         <p>현재 레벨: <span id="currentLevel" th:text="${currentLevel}">N/A</span></p>
         <p>Original 레벨: <span id="originalLevel" th:text="${originalLevel}">N/A</span></p>
+        <p>유저 국적: <span id="user_nationality" th:text="${userNationality}">N/A</span></p> 
     </div>
 
     <!-- 첫 번째 줄: current_level과 original_level 둘 다 변경 -->
@@ -68,6 +69,32 @@
         <button onclick="updateLevel('N3', false)">N3</button>
         <button onclick="updateLevel('N2', false)">N2</button>
         <button onclick="updateLevel('N1', false)">N1</button>
+    </div>
+
+    <br>
+
+    <!-- 한국어 급수시험 레벨 설정 -->
+    <h3>한국어 급수시험 레벨 설정</h3>
+    <div>
+        <button onclick="updateLevel('1급', true)">1</button>
+        <button onclick="updateLevel('2급', true)">2</button>
+        <button onclick="updateLevel('3급', true)">3</button>
+        <button onclick="updateLevel('4급', true)">4</button>
+        <button onclick="updateLevel('5급', true)">5</button>
+        <button onclick="updateLevel('6급', true)">6</button>
+    </div>
+
+    <br>
+
+    <!-- 한국어 급수시험 레벨 (current_level만 변경) -->
+    <h3>한국어 급수시험 레벨 (current_level만 변경)</h3>
+    <div>
+        <button onclick="updateLevel('1급', false)">1</button>
+        <button onclick="updateLevel('2급', false)">2</button>
+        <button onclick="updateLevel('3급', false)">3</button>
+        <button onclick="updateLevel('4급', false)">4</button>
+        <button onclick="updateLevel('5급', false)">5</button>
+        <button onclick="updateLevel('6급', false)">6</button>
     </div>
 </body>
 </html>

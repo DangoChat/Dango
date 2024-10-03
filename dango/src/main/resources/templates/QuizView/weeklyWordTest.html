@@ -35,12 +35,23 @@
     select {
       margin-bottom: 20px;
     }
+
+    /* 메시지 표시 스타일 */
+    .message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: green;
+    }
+
+    .error-message {
+      color: red;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
-<h1>GPT 청해 문제</h1>
+<h1>GPT 단어 문제</h1>
 
 <!-- 몇 번째 문제인지 표시 -->
 <div class="question-number">
@@ -63,14 +74,46 @@
   </div>
 </div>
 
-<!-- 오류 메시지 표시 -->
-<div th:if="${error}">
-  <p th:text="${error}" style="color: red;"></p>
-</div>
+<!-- 저장 버튼 추가 -->
+<form id="saveQuizForm">
+  <input type="hidden" id="quizContent" name="quizContent" th:value="${question}">
+  <button type="button" id="saveQuizButton">문제 저장</button>
+</form>
+
+<!-- 저장 및 오류 메시지 표시 -->
+<div class="message" id="messageBox"></div>
 
 <!-- 다음 문제로 이동하는 버튼 -->
 <form action="/quiz/weeklyWordTest/next" method="post">
-  <button type="submit">다음 문제</button>
+  <button type="submit">다음 문제</button> 
 </form>
+
+<script>
+  $(document).ready(function() {
+    // 문제 저장 버튼 클릭 시 Ajax 요청 전송
+    $('#saveQuizButton').on('click', function() {
+      const quizContent = $('#quizContent').val();  // 퀴즈 내용 가져오기
+      const studyContentId = $('#studyContentId').val();  // study_content_id 가져오기
+
+      $.ajax({
+        type: 'POST',
+        url: '/quiz/weeklyWordTest/save',
+        data: {
+          quizContent: quizContent,
+          studyContentId: studyContentId  // study_content_id 함께 전송
+        },
+        success: function(response) {
+          // 저장 성공 메시지 표시
+          $('#messageBox').removeClass('error-message').addClass('message').text('문제가 성공적으로 저장되었습니다.');
+        },
+        error: function(xhr, status, error) {
+          // 오류 메시지 표시
+          $('#messageBox').removeClass('message').addClass('error-message').text('퀴즈 저장 중 오류가 발생했습니다.');
+        }
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
