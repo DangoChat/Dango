@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+           xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,20 +48,23 @@
   <a href="miynnn" class="button">미연</a>
 </div>
 
+<div class="button-container" sec:authorize="not isAuthenticated()">
+  <a th:href="@{/member/join}" class="button">회원가입</a>
+  <a th:href="@{/member/loginForm}" class="button">로그인</a>
+  <a th:href="@{/member/passwordSearch}" class="button">비밀번호 찾기</a>
+  <a th:href="@{/mail/passwordSearch2}" class="button">비밀번호 찾기2</a>
+</div>
+
+<div sec:authorize="isAuthenticated()">
+  <a th:href="@{/logout}" class="button">로그아웃</a>
+</div>
+
 <table>
   <!-- 로그인 관련 -->
   <tr>
     <th>로그인 [완료] </th>
     <td>
-      <div class="button-container" sec:authorize="not isAuthenticated()">
-        <a href="@{/member/join}" class="button">회원가입</a>
-        <a href="@{/member/loginForm}" class="button">로그인</a>
-        <a href="@{/member/passwordSearch}" class="button">비밀번호 찾기</a>
-        <a href="@{/mail/passwordSearch2}" class="button">비밀번호 찾기2</a>
-      </div>
-      <div sec:authorize="isAuthenticated()">
-        <a href="@{/logout}" class="button">로그아웃</a>
-      </div>
+
     </td>
   </tr>
 
