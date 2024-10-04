@@ -111,7 +111,7 @@ public class KorLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = studyRepository.findByKorWordStart(level); // 24개의 단어 목록 가져옴
+        List<String> contentList = studyRepository.findByKorWordStart(level); // 3개의 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 
@@ -119,6 +119,7 @@ public class KorLevelupTestController {
             int messageType = (int) session.getAttribute("currentMessageType");
             List<String> korGeneratedQuestions = korLevelupTestService.korGenerateQuestions(contentList.subList(startIndex - 1, Math.min(startIndex - 1 + count, contentList.size())), messageType, count, level);
             session.setAttribute("korGeneratedQuestions", korGeneratedQuestions);
+            session.setAttribute("contentList", contentList);
             log.info("초기 생성된 {}개의 문제: {}", count, korGeneratedQuestions);
         } catch (Exception e) {
             log.error("문제가 생성되지 않았습니다.", e);
@@ -130,20 +131,35 @@ public class KorLevelupTestController {
     private void korGenerateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex, String level) {
         new Thread(() -> {
             try {
-                List<String> contentList = studyRepository.findByKorWordBack(level);
+                // 세션에서 contentList를 가져옴
+                List<String> contentList = (List<String>) session.getAttribute("contentList");
 
-                log.info("뽑힌 단어 = {}", contentList);
+                if (contentList == null) {
+                    log.error("contentList가 세션에 없습니다.");
+                    return;
+                }
+
+                // 남은 문제의 index 범위를 확인
                 if (targetIndex < 25 && targetIndex - 1 < contentList.size()) {
-                    List<String> nextQuestion = korLevelupTestService.korGenerateQuestions(contentList.subList(targetIndex - 1, targetIndex), currentMessageType, 1, level);
+                    // 다음 문제를 생성할 때 사용되지 않은 단어를 하나씩 사용
+                    List<String> nextQuestion = korLevelupTestService.korGenerateQuestions(
+                            contentList.subList(targetIndex - 1, targetIndex), // 사용되지 않은 단어를 사용
+                            currentMessageType,
+                            1,
+                            level
+                    );
+
+                    // 세션에서 이미 생성된 문제 리스트를 가져옴
                     List<String> korGeneratedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions");
 
                     if (korGeneratedQuestions != null) {
+                        // 새로운 문제를 기존 문제 리스트에 추가
                         korGeneratedQuestions.addAll(nextQuestion);
                         log.info("대기 중인 문제 추가: {}번째 문제 - {}", targetIndex, nextQuestion.get(0));
 
+                        // 세션에 다시 저장
+                        session.setAttribute("korGeneratedQuestions", korGeneratedQuestions);
                     }
-
-                    session.setAttribute("korGeneratedQuestions", korGeneratedQuestions);
                 }
             } catch (Exception e) {
                 log.error("백그라운드에서 문제 생성 중 오류 발생: ", e);
