@@ -57,140 +57,7 @@ public class GPTQuizController {
     private final userQuizQuestionReviewService userQuizQuestionReviewService;
     private final MemberRepository memberRepository;
 
-    // [승급테스트 기능] 실제로는 사용 x >> JLPT / Kor 따로 분리해 놨어요 이거지우면 밑에 다 바꿔야 해서 안지움 ]
-    // 첫 번째 문제는 항상 /level/ 1 번문제 부터 시작하는 메서드
-    @GetMapping("/level/1")
-    public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        int userId = userDetails.getId();
-        String currentLevel = memberService.getUserCurrentLevel(userId);
-        session.setAttribute("level", currentLevel);
-        // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("generatedQuestions", new ArrayList<String>()); // 생성된 문제들을 저장하는 리스트 초기화
-        session.setAttribute("currentIndex", 1);                          // 현재 문제 번호 1로 설정
-        session.setAttribute("currentMessageType", 2);                   // 현재 메세지 타입 2로 설정 (1번 프로미프트)
-
-        // 3개의 문제를 미리 생성해서 세션에 저장
-        log.info("초기 2개의 문제 생성 시작.");
-        loadInitialQuestions(session, 1, 2, currentLevel);  // 첫 번째 문제에서부터 3개의 문제를 생성하고 세션에 저장
-        log.info("초기 2개의 문제 생성 완료.");
-
-        // 첫 번째 문제를 화면에 표시
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
-        if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
-            String currentQuestion = generatedQuestions.get(0); // 첫 번째 문제를 가져옴
-            model.addAttribute("question", currentQuestion); // 문제를 모델에 추가하여 뷰로 전달
-            model.addAttribute("currentIndex", 1); // 현재 문제 번호를 모델에 추가하여 뷰로 전달
-            log.info("첫 번째 문제 표시: {}", currentQuestion); // 문제 내용 로그 출력
-        }
-
-        return "QuizView/levelup"; // levelup이라는 이름의 뷰로 이동
-    }
-
-    // 문제 번호를 URL로 받아 해당 문제를 출력하는 메서드
-    @GetMapping("/level/{questionNumber}")
-    public String levelupquizWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions"); // 세션에서 생성된 문제 리스트를 가져옴
-        Integer currentIndex = (Integer) session.getAttribute("currentIndex"); // 세션에서 현재 문제 번호를 가져옴
-
-        // 유효한 문제 번호인지 확인 (24번째 문제까지만 허용)
-        if (questionNumber > 24 || questionNumber < 1) {
-            return "redirect:/"; // 문제 번호가 범위를 벗어나면 홈으로 리다이렉트
-        }
-
-        // 문제 리스트가 존재하고, 해당 문제 번호에 맞는 문제가 있을 경우
-        if (generatedQuestions != null && questionNumber <= generatedQuestions.size()) {
-            String currentQuestion = generatedQuestions.get(questionNumber - 1); // 문제는 0-based index이므로 -1 해줌
-            model.addAttribute("question", currentQuestion); // 해당 문제를 모델에 추가
-            model.addAttribute("currentIndex", questionNumber);  // 사용자에게 현재 문제 번호를 표시
-            session.setAttribute("currentIndex", questionNumber); // 현재 문제 번호를 세션에 저장
-            log.info("현재 문제 표시: {}번째 문제 - {}", questionNumber, currentQuestion); // 문제 번호와 문제 내용 로그 출력
-        }
-
-        String level = session.getAttribute("level").toString();
-        log.info("user level: {}", level );
-
-        // n번째 문제를 풀 때, n+2번째 문제를 백그라운드에서 미리 생성
-        if (questionNumber + 2 <= 24) {
-            log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground(session, (Integer) session.getAttribute("currentMessageType"), questionNumber + 2, level); // n+2번째 문제를 백그라운드에서 생성
-            log.info("{}번째 문제 생성 완료.", questionNumber + 2);
-        }
-
-        return "QuizView/levelup"; // levelup이라는 이름의 뷰로 이동
-    }
-
-    // 다음 문제로 이동하는 로직
-    @PostMapping("/next")
-    public String nextQuestion(HttpSession session) {
-        Integer currentIndex = (Integer) session.getAttribute("currentIndex"); // 세션에서 현재 문제 번호를 가져옴
-        List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions"); // 세션에서 생성된 문제 리스트를 가져옴
-
-        // 다음 문제로 인덱스를 증가시킴
-        if (currentIndex != null && generatedQuestions != null && currentIndex < generatedQuestions.size()) {
-            session.setAttribute("currentIndex", currentIndex + 1); // 문제 번호를 1 증가시킴
-            log.info("다음 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
-        }
-
-        // 마지막 문제일 경우 홈으로 리다이렉트
-        if (currentIndex != null && currentIndex >= 24) {
-            return "redirect:/"; // 마지막 문제 이후에는 홈으로 리다이렉트
-        }
-
-        // 다음 문제 화면에 출력 (URL에 문제 번호를 포함)
-        return "redirect:/quiz/level/" + (currentIndex + 1); // 다음 문제로 리다이렉트
-    }
-
-    // 초기 문제 3개를 미리 로드하는 메서드                                  1      ,       3
-    private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) { //startindex :  지금보고 있는 페이지의 문제 번호 n번째 문제
-        List<String> contentList = studyRepository.findByJLPTWord(level);
-
-        // 24개의 단어를 로그에 출력
-        log.info("가져온 단어 목록:");
-        for (int i = 0; i < contentList.size(); i++) {
-            log.info("단어 {}: {}", (i + 1), contentList.get(i));
-        }
-
-        List<String> generatedQuestions = new ArrayList<>();
-
-        try {
-            int messageType = (int) session.getAttribute("currentMessageType");  // 세션에서 현재 메세지 타입을 가져옴
-            generatedQuestions = gptQuizService.generateQuestions(contentList.subList(startIndex - 1, startIndex - 1 + count), messageType, count, level); // level 추가
-            session.setAttribute("generatedQuestions", generatedQuestions); // 생성된 문제 리스트를 세션에 저장
-            log.info("초기 생성된 {}개의 문제: {}", count, generatedQuestions); //2개, 만둘아진 문제
-        } catch (Exception e) {
-            log.error("문제가 생성되지 않았습니다.", e); // 문제 생성 중 오류 발생 시 로그에 출력
-        }
-    }
-
-    // 백그라운드에서 다음 문제를 미리 생성하는 메서드
-    private void generateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex, String level) { //targetindex : 지금 생성해야 할 문제 번호 n+2번째 문제
-        new Thread(() -> {
-            try {
-                List<String> contentList = studyRepository.findByJLPTWord(level); // 24개의 단어를 랜덤하게 가져옴
-
-                int messageType;
-                if (targetIndex < 25) {
-                    messageType = 2;
-
-                }
-
-                // targetIndex에 해당하는 문제를 생성
-                List<String> nextQuestion = gptQuizService.generateQuestions(contentList.subList(targetIndex - 1, targetIndex), 2, 1, level); // level 추가
-                List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
-
-                if (generatedQuestions != null) {
-                    generatedQuestions.addAll(nextQuestion); // 생성된 문제를 기존 문제 리스트에 추가
-                    log.info("대기 중인 문제 추가: {}번째 문제 - {}", targetIndex, nextQuestion.get(0)); // 새로운 문제 로그 출력
-                }
-
-                session.setAttribute("generatedQuestions", generatedQuestions); // 세션에 업데이트된 문제 리스트 저장
-            } catch (Exception e) {
-                log.error("백그라운드에서 문제 생성 중 오류 발생: ", e); // 백그라운드에서 문제 생성 중 오류 발생 시 로그에 출력
-            }
-        }).start(); // 백그라운드 스레드에서 실행
-    }
+    
 
 
     //       =======================================================================================================
@@ -331,7 +198,7 @@ public class GPTQuizController {
         // n번째 문제를 풀 때 n+2번째 문제를 백그라운드에서 미리 생성
         if (questionNumber + 2 <= 23) {
             log.info("{}번째 문제 이후에 {}번째 문제를 생성 중...", questionNumber, questionNumber + 2);
-            generateNextQuestionInBackground2(session, messageType, questionNumber + 2, userId);
+            generateNextQuestionInBackground2(session, messageType, questionNumber + 2, userId,userNationality);
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
@@ -340,7 +207,7 @@ public class GPTQuizController {
 
 
 
-    private void generateNextQuestionInBackground2(HttpSession session, int messageType, int targetIndex, int userId) {
+    private void generateNextQuestionInBackground2(HttpSession session, int messageType, int targetIndex, int userId,String userNationality) {
         new Thread(() -> {
             try {
                 // 유저의 현재 레벨 가져오기 (userId를 사용하여)
@@ -350,13 +217,7 @@ public class GPTQuizController {
                 List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
 
-                // GPT 문제 생성 (userLevel을 네 번째 인자로 사용)
-                List<String> nextQuestion = gptQuizService.generateQuestions(
-                        studyContent.subList(targetIndex - 1, endIndex),
-                        messageType,
-                        2,
-                        userLevel // level 추가
-                );
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, endIndex), messageType, 1,userNationality); // targetIndex번째 문제 생성
 
                 // 세션에서 기존 문제 리스트를 가져옴
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
