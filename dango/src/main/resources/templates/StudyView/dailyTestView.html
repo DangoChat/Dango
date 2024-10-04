@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>일간 테스트 기록 확인</title>
+</head>
+<body>
+    <h1>[ 일간 테스트 ]</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>문제 ID</th>
+                <th>문제 내용</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="test : ${dailyTests}">
+                <td th:text="${test.userQuizQuestionId}"></td>
+                <td th:text="${test.quizContent}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

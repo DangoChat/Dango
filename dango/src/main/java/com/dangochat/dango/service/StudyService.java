@@ -30,6 +30,7 @@ public class StudyService {
     private final UserMistakesRepository userMistakesRepository;
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
+    private final UserQuizQuestionReviewRepository userQuizQuestionReviewRepository;
 
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
@@ -49,7 +50,7 @@ public class StudyService {
     }
     
     //오리지날 레벨과 커렌트 레벨을 비교하기 위해 필요한 메서드
-    public boolean isInvalidHigherLevelChange(String originalLevel, String currentLevel) {
+    public boolean isInvalidHigherLevelChangeJP(String originalLevel, String currentLevel) {
         Map<String, Integer> levelMap = Map.of(
             "N1", 1,  // 가장 높은 레벨
             "N2", 2,
@@ -60,7 +61,21 @@ public class StudyService {
         // originalLevel이 currentLevel보다 높은 경우 true 반환 (즉, 레벨을 하향하면 true)
         return levelMap.get(originalLevel) < levelMap.get(currentLevel);
     }
-
+    //오리지날 레벨과 커렌트 레벨을 비교하기 위해 필요한 메서드
+    public boolean isInvalidHigherLevelChangeKR(String originalLevel, String currentLevel) {
+    	System.out.println("ggggggggggggggggggggggggggggggggg"+originalLevel+currentLevel);
+    	
+        Map<String, Integer> levelMap = Map.of(
+            "6", 6,  // 가장 높은 레벨
+            "5", 5,
+            "4", 4,
+            "3", 3,
+            "2", 2,
+            "1", 1// 가장 낮은 레벨
+        );
+        // originalLevel이 currentLevel보다 높은 경우 true 반환 (즉, 레벨을 하향하면 true)
+        return levelMap.get(originalLevel) < levelMap.get(currentLevel);
+    }
 
 
     // 사용자 ID와 레벨에 따라 학습 콘텐츠 20개 가져 오기 (오답노트 최대 20% 포함, 비율은 랜덤)
@@ -106,7 +121,8 @@ public class StudyService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + userId));
         StudyEntity studyContent = studyRepository.findById(studyContentId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid study content ID: " + studyContentId));
-
+        String userNationality = user.getUserNationality();
+        
         UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
         userStudyContent.setUser(user);
         userStudyContent.setStudyContent(studyContent);
@@ -116,14 +132,22 @@ public class StudyService {
         // 레벨 비교 로직 추가
         String currentLevel = getUserLevel(userId);  // 현재 레벨
         String originalLevel = getOriginalLevel(userId);  // 오리지널 레벨
-        System.out.println(currentLevel+originalLevel);
-
+        
         // 만약 현재 레벨이 오리지널 레벨보다 낮으면 마일리지 지급 중단
-        if (isInvalidHigherLevelChange(originalLevel, currentLevel)) {
-            log.info("현재 레벨이 original 레벨보다 낮아 마일리지가 지급되지 않습니다.");
-            return;  // 마일리지 지급 중지
+        if ("Japan".equalsIgnoreCase(userNationality)) {
+            // 만약 현재 레벨이 오리지널 레벨보다 낮으면 마일리지 지급 중단
+            if (isInvalidHigherLevelChangeKR(originalLevel, currentLevel)) {
+                log.info("현재 레벨이 original 레벨보다 낮아 마일리지가 지급되지 않습니다.");
+                return;  // 마일리지 지급 중지
+            }
+        }else if ("Korea".equalsIgnoreCase(userNationality)) {
+            // 만약 현재 레벨이 오리지널 레벨보다 낮으면 마일리지 지급 중단
+            if (isInvalidHigherLevelChangeJP(originalLevel, currentLevel)) {
+                log.info("현재 레벨이 original 레벨보다 낮아 마일리지가 지급되지 않습니다.");
+                return;  // 마일리지 지급 중지
+            }
         }
-
+        
         // 마일리지 로직 (레벨 비교 후)
         if ("grammar".equalsIgnoreCase(studyType)) {
             if (isCorrect) {
@@ -283,6 +307,11 @@ public class StudyService {
         return wordContentEntities.stream()
                 .map(StudyEntity::getContent)
                 .toList();
+    }
+    
+    
+    public List<UserQuizQuestionReviewEntity> findQuizByTypeAndUserId(QuizType quizType, int userId) {
+        return userQuizQuestionReviewRepository.findByQuizTypeAndUserId(quizType, userId);
     }
 
 }
