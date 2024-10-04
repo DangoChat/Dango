@@ -217,7 +217,7 @@ public class GPTQuizController {
                 List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
 
-                List<String> nextQuestion = gptQuizService.generateQuestions(studyContent.subList(targetIndex - 1, endIndex), messageType, 1,userNationality); // targetIndex번째 문제 생성
+                List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, endIndex), messageType, 1,userNationality); // targetIndex번째 문제 생성
 
                 // 세션에서 기존 문제 리스트를 가져옴
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
