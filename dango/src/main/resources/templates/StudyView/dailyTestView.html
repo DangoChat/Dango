@@ -1,25 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>일간 테스트 기록 확인</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일간 테스트 기록</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid black;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>[ 일간 테스트 ]</h1>
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>문제 ID</th>
-                <th>문제 내용</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="test : ${dailyTests}">
-                <td th:text="${test.userQuizQuestionId}"></td>
-                <td th:text="${test.quizContent}"></td>
-            </tr>
-        </tbody>
-    </table>
+<h1>유저 일간 테스트 기록</h1>
+
+<!-- 테스트 결과를 표시할 테이블 -->
+<table id="dailyTestTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>유저 ID</th>
+            <th>학습 날짜</th>
+            <th>퀴즈 타입</th>
+            <th>퀴즈 내용</th>
+            <th>오답여부</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- 데이터가 여기에 추가됩니다 -->
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+        // API 호출하여 데이터 가져오기
+        $.ajax({
+            url: '/api/study/dailyTestView',  // Rest API 호출 경로
+            type: 'GET',
+            success: function(response) {
+                var tableBody = $('#dailyTestTable tbody');
+                tableBody.empty();  // 기존 데이터를 지우고
+
+                // 받아온 데이터를 테이블에 추가
+                response.forEach(function(test) {
+                    var row = `
+                        <tr>
+                            <td>${test.userQuizQuestionId}</td>
+                            <td>${test.userId}</td>
+                            <td>${test.quizStudyDate}</td>
+                            <td>${test.quizType}</td>
+                            <td>${test.quizContent}</td>
+                            <td>${test.quizStatus ? '맞음' : '틀림'}</td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            },
+            error: function() {
+                alert('데이터를 불러오는 중 오류가 발생했습니다.');
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

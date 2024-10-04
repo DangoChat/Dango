@@ -1,6 +1,9 @@
 package com.dangochat.dango.restcontroller;
 
 import com.dangochat.dango.dto.StudyDTO;
+import com.dangochat.dango.dto.UserQuizQuestionReviewDTO;
+import com.dangochat.dango.entity.QuizType;
+import com.dangochat.dango.entity.UserQuizQuestionReviewEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.StudyService;
 import lombok.RequiredArgsConstructor;
@@ -156,6 +159,62 @@ public class StudyRestController {
     }
 
     
+    // 유저 일간,주간 테스트 기록 관련 Controller
+    @GetMapping("/dailyTestView")
+    public ResponseEntity<List<UserQuizQuestionReviewDTO>> getDailyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        
+        // QuizType.DAILY를 직접 사용하여 엔티티 조회
+        List<UserQuizQuestionReviewEntity> dailyTests = studyService.findQuizByTypeAndUserId(QuizType.daily, userId);
+
+        // 엔티티를 DTO로 변환
+        List<UserQuizQuestionReviewDTO> dailyTestDTOs = dailyTests.stream()
+            .map(test -> UserQuizQuestionReviewDTO.builder()
+                .userQuizQuestionId(test.getUserQuizQuestionId())  // ID
+                .userId(test.getUser().getUserId())  // 유저 ID
+                .quizStudyDate(test.getQuizStudyDate())  // 퀴즈 학습 날짜
+                .quizType(test.getQuizType())  // 퀴즈 타입
+                .quizContent(test.getQuizContent())  // 퀴즈 내용
+                .quizStatus(test.getQuizStatus())
+                .build())
+            .collect(Collectors.toList());
+
+        // 결과 반환
+        if (dailyTestDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();  // 데이터가 없을 경우 204 응답
+        }
+
+        return ResponseEntity.ok(dailyTestDTOs);  // 데이터 반환
+    }
     
     
+    
+    @GetMapping("/weeklyTestView")
+    public ResponseEntity<List<UserQuizQuestionReviewDTO>> getWeeklyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+
+        // QuizType.WEEKLY를 사용하여 주간 퀴즈 조회
+        List<UserQuizQuestionReviewEntity> weeklyTests = studyService.findQuizByTypeAndUserId(QuizType.weekly, userId);
+
+        // 엔티티를 DTO로 변환
+        List<UserQuizQuestionReviewDTO> weeklyTestDTOs = weeklyTests.stream()
+            .map(test -> UserQuizQuestionReviewDTO.builder()
+                .userQuizQuestionId(test.getUserQuizQuestionId())  // ID
+                .userId(test.getUser().getUserId())  // 유저 ID
+                .quizStudyDate(test.getQuizStudyDate())  // 퀴즈 학습 날짜
+                .quizType(test.getQuizType())  // 퀴즈 타입
+                .quizContent(test.getQuizContent())  // 퀴즈 내용
+                .quizStatus(test.getQuizStatus())  // 퀴즈 상태
+                .build())
+            .collect(Collectors.toList());
+
+        // 결과 반환
+        if (weeklyTestDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();  // 데이터가 없으면 204 No Content 응답
+        }
+
+        return ResponseEntity.ok(weeklyTestDTOs);  // 데이터를 JSON으로 반환
+    }
+
+
 }

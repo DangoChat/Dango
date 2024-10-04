@@ -51,34 +51,13 @@ public class StudyController {
     }
    
     
-    // 유저 일간,주간 테스트 기록 관련
+    // 유저 일간,주간 테스트 기록 관련 Controller
     @GetMapping("/dailyTestView")
-    public String dailyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
-        // 로그인된 유저 ID를 가져옵니다.
-        int userId = userDetails.getId();
-        
-        // QuizType.DAILY를 직접 사용
-        List<UserQuizQuestionReviewEntity> dailyTests = studyService.findQuizByTypeAndUserId(QuizType.daily, userId);
-        // 조회한 데이터를 모델에 추가하여 뷰에 전달
-        
-        model.addAttribute("dailyTests", dailyTests);
-
-        return "StudyView/dailyTestView";  // dailyTestView.html로 이동
+    public String dailyTestView() {
+        return "StudyView/dailyTestView";  
     }
-    
-    
     @GetMapping("/weeklyTestView")
-    public String weeklyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
-    	 // 로그인된 유저 ID를 가져옵니다.
-        int userId = userDetails.getId();
-        
-        // QuizType.DAILY를 직접 사용
-        List<UserQuizQuestionReviewEntity> weeklyTests = studyService.findQuizByTypeAndUserId(QuizType.weekly, userId);
-        // 조회한 데이터를 모델에 추가하여 뷰에 전달
-        
-        model.addAttribute("weeklyTests", weeklyTests);
-    	
-    	
+    public String weeklyTestView() {
         return "StudyView/weeklyTestView";
     }
 
