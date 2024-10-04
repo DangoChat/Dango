@@ -1,78 +1,71 @@
-package com.dangochat.dango.controller;
+package com.dangochat.dango.restcontroller;
 
 import com.dangochat.dango.service.*;
-import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.security.AuthenticatedUser;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.io.IOException;
+import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
-@RequestMapping("/quiz/levelup/kor")
-public class KorLevelupTestController {
+@RestController // @Controller 대신 @RestController로 변경
+@RequestMapping("/api/quiz/levelup/kor")
+public class KorLevelupTestRestController {
 
     private final KorLevelupTestService korLevelupTestService;
-    private final StudyRepository studyRepository;
     private final MemberService memberService;
 
-    // 첫 번째 문제는 항상 /levelup/kor/1 번 문제부터 시작하는 메서드
+    // 첫 번째 문제는 항상 /levelup/kor/1 번 문제 부터 시작 하는 메서드
     @GetMapping("/1")
-    public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
-        String currentLevel = memberService.getUserCurrentLevel(userId);
-        session.setAttribute("level", currentLevel);
+    public Map<String, Object> levelupquiz(HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();  // 로그인 한 사용자 아이디
+        String currentLevel = memberService.getUserCurrentLevel(userId); //사용자의 현재 레벨
+        session.setAttribute("level", currentLevel); //사용자의 현재 레벨을 세션에 저장
 
         // 세션 초기화 후 첫 번째 문제부터 시작
-        session.setAttribute("korGeneratedQuestions", new ArrayList<String>());
-        session.setAttribute("currentIndex", 1);
-        session.setAttribute("currentMessageType", 2);
+        session.setAttribute("korGeneratedQuestions", new ArrayList<String>()); // 생성된 문제들을 저장할 리스트
+        session.setAttribute("currentIndex", 1); //현재 문제의 인덱스는 1
+     // session.setAttribute("currentMessageType", 2); // 메세지 유형은 2의 유형임
 
         // 초기 문제 3개를 미리 생성
         log.info("초기 3개의 문제 생성 시작.");
-        loadInitialQuestions(session, 1, 3, currentLevel);
+        loadInitialQuestions(session, 1, 3, currentLevel); //1번부터 총 3개의 문제를 만듬
         log.info("초기 3개의 문제 생성 완료.");
 
-        // 첫 번째 문제를 화면에 표시
-        List<String> generatedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions");
+        // 첫 번째 문제를 JSON 으로 반환
+        List<String> generatedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions"); //세션에 저장된 문제 리스트 가져오기
+        Map<String, Object> response = new HashMap<>(); // json형식의 데이터를 담은 Map 생성
         if (generatedQuestions != null && !generatedQuestions.isEmpty()) {
-            String currentQuestion = generatedQuestions.get(0);
-            model.addAttribute("question", currentQuestion);
-            model.addAttribute("currentIndex", 1);
+            String currentQuestion = generatedQuestions.get(0); // 첫 번째 문제 가져오기
+            response.put("question", currentQuestion); // 응답에 문제 추가
+            response.put("currentIndex", 1); // 응답에 현재 문제의 인덱스 1 추가
             log.info("첫 번째 문제 표시: {}", currentQuestion);
         }
 
-        return "QuizView/levelupKor";
+        return response;
     }
 
     // 문제 번호를 URL로 받아 해당 문제를 출력하는 메서드
     @GetMapping("/{questionNumber}")
-    public String levelupquizWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        List<String> korGeneratedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions");
-        Integer currentIndex = (Integer) session.getAttribute("currentIndex");
+    public Map<String, Object> levelupquizWithQuestionNumber(@PathVariable("questionNumber") int questionNumber, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        List<String> korGeneratedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions"); // 세션에 저장된 문제
 
-        if (questionNumber > 24 || questionNumber < 1) {
-            return "redirect:/";
+        Map<String, Object> response = new HashMap<>();     // 응답 데이터를 담을 Map 생성
+        if (questionNumber > 24 || questionNumber < 1) {    // 문제 번호가 1~24 범위 밖이면
+            response.put("redirect", "/");                  // 잘못된 문제 번호일 경우 홈으로 리다이렉트
+            return response;
         }
 
         if (korGeneratedQuestions != null && questionNumber <= korGeneratedQuestions.size()) {
-            String currentQuestion = korGeneratedQuestions.get(questionNumber - 1);
-            model.addAttribute("question", currentQuestion);
-            model.addAttribute("currentIndex", questionNumber);
+            String currentQuestion = korGeneratedQuestions.get(questionNumber - 1); // 요청된 문제 번호에 해당하는 문제 가져오기
+            response.put("question", currentQuestion);
+            response.put("currentIndex", questionNumber);
             session.setAttribute("currentIndex", questionNumber);
             log.info("현재 문제 표시: {}번째 문제 - {}", questionNumber, currentQuestion);
         }
@@ -87,30 +80,33 @@ public class KorLevelupTestController {
             log.info("{}번째 문제 생성 완료.", questionNumber + 2);
         }
 
-        return "QuizView/levelupKor";
+        return response;
     }
 
     // 다음 문제로 이동하는 로직
     @PostMapping("/next")
-    public String nextQuestion(HttpSession session) {
+    public Map<String, Object> nextQuestion(HttpSession session) {
         Integer currentIndex = (Integer) session.getAttribute("currentIndex");
         List<String> korGeneratedQuestions = (List<String>) session.getAttribute("korGeneratedQuestions");
 
+        Map<String, Object> response = new HashMap<>();
         if (currentIndex != null && korGeneratedQuestions != null && currentIndex < korGeneratedQuestions.size()) {
             session.setAttribute("currentIndex", currentIndex + 1);
             log.info("다음 문제로 이동, 현재 인덱스: {}", currentIndex + 1);
         }
 
         if (currentIndex != null && currentIndex >= 24) {
-            return "redirect:/";
+            response.put("redirect", "/");   // 24번 문제 이후 홈으로 리다이렉트
+            return response;
         }
 
-        return "redirect:/quiz/levelup/kor/" + (currentIndex + 1);
+        response.put("redirect", "/api/quiz/levelup/kor/" + (currentIndex + 1));
+        return response;
     }
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = studyRepository.findByKorWord(level); // 3개의 단어 목록 가져옴
+        List<String> contentList = korLevelupTestService.findByKorWord(level);      // 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 
@@ -124,7 +120,6 @@ public class KorLevelupTestController {
             log.error("문제가 생성되지 않았습니다.", e);
         }
     }
-
 
     // 백그라운드에서 다음 문제를 미리 생성하는 메서드
     private void korGenerateNextQuestionInBackground(HttpSession session, int currentMessageType, int targetIndex, String level) {

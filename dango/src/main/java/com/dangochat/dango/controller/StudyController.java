@@ -66,7 +66,6 @@ public class StudyController {
         return "StudyView/dailyTestView";  // dailyTestView.html로 이동
     }
     
-    
     @GetMapping("/weeklyTestView")
     public String weeklyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
     	 // 로그인된 유저 ID를 가져옵니다.
