@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class KorLevelupTestService {
+
     private final StudyRepository studyRepository;
 
     @Value("${gpt.model}")
@@ -31,6 +32,10 @@ public class KorLevelupTestService {
 
     private final RestTemplate restTemplate;
 
+    //단어 24개 랜덤으로 가져오기
+    public List<String> findByKorWord(String level) {
+        return studyRepository.findByKorWord(level);
+    }
     // GPT에 보낼 메시지 생성
     private List<Message> korCreateMessage(String content, String currentLevel) {
         String questionPrompt = String.format(

@@ -30,23 +30,24 @@ public class StudyRestController {
         log.debug("로그인한 유저 아이디: " + userId);
         
         String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
+
         // StudyEntity를 StudyDTO로 변환하여 리스트로 저장
         List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
                 .stream()
                 .map(studyEntity -> StudyDTO.builder()
-                        .studyContentId(studyEntity.getStudyContentId())
-                        .content(studyEntity.getContent())
-                        .pronunciation(studyEntity.getPronunciation())
-                        .meaning(studyEntity.getMeaning())
-                        .type(studyEntity.getType())
-                        .level(studyEntity.getLevel())
-                        .example1(studyEntity.getExample1())
-                        .exampleTranslation1(studyEntity.getExampleTranslation1())
-                        .example2(studyEntity.getExample2())
-                        .exampleTranslation2(studyEntity.getExampleTranslation2())
-                        .build())
+                .studyContentId(studyEntity.getStudyContentId())
+                .content(studyEntity.getContent())
+                .pronunciation(studyEntity.getPronunciation())
+                .meaning(studyEntity.getMeaning())
+                .type(studyEntity.getType())
+                .level(studyEntity.getLevel())
+                .example1(studyEntity.getExample1())
+                .exampleTranslation1(studyEntity.getExampleTranslation1())
+                .example2(studyEntity.getExample2())
+                .exampleTranslation2(studyEntity.getExampleTranslation2())
+                .build())
                 .collect(Collectors.toList());
-        return studyContent;
+                return studyContent;
     }
 
     @ResponseBody

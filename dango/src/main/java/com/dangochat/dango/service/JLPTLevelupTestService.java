@@ -3,6 +3,7 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.dto.GPTRequest;
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.Message;
+import com.dangochat.dango.repository.StudyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +26,20 @@ public class JLPTLevelupTestService {
     private String model;
 
     @Value("${gpt.api.url}")
-    private String apiUrl;
 
+    private String apiUrl;
     private final RestTemplate restTemplate;
+    private final StudyRepository studyRepository;
+
+    //랜덤 으로 24개의 단어 가져 오기
+    public List<String> findByJLPTWord(String level) {
+        return studyRepository.findByJLPTWord(level);
+    }
 
     // GPT에 보낼 메시지 생성
     private List<Message> jlptCreateMessage(String content, String currentLevel) {
         String questionPrompt = String.format(
-                "JLPT 스타일의 객관식 문제를 1개만 생성해주세요." +
+                        "JLPT 스타일의 객관식 문제를 1개만 생성해주세요." +
                         "JLPT " + currentLevel + " 수준으로 내주세요." +
                         "먼저 ()에 들어갈 말이 " + content + "이어야 합니다. " +
                         "이 " + content + "을 넣었을 때 문장이 문법적으로나 문맥상으로 완벽해야 합니다." +
@@ -42,11 +49,12 @@ public class JLPTLevelupTestService {
                         "즉, 오답들이 ()에 들어갔을 때 문장이 어색하고 맞지 않아야 합니다." +
                         "3. 아래와 같은 JSON 형식으로 출력해주세요:\n" +
                         "{ \"content\": \"Sentence with ()\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"number of the correct answer\" }\n" +
-                        "answer는 정답의 번호를 숫자로만 표기해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요." +
-                        "JLPT니까 모두 일본어로만 구성되어야합니다"
+                        "answer는 정답의 번호를 숫자로만 표기 해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요." +
+                        "JLPT 니까 모두 일본어로만 구성 되어야 합니다"
         );
         return List.of(new Message("user", questionPrompt));
     }
+
 
     // GPT에 문제 요청하고 만들어진 문제들을 반환하는 메서드
     public List<String> jlptGenerateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
@@ -96,7 +104,6 @@ public class JLPTLevelupTestService {
                 }
             }
         }
-
         return generatedQuestions;
     }
 }
