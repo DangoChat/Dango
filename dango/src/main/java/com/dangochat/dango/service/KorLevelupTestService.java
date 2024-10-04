@@ -43,8 +43,9 @@ public class KorLevelupTestService {
                         "나머지 세 가지 오답은 문맥상 매우 어색한 단어들이어야 합니다. " +
                         "즉, 오답들이 ()에 들어갔을 때 문장이 어색하고 맞지 않아야 합니다." +
                         "3. 아래와 같은 JSON 형식으로 출력해주세요:\n" +
-                        "{ \"content\": \"문장\", \"options\": [ \"1. 오답1\", \"2. 오답2\", \"3. 정답\", \"4. 오답3\" ], \"answer\": \"정답의 번호\" }\n" +
-                        "answer는 정답의 번호를 숫자로만 표기해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요."
+                        "{ \"content\": \"Sentence with ()\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"number of the correct answer\" }\n" +
+                        "answer는 정답의 번호를 숫자로만 표기해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요."+
+                        "한국어능력시험이니까 모두 한국어로만 구성되어야합니다"
         );
         return List.of(new Message("user", questionPrompt));
     }

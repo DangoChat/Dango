@@ -3,7 +3,6 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.dto.GPTRequest;
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.Message;
-import com.dangochat.dango.repository.StudyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,52 +15,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * JLPT 문제 생성 및 관리 서비스
+ * GPT로 JLPT 문제 만들기
  */
-
 @Service
 @RequiredArgsConstructor
 public class JLPTLevelupTestService {
 
-    private final StudyRepository studyRepository;
-
-    @Value("${gpt.model}") //gpt-3.5-turbo
+    @Value("${gpt.model}")
     private String model;
 
-    @Value("${gpt.api.url}") //https://api.openai.com/v1/chat/completions
+    @Value("${gpt.api.url}")
     private String apiUrl;
 
     private final RestTemplate restTemplate;
 
-    // JLPT 레벨에 맞는 문제 생성 요청 메시지 생성
-    private List<Message> createJLPTMessage(String content, String currentLevel) {
+    // GPT에 보낼 메시지 생성
+    private List<Message> jlptCreateMessage(String content, String currentLevel) {
         String questionPrompt = String.format(
-                "You must create a JLPT " + currentLevel + " level multiple-choice question where the correct word is chosen to fill the blank '(　　　)'. "
-                        + "The sentence must be grammatically correct and meaningful in Japanese, and it should be a well-formed sentence that is appropriate for the JLPT " + currentLevel + " level."
-                        + "The response must be in the following exact JSON format: "
-                        + "{ \"content\": \"question\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"correct_option_number\" }"
-                        + "Example question: { \"content\": \"彼は昨日詐欺罪で (　　　) されました。\", \"options\": [ \"1. 訴訟\", \"2. 告発\", \"3. 調査\", \"4. 逮捕\" ], \"answer\": \"4\" }"
-                        + "Important: Only one of the options must be the correct answer, which is \"" + content + "\". The remaining three options must be incorrect but plausible distractors."
-                        + "Ensure the question is a natural and well-formed sentence, and the correct answer is placed in one of the options, assigned to the \"answer\" field as a single number (e.g., \"1\", \"2\", \"3\", or \"4\")."
-                        + "All text, including the question and options, must be written entirely in Japanese."
-                        + "The response must strictly follow the provided JSON format. Do not include any explanations, comments, or additional information outside of the specified format."
+                "JLPT 스타일의 객관식 문제를 1개만 생성해주세요." +
+                        "JLPT " + currentLevel + " 수준으로 내주세요." +
+                        "먼저 ()에 들어갈 말이 " + content + "이어야 합니다. " +
+                        "이 " + content + "을 넣었을 때 문장이 문법적으로나 문맥상으로 완벽해야 합니다." +
+                        "이 문제는 ()가 있는 형식으로, ()에 들어갈 알맞은 정답을 선택하는 문제입니다. 정답은 반드시 " + content + "이어야 합니다." +
+                        "2. 각 문제에는 네 개의 선택지가 포함되어야 합니다. 그 중 하나는 " + content + "이며, 이것이 정답입니다. " +
+                        "나머지 세 가지 오답은 문맥상 매우 어색한 단어들이어야 합니다. " +
+                        "즉, 오답들이 ()에 들어갔을 때 문장이 어색하고 맞지 않아야 합니다." +
+                        "3. 아래와 같은 JSON 형식으로 출력해주세요:\n" +
+                        "{ \"content\": \"Sentence with ()\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"number of the correct answer\" }\n" +
+                        "answer는 정답의 번호를 숫자로만 표기해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요." +
+                        "JLPT니까 모두 일본어로만 구성되어야합니다"
         );
-
         return List.of(new Message("user", questionPrompt));
     }
 
-    // GPT에 문제 요청하고 만들어진 문제들 가져오기
-    public List<String> generateJLPTQuestions(List<String> contentList, int numOfQuestions, String currentLevel) throws IOException {
+    // GPT에 문제 요청하고 만들어진 문제들을 반환하는 메서드
+    public List<String> jlptGenerateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
+        // numOfQuestions 만큼 반복하여 contentList에서 순차적으로 단어를 가져옴
         for (int i = 0; i < numOfQuestions; i++) {
-            String content = contentList.get(i);
+            String content = contentList.get(i);  // contentList의 i번째 단어를 사용
             if (content != null && !content.trim().isEmpty()) {
                 System.out.println("현재 처리 중인 단어: " + content);
 
-                List<Message> messages = createJLPTMessage(content, currentLevel);
+                // GPT에게 보낼 메시지 생성
+                List<Message> jlptMessages = jlptCreateMessage(content, currentLevel);
 
-                GPTRequest request = new GPTRequest(model, messages, null, 1, 256, 1, 2, 2);
+                // GPT 요청 객체 생성
+                GPTRequest request = new GPTRequest(model, jlptMessages, null, 1, 256, 1, 2, 2);
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonRequest;
@@ -73,6 +74,7 @@ public class JLPTLevelupTestService {
                     throw new IOException("JSON 변환 중 오류 발생", e);
                 }
 
+                // GPT API 호출 및 응답 처리
                 GPTResponse gptResponse;
                 try {
                     gptResponse = restTemplate.postForObject(
@@ -81,6 +83,7 @@ public class JLPTLevelupTestService {
                             GPTResponse.class
                     );
 
+                    // GPT 응답에서 문제 파싱
                     if (gptResponse != null && gptResponse.getChoices() != null) {
                         String quizResponse = gptResponse.getChoices().get(0).getMessage().getContent();
                         generatedQuestions.add(quizResponse);
@@ -94,6 +97,6 @@ public class JLPTLevelupTestService {
             }
         }
 
-        return generatedQuestions;  // 생성된 질문 리스트 반환
+        return generatedQuestions;
     }
 }
