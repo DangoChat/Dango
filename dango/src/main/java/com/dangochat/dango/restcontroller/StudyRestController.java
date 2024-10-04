@@ -54,15 +54,17 @@ public class StudyRestController {
 
     // O, X를 누를 때 유저 공부 기록으로 보내는 기능.
     @PostMapping("/answer")
-    public ResponseEntity<String> answer(@RequestBody Map<String, Object> payload,
-                                         @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    public ResponseEntity<String> answer(@RequestBody Map<String, Object> payload) {
         try {
             // 숫자로 변환하여 처리
-            int studyContentId = Integer.parseInt(payload.get("studyContentId").toString());
+            // int studyContentId = Integer.parseInt(payload.get("studyContentId").toString());
+            int studyContentId = (Integer) payload.get("studyContentId");
             String answer = (String) payload.get("answer");
+            int userId = (Integer) payload.get("userId"); // userId 추출
             String studyType = (String) payload.get("studyType");
-            int userId = userDetails.getId();  // @AuthenticationPrincipal을 통해 userId 가져오기
             boolean isCorrect = "O".equals(answer);
+            log.debug("answer part studyId : {}, answer : {} , userId : {}, studyType : {}, isCorrect: {} "
+                        ,studyContentId, answer, userId, studyType, isCorrect);
             // 학습 내용 기록
             studyService.recordStudyContent(studyContentId, userId, isCorrect, studyType);
 
