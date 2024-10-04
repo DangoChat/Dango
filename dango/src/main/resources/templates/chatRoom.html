@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  </head>
+  <body>
+    <h1>채팅방</h1>
+    <h2>현재 채팅방: <span th:text="${roomName}"></span></h2>
+
+    <!-- From User ID 입력 -->
+    <div>
+      <label for="from">내 ID (User ID):</label>
+      <input type="number" id="from" value="1" />
+      <!-- 기본값을 1로 설정 -->
+    </div>
+
+    <!-- To User ID 입력 -->
+    <div>
+      <label for="to">상대방 ID (User ID):</label>
+      <input type="number" id="to" value="2" />
+      <!-- 기본값을 2로 설정 -->
+    </div>
+
+    <!-- 메시지 입력 -->
+    <div>
+      <label for="message">메시지:</label>
+      <input type="text" id="message" placeholder="메시지를 입력하세요" />
+    </div>
+    <button onclick="sendMessage()">메시지 전송</button>
+
+    <h2>메시지 목록</h2>
+    <ul id="messages"></ul>
+
+    <script>
+      var stompClient = null;
+
+      // Thymeleaf 표현식을 통해 roomId를 자바스크립트로 전달
+      var roomId = "[[${roomId}]]"; // 주석 아님, 실제 Thymeleaf 변수 값 사용
+
+      // WebSocket 연결
+      function connect() {
+        var socket = new SockJS("/ws"); // WebSocket 엔드포인트 설정
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+          console.log("Connected: " + frame);
+
+          // 채팅방 ID에 대해 구독
+          stompClient.subscribe(
+            "/topic/public/rooms/" + roomId,
+            function (messageOutput) {
+              showMessage(JSON.parse(messageOutput.body));
+            }
+          );
+        });
+      }
+
+      // 메시지 전송
+      function sendMessage() {
+        var fromUserId = document.getElementById("from").value;
+        var toUserId = document.getElementById("to").value;
+        var messageContent = document.getElementById("message").value;
+
+        if (messageContent && stompClient) {
+          var chatMessage = {
+            from: parseInt(fromUserId),
+            to: parseInt(toUserId),
+            text: messageContent,
+            roomId: roomId, // Thymeleaf 변수로 전달된 roomId 사용
+          };
+          stompClient.send(
+            "/app/chat/rooms/" + roomId + "/send",
+            {},
+            JSON.stringify(chatMessage)
+          );
+          document.getElementById("message").value = "";
+        }
+      }
+
+      // 메시지 표시
+      function showMessage(message) {
+        var response = document.getElementById("messages");
+        var messageElement = document.createElement("li");
+
+        var textNode = document.createTextNode(
+          "From User " + message.writer + ": " + message.content
+        );
+        messageElement.appendChild(textNode);
+
+        response.appendChild(messageElement);
+      }
+
+      // 페이지 로드 시 WebSocket 연결
+      window.onload = connect;
+    </script>
+  </body>
+</html>

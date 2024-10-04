@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-
 @RestController
 @RequestMapping("/api/study") // localhost8888/api/study +
 @RequiredArgsConstructor
@@ -23,15 +22,18 @@ public class StudyRestController {
 
     private final StudyService studyService;
 
-    @ResponseBody
     @PostMapping("word")
-    public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
-        log.debug("로그인한 유저 아이디: " + userId);
-        
-        String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
+    public List<StudyDTO> getWords(@RequestBody Map<String, Object> payload) {
+        String level = (String) payload.get("level"); // jlptLevel 추출
+        int userId = (Integer) payload.get("userId"); // userId 추출
+        String type = (String) payload.get("type");
+        log.debug("로그인한 유저 아이디: {}, type : {}, level : {}" ,userId, type, level);
+
+        // String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
+
         // StudyEntity를 StudyDTO로 변환하여 리스트로 저장
-        List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
+        // List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(userlevel, "단어", userId)
+        List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(level, type, userId)
                 .stream()
                 .map(studyEntity -> StudyDTO.builder()
                         .studyContentId(studyEntity.getStudyContentId())
@@ -46,10 +48,11 @@ public class StudyRestController {
                         .exampleTranslation2(studyEntity.getExampleTranslation2())
                         .build())
                 .collect(Collectors.toList());
+        System.out.println("studyContent constnet : " + studyContent);
         return studyContent;
     }
 
-    @ResponseBody
+    // O, X를 누를 때 유저 공부 기록으로 보내는 기능.
     @PostMapping("/answer")
     public ResponseEntity<String> answer(@RequestBody Map<String, Object> payload,
                                          @AuthenticationPrincipal AuthenticatedUser userDetails) {
@@ -76,7 +79,6 @@ public class StudyRestController {
     }
 
     // 문법 20개 학습하기
-    @ResponseBody
     @PostMapping("/grammar")
     public List<StudyDTO> studyGrammar(@AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
@@ -103,7 +105,6 @@ public class StudyRestController {
     }
 
     // 오답 노트 가져오기
-    @ResponseBody
     @GetMapping("/wordMistakes")
     public List<StudyDTO> getWordMistakes(@AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
@@ -129,7 +130,6 @@ public class StudyRestController {
         return userWordMistakes;
     }
     // 오답 노트 2 가져오기
-    @ResponseBody
     @GetMapping("/grammarMistakes")
     public List<StudyDTO> getMistakes2(@AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();

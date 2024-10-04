@@ -31,6 +31,7 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'org.springframework.boot:spring-boot-starter-mail' // Spring Email 의존성 추가
 	implementation 'org.springframework:spring-context-support' // Spring Email 의존성 추가 2
+	implementation 'org.springframework.boot:spring-boot-starter-websocket' // 채팅을 위한 웹소켓 추가 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
