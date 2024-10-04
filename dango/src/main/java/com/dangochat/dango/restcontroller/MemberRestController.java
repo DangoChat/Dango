@@ -66,8 +66,11 @@ public class MemberRestController {
 
             // 인증 성공 시 SecurityContext에 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("Authentication Principal: " + authentication.getPrincipal().getClass().getName());
             AuthenticatedUser userDetails = (AuthenticatedUser) authentication.getPrincipal();
             MemberDTO userInfo = memberService.getMemberInfo(userDetails.getEmail());
+            log.debug("Authentication 성공:111111 " + authentication.getPrincipal());
+
             // 로그인 성공 응답
             return ResponseEntity.ok(userInfo);
 
