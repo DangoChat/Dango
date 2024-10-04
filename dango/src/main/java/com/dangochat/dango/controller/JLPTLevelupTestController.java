@@ -111,7 +111,7 @@ public class JLPTLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = jlptLevelupTestService.findByJLPTWord(level); // 3개의 단어 목록 가져옴
+        List<String> contentList = jlptLevelupTestService.findByJLPTWord(level); // 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 

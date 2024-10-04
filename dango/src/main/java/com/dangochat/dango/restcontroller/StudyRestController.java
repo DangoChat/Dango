@@ -23,11 +23,6 @@ public class StudyRestController {
     private final StudyService studyService;
 
     @PostMapping("word")
-    public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
-        log.debug("로그인한 유저 아이디: " + userId);
-        
-        String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
     public List<StudyDTO> getWords(@RequestBody Map<String, Object> payload) {
         String level = (String) payload.get("level"); // jlptLevel 추출
         int userId = (Integer) payload.get("userId"); // userId 추출
@@ -41,19 +36,18 @@ public class StudyRestController {
         List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType(level, type, userId)
                 .stream()
                 .map(studyEntity -> StudyDTO.builder()
-                .studyContentId(studyEntity.getStudyContentId())
-                .content(studyEntity.getContent())
-                .pronunciation(studyEntity.getPronunciation())
-                .meaning(studyEntity.getMeaning())
-                .type(studyEntity.getType())
-                .level(studyEntity.getLevel())
-                .example1(studyEntity.getExample1())
-                .exampleTranslation1(studyEntity.getExampleTranslation1())
-                .example2(studyEntity.getExample2())
-                .exampleTranslation2(studyEntity.getExampleTranslation2())
-                .build())
+                        .studyContentId(studyEntity.getStudyContentId())
+                        .content(studyEntity.getContent())
+                        .pronunciation(studyEntity.getPronunciation())
+                        .meaning(studyEntity.getMeaning())
+                        .type(studyEntity.getType())
+                        .level(studyEntity.getLevel())
+                        .example1(studyEntity.getExample1())
+                        .exampleTranslation1(studyEntity.getExampleTranslation1())
+                        .example2(studyEntity.getExample2())
+                        .exampleTranslation2(studyEntity.getExampleTranslation2())
+                        .build())
                 .collect(Collectors.toList());
-                return studyContent;
         System.out.println("studyContent constnet : " + studyContent);
         return studyContent;
     }
@@ -161,7 +155,7 @@ public class StudyRestController {
         return userMistakes;
     }
 
-    
-    
-    
+
+
+
 }

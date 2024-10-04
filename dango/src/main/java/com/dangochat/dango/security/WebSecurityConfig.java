@@ -47,15 +47,17 @@ public class WebSecurityConfig {
             )
             // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
-            // // 폼 로그인 설정 유지
-            // .formLogin(formLogin -> formLogin
-            //         .loginPage("/member/loginForm")
-            //         .usernameParameter("userEmail")
-            //         .passwordParameter("userPassword")
-            //         .loginProcessingUrl("/member/login")
-            //         .defaultSuccessUrl("/")
-            //         .permitAll()
-            // )
+                // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
+
+                 // 폼 로그인 설정 유지
+                 .formLogin(formLogin -> formLogin
+                         .loginPage("/member/loginForm")
+                         .usernameParameter("userEmail")
+                         .passwordParameter("userPassword")
+                         .loginProcessingUrl("/member/login")
+                         .defaultSuccessUrl("/")
+                         .permitAll()
+                 )
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     // .logoutSuccessUrl("https://scit45dango.site/") // 서버 환경의 경우

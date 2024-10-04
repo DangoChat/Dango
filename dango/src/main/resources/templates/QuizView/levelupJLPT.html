@@ -23,6 +23,63 @@
             margin-bottom: 10px;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 첫 번째 문제를 불러오는 함수
+            let loadFirstQuestion = function() {
+                $.ajax({
+                    url: '/api/quiz/levelup/jlpt/1',  // 첫 번째 문제 요청 URL
+                    method: 'GET',                   // GET 방식으로 요청
+                    success: function(data) {
+                        // 문제와 인덱스를 화면에 업데이트
+                        $('.question-number p').text(`현재의 문제: ${data.currentIndex}번째 문제`);
+                        $('.quiz-item p').html(data.question.content);
+                        $('.quiz-options').empty();
+                        data.question.options.forEach(function(option, index) {
+                            $('.quiz-options').append(`<button>${index + 1}. ${option}</button>`);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('첫 번째 문제 불러오기 실패:', error);
+                    }
+                });
+            };
+
+            // 다음 문제를 불러오는 함수
+            let loadNextQuestion = function() {
+                $.ajax({
+                    url: '/api/quiz/levelup/jlpt/next',  // 다음 문제 요청 URL
+                    method: 'POST',                      // POST 방식으로 요청
+                    success: function(data) {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;  // 리다이렉트 시 페이지 이동
+                        } else {
+                            // 다음 문제로 업데이트
+                            $('.question-number p').text(`현재의 문제: ${data.currentIndex}번째 문제`);
+                            $('.quiz-item p').html(data.question.content);
+                            $('.quiz-options').empty();
+                            data.question.options.forEach(function(option, index) {
+                                $('.quiz-options').append(`<button>${index + 1}. ${option}</button>`);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('다음 문제 불러오기 실패:', error);
+                    }
+                });
+            };
+
+            // 페이지 로드 시 첫 번째 문제 불러오기
+            loadFirstQuestion();
+
+            // "다음 문제" 버튼 클릭 시 AJAX 요청으로 다음 문제를 불러옴
+            $('form').on('submit', function(event) {
+                event.preventDefault();  // 기본 폼 제출을 막음
+                loadNextQuestion();      // 다음 문제 요청
+            });
+        });
+    </script>
 </head>
 <body>
 
@@ -30,38 +87,27 @@
 
 <!-- 몇 번째 문제인지 표시 -->
 <div class="question-number">
-    <!-- currentIndex 값을 사용하여 n번째 문제 표시 -->
-    <p th:text="'현재의 문제: ' + ${currentIndex} + '번째 문제'"></p>
+    <p>현재의 문제: 1번째 문제</p> <!-- 초기값 설정 -->
 </div>
 
 <!-- 생성된 퀴즈 표시 -->
 <h2>생성된 퀴즈</h2>
-<div th:if="${question}">
-    <div class="quiz-item">
-        <!-- 문제 표시 (HTML 태그를 인식할 수 있도록 th:utext 사용) -->
-        <p th:utext="${question}"></p>
-
-        <!-- 선택지 버튼 -->
-        <div class="quiz-options">
-            <button>1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-        </div>
-    </div>
+<div class="quiz-item">
+    <p>퀴즈</p> <!-- 문제 텍스트가 여기에 표시됨 -->
 </div>
 
-<!-- 오류 메시지 표시 -->
-<div th:if="${error}">
-    <p th:text="${error}" style="color: red;"></p>
+<!-- 선택지 버튼 -->
+<div class="quiz-options">
+    <button type="button">1</button>
+    <button type="button">2</button>
+    <button type="button">3</button>
+    <button type="button">4</button>
 </div>
 
-
-<form action="/quiz/levelup/jlpt/next" method="post">
-    <!--<input type="hidden" name="_csrf" th:value="${_csrf.token}" /> -->
+<!-- 다음 문제로 이동하는 버튼 -->
+<form>
     <button type="submit">다음 문제</button>
 </form>
-
 
 </body>
 </html>
