@@ -53,7 +53,7 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
             "ORDER BY RAND() LIMIT 24", nativeQuery = true)
     List<String> findByKorWord(@Param("level") String level);
 
-    // (성준) [ 승급 테스트 한국어 능력 시험 ] 문법 문제 - level 똑같은 단어 6개 뽑기
+    // (성준) [ 승급 테스트 JLPT ] 문법 문제 - 단어 6개 뽑기
     @Query(value = "SELECT *\n" +
             "FROM study_content\n" +
             "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
@@ -63,6 +63,9 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
             "LIMIT 6;", nativeQuery = true)
     List<StudyEntity> findRandomGrammerContent();
 
+    // (미연) [ 승급 테스트 한국어 능력 시험 ] 문법 문제 단어 6개 뽑기
+    @Query(value = "SELECT * FROM study_content WHERE study_content_type = '문법' ORDER BY RAND() LIMIT 6;", nativeQuery = true)
+    List<StudyEntity> findRandomGrammerKorContent();
 
     // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일 테스트)
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +

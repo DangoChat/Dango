@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>한국어 문법 문제</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    h1 {
+      color: #4CAF50;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .options {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .options li {
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+<h1>한국어 문법 문제</h1>
+
+<div th:if="${grammerQuestions != null}">
+  <div th:each="question, stat : ${grammerQuestions}">
+    <div class="question">
+      <h2 th:text="'문제 ' + ${stat.index + 1} + ': ' + ${question}"></h2>
+    </div>
+  </div>
+</div>
+
+<div th:if="${grammerQuestions == null}">
+  <p>문제가 없습니다. 문제가 로드되지 않았습니다.</p>
+</div>
+
+<button type="submit">다음 문제로 이동</button>
+</body>
+</html>
