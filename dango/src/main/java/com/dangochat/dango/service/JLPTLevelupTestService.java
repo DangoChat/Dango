@@ -57,7 +57,7 @@ public class JLPTLevelupTestService {
 
 
     // GPT에 문제 요청하고 만들어진 문제들을 반환하는 메서드
-    public List<String> jlptGenerateQuestions(List<String> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
+    public List<String> jlptGenerateQuestions(List<String> contentList, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         // numOfQuestions 만큼 반복하여 contentList에서 순차적으로 단어를 가져옴
