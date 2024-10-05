@@ -58,6 +58,7 @@ public class StudyController {
     public String dailyTestView() {
         return "StudyView/dailyTestView";  
     }
+
     @GetMapping("/weeklyTestView")
     public String weeklyTestView() {
         return "StudyView/weeklyTestView";
@@ -76,10 +77,10 @@ public class StudyController {
         int userId = userDetails.getId();
         
         // 유저의 학습 기록을 가져옵니다.
-        List<StudyDTO> userStudyContent = studyService.getStudyContentByUserId(userId);
+      //  List<StudyDTO> userStudyContent = studyService.getStudyContentByUserId(userId);
 
         // 뷰로 전달하기 위해 모델에 데이터를 추가합니다.
-        model.addAttribute("userStudyContent", userStudyContent);
+      //  model.addAttribute("userStudyContent", userStudyContent);
     	
         return "StudyView/wordReviewView";  
     }

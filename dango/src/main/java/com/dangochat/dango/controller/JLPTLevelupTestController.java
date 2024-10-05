@@ -27,11 +27,12 @@ import java.util.List;
 public class JLPTLevelupTestController {
 
     private final JLPTLevelupTestService jlptLevelupTestService;
+    private final GPTGrammerService gptGrammerService;
     private final StudyRepository studyRepository;
     private final StudyService studyService;
     private final MemberService memberService;
 
-    // 첫 번째 문제는 항상 /levelup/jlpt/1 번 문제부터 시작하는 메서드
+    // 첫 번째 문제는 항상 / levelup / jlpt /1번 문제부터 시작하는 메서드
     @GetMapping("/1")
     public String levelupquiz(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
@@ -56,7 +57,6 @@ public class JLPTLevelupTestController {
             model.addAttribute("currentIndex", 1);
             log.info("첫 번째 문제 표시: {}", currentQuestion);
         }
-
         return "QuizView/levelupJLPT";
     }
 
@@ -111,7 +111,7 @@ public class JLPTLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = studyRepository.findByJLPTWord(level); // 3개의 단어 목록 가져옴
+        List<String> contentList = jlptLevelupTestService.findByJLPTWord(level); // 3개의 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 
@@ -160,6 +160,8 @@ public class JLPTLevelupTestController {
                         // 세션에 다시 저장
                         session.setAttribute("jlptGeneratedQuestions", jlptGeneratedQuestions);
                     }
+                } else if (targetIndex >= 25 && targetIndex - 1 < contentList.size()) {
+
                 }
             } catch (Exception e) {
                 log.error("백그라운드에서 문제 생성 중 오류 발생: ", e);
@@ -167,3 +169,4 @@ public class JLPTLevelupTestController {
         }).start();
     }
 }
+

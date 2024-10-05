@@ -39,6 +39,4 @@ public class GPTGrammerController {
 
         return "QuizView/grammer";
     }
-    
-    
 }
