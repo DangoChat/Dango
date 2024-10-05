@@ -2,6 +2,7 @@ package com.dangochat.dango.restcontroller;
 
 import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.dto.UserQuizQuestionReviewDTO;
+import com.dangochat.dango.dto.UserStudyContentDTO;
 import com.dangochat.dango.entity.QuizType;
 import com.dangochat.dango.entity.UserQuizQuestionReviewEntity;
 import com.dangochat.dango.security.AuthenticatedUser;
@@ -13,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -192,7 +196,6 @@ public class StudyRestController {
     }
     
     
-    
     @GetMapping("/weeklyTestView")
     public ResponseEntity<List<UserQuizQuestionReviewDTO>> getWeeklyTestView(@AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
@@ -221,5 +224,33 @@ public class StudyRestController {
     }
 
 
-
+    
+    //    단어, 문법 복습 기능 
+    @GetMapping("/studyReview")
+    public List<String> studyReview(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        
+        // 유저가 학습한 모든 날짜 리스트를 가져옴
+        return studyService.getUserStudyDates(userId);
+    }
+    
+    @GetMapping("/studyReviewByDateAndType")
+    public List<UserStudyContentDTO> studyReviewByDateAndType(@RequestParam("date") String date, @RequestParam("type") String type, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        
+        // String을 java.sql.Date로 변환
+        LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Date sqlDate = Date.valueOf(localDate);
+        
+        if ("word".equals(type)) {
+            // 단어 데이터를 가져옴
+            return studyService.getUserWordStudyContentByDate(userId, sqlDate);
+        } else {
+            // 문법 데이터를 가져옴
+            return studyService.getUserGrammarStudyContentByDate(userId, sqlDate);
+        }
+    }
+    
+    
+    
 }
