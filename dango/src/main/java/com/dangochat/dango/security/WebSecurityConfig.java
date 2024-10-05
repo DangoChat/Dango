@@ -45,17 +45,17 @@ public class WebSecurityConfig {
                 .requestMatchers(PUBLIC_URLS).permitAll()   // 모두 접근 허용
                 .anyRequest().authenticated()               // 나머지 요청은 인증 필요
             )
-            // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
+             .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
-            // // 폼 로그인 설정 유지
-            // .formLogin(formLogin -> formLogin
-            //         .loginPage("/member/loginForm")
-            //         .usernameParameter("userEmail")
-            //         .passwordParameter("userPassword")
-            //         .loginProcessingUrl("/member/login")
-            //         .defaultSuccessUrl("/")
-            //         .permitAll()
-            // )
+             // 폼 로그인 설정 유지
+             .formLogin(formLogin -> formLogin
+                     .loginPage("/member/loginForm")
+                     .usernameParameter("userEmail")
+                     .passwordParameter("userPassword")
+                     .loginProcessingUrl("/member/login")
+                     .defaultSuccessUrl("/")
+                     .permitAll()
+             )
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     // .logoutSuccessUrl("https://scit45dango.site/") // 서버 환경의 경우
