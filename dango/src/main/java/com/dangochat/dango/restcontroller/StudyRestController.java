@@ -23,11 +23,11 @@ public class StudyRestController {
     private final StudyService studyService;
 
     @PostMapping("word")
-    public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
-        log.debug("로그인한 유저 아이디: " + userId);
+    // public List<StudyDTO> getWords(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+    //     int userId = userDetails.getId();
+    //     log.debug("로그인한 유저 아이디: " + userId);
         
-        String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
+    //     String userlevel = studyService.getUserLevel(userId);  // 사용자 레벨 가져오기
     public List<StudyDTO> getWords(@RequestBody Map<String, Object> payload) {
         String level = (String) payload.get("level"); // jlptLevel 추출
         int userId = (Integer) payload.get("userId"); // userId 추출
@@ -53,8 +53,8 @@ public class StudyRestController {
                 .exampleTranslation2(studyEntity.getExampleTranslation2())
                 .build())
                 .collect(Collectors.toList());
-                return studyContent;
-        System.out.println("studyContent constnet : " + studyContent);
+                // return studyContent;
+        // System.out.println("studyContent constnet : " + studyContent);
         return studyContent;
     }
 
@@ -88,27 +88,29 @@ public class StudyRestController {
 
     // 문법 20개 학습하기
     @PostMapping("/grammar")
-    public List<StudyDTO> studyGrammar(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
-        log.debug("로그인한 유저 아이디: " + userId);
-
-        String level = studyService.getUserLevel(userId);
+    public List<StudyDTO> studyGrammar(@RequestBody Map<String, Object> payload) {
+        String level = (String) payload.get("level"); // jlptLevel 추출
+        int userId = (Integer) payload.get("userId"); // userId 추출
+        String type = (String) payload.get("type");
+        // String level = studyService.getUserLevel(userId);
 
         // 문법 학습 콘텐츠 가져오기 및 DTO 변환
-        List<StudyDTO> studyContent = studyService.getRandomGrammarContentWithMistake(level, "문법", userId)
-                .stream()
-                .map(studyEntity -> StudyDTO.builder()
-                        .studyContentId(studyEntity.getStudyContentId())
-                        .content(studyEntity.getContent())
-                        .meaning(studyEntity.getMeaning())
-                        .level(studyEntity.getLevel())
-                        .example1(studyEntity.getExample1())
-                        .exampleTranslation1(studyEntity.getExampleTranslation1())
-                        .example2(studyEntity.getExample2())
-                        .exampleTranslation2(studyEntity.getExampleTranslation2())
-                        .build())
-                .collect(Collectors.toList());
-
+        List<StudyDTO> studyContent = studyService.getRandomGrammarContentWithMistake(level, type, userId)
+                    .stream()
+                    .map(studyEntity -> StudyDTO.builder()
+                    .studyContentId(studyEntity.getStudyContentId())
+                    .content(studyEntity.getContent())
+                    .pronunciation(studyEntity.getPronunciation())
+                    .meaning(studyEntity.getMeaning())
+                    .type(studyEntity.getType())
+                    .level(studyEntity.getLevel())
+                    .example1(studyEntity.getExample1())
+                    .exampleTranslation1(studyEntity.getExampleTranslation1())
+                    .example2(studyEntity.getExample2())
+                    .exampleTranslation2(studyEntity.getExampleTranslation2())
+                    .build())
+                    .collect(Collectors.toList());
+        System.out.println("grammer Content :" +  studyContent);
         return studyContent;
     }
 
