@@ -111,13 +111,13 @@ public class JLPTLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = jlptLevelupTestService.findByJLPTWord(level); // 3개의 단어 목록 가져옴
+        List<String> contentList = jlptLevelupTestService.findByJLPTWord(level); // 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 
         try {
             int messageType = (int) session.getAttribute("currentMessageType");
-            List<String> jlptGeneratedQuestions = jlptLevelupTestService.jlptGenerateQuestions(contentList.subList(startIndex - 1, Math.min(startIndex - 1 + count, contentList.size())), messageType, count, level);
+            List<String> jlptGeneratedQuestions = jlptLevelupTestService.jlptGenerateQuestions(contentList.subList(startIndex - 1, Math.min(startIndex - 1 + count, contentList.size())), count, level);
             session.setAttribute("jlptGeneratedQuestions",jlptGeneratedQuestions);
             session.setAttribute("contentList", contentList);
             log.info("초기 생성된 {}개의 문제: {}", count, jlptGeneratedQuestions);
@@ -144,7 +144,6 @@ public class JLPTLevelupTestController {
                     // 다음 문제를 생성할 때 사용되지 않은 단어를 하나씩 사용
                     List<String> nextQuestion = jlptLevelupTestService.jlptGenerateQuestions(
                             contentList.subList(targetIndex - 1, targetIndex), // 사용되지 않은 단어를 사용
-                            currentMessageType,
                             1,
                             level
                     );
