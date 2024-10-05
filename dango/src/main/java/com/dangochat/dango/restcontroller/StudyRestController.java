@@ -207,12 +207,12 @@ public class StudyRestController {
                 .quizStatus(test.getQuizStatus())  // 퀴즈 상태
                 .build())
             .collect(Collectors.toList());
-
+        
         // 결과 반환
         if (weeklyTestDTOs.isEmpty()) {
             return ResponseEntity.noContent().build();  // 데이터가 없으면 204 No Content 응답
         }
-
+        
         return ResponseEntity.ok(weeklyTestDTOs);  // 데이터를 JSON으로 반환
     }
 

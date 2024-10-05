@@ -49,7 +49,9 @@ public class StudyController {
     public String studyRestGrammarMistakes() {
         return "StudyView/restGrammarMistakes";
     }
-   
+    
+    
+// ============================================================    
     
     // 유저 일간,주간 테스트 기록 관련 Controller
     @GetMapping("/dailyTestView")
@@ -61,4 +63,32 @@ public class StudyController {
         return "StudyView/weeklyTestView";
     }
 
+    
+    
+    
+// =========================================================== 
+    
+    // 유저 단어,문법 복습 Controller
+    @GetMapping("/wordReview")
+    public String wordReview(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    	
+    	 // 로그인한 유저의 ID를 가져옵니다.
+        int userId = userDetails.getId();
+        
+        // 유저의 학습 기록을 가져옵니다.
+        List<StudyDTO> userStudyContent = studyService.getStudyContentByUserId(userId);
+
+        // 뷰로 전달하기 위해 모델에 데이터를 추가합니다.
+        model.addAttribute("userStudyContent", userStudyContent);
+    	
+        return "StudyView/wordReviewView";  
+    }
+   
+    @GetMapping("/grammarReview")
+    public String grammarReview() {
+    	
+    	
+        return "StudyView/grammarReviewView";  
+    }
+    
 }

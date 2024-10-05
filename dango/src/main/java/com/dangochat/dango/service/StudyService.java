@@ -313,5 +313,12 @@ public class StudyService {
     public List<UserQuizQuestionReviewEntity> findQuizByTypeAndUserId(QuizType quizType, int userId) {
         return userQuizQuestionReviewRepository.findByQuizTypeAndUserId(quizType, userId);
     }
+    
+    
+    
+    
 
+
+	
+	
 }

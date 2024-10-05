@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>단어 복습</title>
+</head>
+<body>
+	<h1>[  단어 복습  ]</h1>
+	
+	<table>
+        <thead>
+            <tr>
+                <th>학습 내용</th>
+                <th>발음</th>
+                <th>의미</th>
+                <th>레벨</th>
+                <th>학습 타입</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="content : ${userStudyContent}">
+                <td th:text="${content.content}"></td>
+                <td th:text="${content.pronunciation}"></td>
+                <td th:text="${content.meaning}"></td>
+                <td th:text="${content.level}"></td>
+                <td th:text="${content.type}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

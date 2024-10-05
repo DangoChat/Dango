@@ -1,5 +1,8 @@
 package com.dangochat.dango.dto;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import com.dangochat.dango.entity.LevelsEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
