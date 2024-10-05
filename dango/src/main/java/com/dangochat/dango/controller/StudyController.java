@@ -2,6 +2,7 @@ package com.dangochat.dango.controller;
 
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.StudyDTO;
+import com.dangochat.dango.dto.UserStudyContentDTO;
 import com.dangochat.dango.entity.QuizType;
 import com.dangochat.dango.entity.StudyEntity;
 import com.dangochat.dango.entity.UserQuizQuestionReviewEntity;
@@ -19,8 +20,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,27 +74,71 @@ public class StudyController {
     
 // =========================================================== 
     
-    // 유저 단어,문법 복습 Controller
+ 
+    
     @GetMapping("/wordReview")
     public String wordReview(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-    	
-    	 // 로그인한 유저의 ID를 가져옵니다.
         int userId = userDetails.getId();
         
-        // 유저의 학습 기록을 가져옵니다.
-      //  List<StudyDTO> userStudyContent = studyService.getStudyContentByUserId(userId);
-
-        // 뷰로 전달하기 위해 모델에 데이터를 추가합니다.
-      //  model.addAttribute("userStudyContent", userStudyContent);
-    	
-        return "StudyView/wordReviewView";  
+        // 유저가 학습한 모든 날짜 리스트를 가져옵니다.
+        List<String> studyDates = studyService.getUserStudyDates(userId);
+        
+        // 데이터를 모델에 추가하여 HTML로 전달합니다.
+        model.addAttribute("studyDates", studyDates);
+        
+        return "StudyView/wordReviewView"; // 학습 날짜에 맞는 페이지로 이동
     }
+    
+    @GetMapping("/wordReviewByDate")
+    public String wordReviewByDate(@RequestParam("date") String date, Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        
+        // String을 java.sql.Date로 변환
+        LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Date sqlDate = Date.valueOf(localDate);
+        
+        // 해당 날짜에 대한 유저의 학습 데이터를 가져옵니다.
+        List<UserStudyContentDTO> studyList = studyService.getUserWordStudyContentByDate(userId, sqlDate);
+        
+        // 데이터를 모델에 추가하여 HTML로 전달합니다.
+        model.addAttribute("studyList", studyList);
+        model.addAttribute("selectedDate", date); // 선택된 날짜 표시
+        
+        return "StudyView/wordReviewView"; // 해당 날짜에 맞는 페이지로 이동
+    }
+    
+    
    
     @GetMapping("/grammarReview")
-    public String grammarReview() {
-    	
+    public String grammarReview(Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    	 
+    	int userId = userDetails.getId();
+        
+        // 유저가 학습한 모든 날짜 리스트를 가져옵니다.
+        List<String> studyDates = studyService.getUserStudyDates(userId);
+        
+        // 데이터를 모델에 추가하여 HTML로 전달합니다.
+        model.addAttribute("studyDates", studyDates);
     	
         return "StudyView/grammarReviewView";  
+    }
+    
+    @GetMapping("/grammarReviewByDate")
+    public String grammarReviewByDate(@RequestParam("date") String date, Model model, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        
+        // String을 java.sql.Date로 변환
+        LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Date sqlDate = Date.valueOf(localDate);
+        
+        // 해당 날짜에 대한 유저의 학습 데이터를 가져옵니다.
+        List<UserStudyContentDTO> studyList = studyService.getUserGrammarStudyContentByDate(userId, sqlDate);
+        
+        // 데이터를 모델에 추가하여 HTML로 전달합니다.
+        model.addAttribute("studyList", studyList);
+        model.addAttribute("selectedDate", date); // 선택된 날짜 표시
+        
+        return "StudyView/grammarReviewView"; // 해당 날짜에 맞는 페이지로 이동
     }
     
 }

@@ -28,6 +28,7 @@ public class StudyDTO {
     private String example2;
     private String exampleTranslation2;
     
+    
     // 단일 필드 생성자 추가
     public StudyDTO(String content) {
         this.content = content;

@@ -1,31 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>단어 복습</title>
+    <meta charset="UTF-8">
+    <title>단어 복습</title>
 </head>
 <body>
-	<h1>[  단어 복습  ]</h1>
-	
-	<table>
-        <thead>
-            <tr>
-                <th>학습 내용</th>
-                <th>발음</th>
-                <th>의미</th>
-                <th>레벨</th>
-                <th>학습 타입</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="content : ${userStudyContent}">
-                <td th:text="${content.content}"></td>
-                <td th:text="${content.pronunciation}"></td>
-                <td th:text="${content.meaning}"></td>
-                <td th:text="${content.level}"></td>
-                <td th:text="${content.type}"></td>
-            </tr>
-        </tbody>
-    </table>
+    <h1>[ 단어 복습 - 날짜별 보기 ]</h1>
+    
+    <!-- 날짜별 버튼 생성 (유저가 학습한 날짜만 표시) -->
+    <div>
+        <form method="get" action="/study/wordReviewByDate">
+            <div th:each="date : ${studyDates}">
+                <button type="submit" name="date" th:value="${date}" th:text="${date}"></button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 데이터가 없을 때 처리 -->
+    <div th:if="${#lists.isEmpty(studyList)}">
+        <p th:text="'선택된 날짜 (' + ${selectedDate} + ')에는 학습한 단어가 없습니다.'"></p>
+    </div>
+
+    <!-- 데이터가 있을 때 테이블로 출력 -->
+    <div th:if="${!#lists.isEmpty(studyList)}">
+        <h2 th:text="'선택된 날짜: ' + ${selectedDate}"></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>학습내용</th>
+                    <th>발음</th>
+                    <th>의미</th>
+                    <th>타입</th>
+                    <th>정답 여부</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="content : ${studyList}">
+                    <td th:text="${content.content}"></td>
+                    <td th:text="${content.pronunciation}"></td>
+                    <td th:text="${content.meaning}"></td>
+                    <td th:text="${content.type}"></td>
+                    <td th:text="${#dates.format(content.recordStudyDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${content.recordIsCorrect ? '정답' : '오답'}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

@@ -4,6 +4,7 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.config.DateUtils;
 
 import com.dangochat.dango.dto.StudyDTO;
+import com.dangochat.dango.dto.UserStudyContentDTO;
 import com.dangochat.dango.entity.*;
 import com.dangochat.dango.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -315,9 +316,55 @@ public class StudyService {
     }
     
     
+    public List<String> getUserStudyDates(int userId) {
+        return userStudyContentRepository.findStudyDatesByUserId(userId);
+    }
     
     
+    // 유저 단어,문법 학습한 내용 가저오는 메서드
+    public List<UserStudyContentDTO> getUserWordStudyContentByDate(int userId, Date date) {
+        return userStudyContentRepository.findStudyContentByUserIdAndDate(userId, date).stream()
+        		.filter(entity -> "단어".equals(entity.getStudyContent().getType()))
+        		.map(entity -> UserStudyContentDTO.builder()
+                .userStudyRecordId(entity.getUserStudyRecordId())
+                .studyContentId(entity.getStudyContent().getStudyContentId())
+                .userId(entity.getUser().getUserId())
+                .recordStudyDate(entity.getRecordStudyDate())
+                .recordIsCorrect(entity.isRecordIsCorrect())
+                .content(entity.getStudyContent().getContent())
+                .pronunciation(entity.getStudyContent().getPronunciation())
+                .meaning(entity.getStudyContent().getMeaning())
+                .type(entity.getStudyContent().getType())
+                .build() // 예문 관련 필드는 제거
+            )
+            .collect(Collectors.toList());
+    }
 
+    
+    public List<UserStudyContentDTO> getUserGrammarStudyContentByDate(int userId, Date date) {
+        return userStudyContentRepository.findStudyContentByUserIdAndDate(userId, date).stream()
+                .filter(entity -> "문법".equals(entity.getStudyContent().getType())) // type이 '문법'인 정보만 필터링
+                .map(entity -> UserStudyContentDTO.builder()
+                .userStudyRecordId(entity.getUserStudyRecordId())
+                .studyContentId(entity.getStudyContent().getStudyContentId())
+                .userId(entity.getUser().getUserId())
+                .recordStudyDate(entity.getRecordStudyDate())
+                .recordIsCorrect(entity.isRecordIsCorrect())
+                .content(entity.getStudyContent().getContent())
+                .pronunciation(entity.getStudyContent().getPronunciation())
+                .meaning(entity.getStudyContent().getMeaning())
+                .type(entity.getStudyContent().getType())
+                .example1(entity.getStudyContent().getExample1())                 // 추가된 필드
+                .exampleTranslation1(entity.getStudyContent().getExampleTranslation1()) // 추가된 필드
+                .example2(entity.getStudyContent().getExample2())                 // 추가된 필드
+                .exampleTranslation2(entity.getStudyContent().getExampleTranslation2()) // 추가된 필드
+                .build()
+            )
+            .collect(Collectors.toList());
+    }
+    
+    
+    
 
 	
 	
