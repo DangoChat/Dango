@@ -239,7 +239,7 @@ public class StudyService {
     }
 
 
-    // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기
+    // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기 JLPT
     public List<StudyDTO> getGrammerContent(){
         List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerContent();
         List<StudyDTO> studyDTOList = new ArrayList<>();
@@ -263,6 +263,28 @@ public class StudyService {
     }
 
 
+    // 승급 테스트에서 사용할 문법 문제 6개를 가져오는 메서드
+    public List<StudyDTO> getGrammerKorContent() {
+        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerKorContent();
+        List<StudyDTO> studyDTOList = new ArrayList<>();
+
+        for (StudyEntity entity : studyGrammerContent) {
+            StudyDTO dto = new StudyDTO(
+                    entity.getStudyContentId(),
+                    entity.getContent(),
+                    entity.getPronunciation(),
+                    entity.getMeaning(),
+                    entity.getType(),
+                    entity.getLevel(),
+                    entity.getExample1(),
+                    entity.getExampleTranslation1(),
+                    entity.getExample2(),
+                    entity.getExampleTranslation2()
+            );
+            studyDTOList.add(dto);
+        }
+        return studyDTOList;
+    }
 
     // repository에 사용자가 하루간 학습한 내용 가저오는 쿼리 요청
     public List<String> getTodayWordContent(int userId) {
