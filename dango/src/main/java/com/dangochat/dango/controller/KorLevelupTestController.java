@@ -27,7 +27,6 @@ import java.util.List;
 public class KorLevelupTestController {
 
     private final KorLevelupTestService korLevelupTestService;
-    private final StudyRepository studyRepository;
     private final MemberService memberService;
 
     // 첫 번째 문제는 항상 /levelup/kor/1 번 문제부터 시작하는 메서드
@@ -110,7 +109,8 @@ public class KorLevelupTestController {
 
     // 초기 문제 3개를 미리 로드하는 메서드
     private void loadInitialQuestions(HttpSession session, int startIndex, int count, String level) {
-        List<String> contentList = studyRepository.findByKorWord(level); // 3개의 단어 목록 가져옴
+
+        List<String> contentList = korLevelupTestService.findByKorWord(level); // 단어 목록 가져옴
 
         log.info("뽑힌 단어 = {}", contentList);
 

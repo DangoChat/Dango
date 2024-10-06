@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>학습 복습</title>
+    <script>
+        // 페이지 로드 시 studyReview API 호출하여 데이터를 가져옵니다.
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("/api/study/studyReview")
+                .then(response => response.json())
+                .then(data => {
+                    // API에서 받은 날짜 데이터를 이용하여 동적으로 HTML을 생성합니다.
+                    const container = document.getElementById('dateContainer');
+                    
+                    data.forEach(date => {
+                        const paragraph = document.createElement('p');
+
+                        // 날짜 표시
+                        const dateSpan = document.createElement('span');
+                        dateSpan.textContent = date;
+                        paragraph.appendChild(dateSpan);
+
+                        // 단어 버튼 생성
+                        const wordForm = document.createElement('form');
+                        wordForm.method = 'get';
+                        wordForm.action = '/study/studyReviewByDateAndType';
+                        wordForm.style.display = 'inline';
+
+                        const wordInput = document.createElement('input');
+                        wordInput.type = 'hidden';
+                        wordInput.name = 'date';
+                        wordInput.value = date;
+                        wordForm.appendChild(wordInput);
+
+                        const wordButton = document.createElement('button');
+                        wordButton.type = 'submit';
+                        wordButton.name = 'type';
+                        wordButton.value = 'word';
+                        wordButton.textContent = '단어';
+                        wordForm.appendChild(wordButton);
+                        paragraph.appendChild(wordForm);
+
+                        // 문법 버튼 생성
+                        const grammarForm = document.createElement('form');
+                        grammarForm.method = 'get';
+                        grammarForm.action = '/study/studyReviewByDateAndType';
+                        grammarForm.style.display = 'inline';
+
+                        const grammarInput = document.createElement('input');
+                        grammarInput.type = 'hidden';
+                        grammarInput.name = 'date';
+                        grammarInput.value = date;
+                        grammarForm.appendChild(grammarInput);
+
+                        const grammarButton = document.createElement('button');
+                        grammarButton.type = 'submit';
+                        grammarButton.name = 'type';
+                        grammarButton.value = 'grammar';
+                        grammarButton.textContent = '문법';
+                        grammarForm.appendChild(grammarButton);
+                        paragraph.appendChild(grammarForm);
+
+                        // 생성된 요소들을 컨테이너에 추가
+                        container.appendChild(paragraph);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</head>
+<body>
+    <h1>[ 학습 복습 - 날짜별 보기 ]</h1>
+
+    <!-- 날짜별 '단어', '문법' 버튼을 동적으로 생성할 컨테이너 -->
+    <div id="dateContainer">
+        <!-- 여기서 JavaScript로 동적 데이터를 삽입할 예정 -->
+    </div>
+</body>
+</html>

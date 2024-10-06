@@ -15,10 +15,10 @@ public class StudyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "study_content_id")
     private int studyContentId;
-
+    
     @Column(name = "study_content_content", length = 2000, nullable = false)
     private String content;
-
+    
     @Column(name = "pronunciation", length = 200)
     private String pronunciation;
 

@@ -212,22 +212,22 @@ public class GPTQuizController {
             try {
                 // 유저의 현재 레벨 가져오기 (userId를 사용하여)
                 String userLevel = memberService.getUserCurrentLevel(userId);
-
+                
                 // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
                 List<String> studyContent = studyService.studyContentForToday(userId); // 유저 ID를 이용해 학습 내용 가져오기
                 int endIndex = Math.min(targetIndex, studyContent.size()); // studyContent의 크기 넘지 않도록 설정
-
+                
                 List<String> nextQuestion = gptService.generateGPTQuestions(studyContent.subList(targetIndex - 1, endIndex), messageType, 1,userNationality); // targetIndex번째 문제 생성
-
+                
                 // 세션에서 기존 문제 리스트를 가져옴
                 List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
-
+                
                 if (generatedQuestions != null) {
                     generatedQuestions.addAll(nextQuestion); // 생성된 문제를 기존 문제 리스트에 추가
                     log.info("대기 중인 문제 추가: {}번째 문제 - {}", targetIndex, nextQuestion.get(0)); // 로그 출력
                 }
                 session.setAttribute("generatedQuestions", generatedQuestions);
-
+                
             } catch (Exception e) {
                 log.error("백그라운드에서 문제 생성 중 오류 발생: ", e);
             }

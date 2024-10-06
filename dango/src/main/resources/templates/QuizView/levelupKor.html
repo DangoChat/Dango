@@ -3,38 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Korean Level-up Quiz</title>
+  <title>GPT 퀴즈</title>
+  <style>
+    .quiz-item {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
 
+    .quiz-options button {
+      margin-right: 10px;
+      padding: 10px 20px;
+    }
+
+    .question-number {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // 첫 번째 문제를 불러오는 함수
+      let loadFirstQuestion = function() {
+        $.ajax({
+          url: '/api/quiz/levelup/kor/1',  // 첫 번째 문제 요청 URL
+          method: 'GET',
+          success: function(data) {
+            if (data && data.question) {
+              // question 필드를 JSON 문자열에서 파싱
+              let parsedQuestion = JSON.parse(data.question);
+              // 문제와 인덱스를 화면에 업데이트
+              $('.question-number p').text(`현재의 문제: ${data.currentIndex}번째 문제`);
+              $('.quiz-item p').html(parsedQuestion.content);  // 문제 내용 업데이트
+              $('.quiz-options').empty();  // 이전 선택지 초기화
+              parsedQuestion.options.forEach(function(option, index) {
+                $('.quiz-options').append(`<button>${index + 1}. ${option}</button>`);
+              });
+            } else {
+              console.error('올바른 데이터 형식이 아닙니다.');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('첫 번째 문제 불러오기 실패:', error);
+          }
+        });
+      };
+
+      // 다음 문제를 불러오는 함수
+      let loadNextQuestion = function() {
+        $.ajax({
+          url: '/api/quiz/levelup/kor/next',  // 다음 문제 요청 URL
+          method: 'POST',
+          success: function(data) {
+            if (data.redirect) {
+              window.location.href = data.redirect;  // 리다이렉트 시 페이지 이동
+            } else if (data && data.question) {
+              // question 필드를 JSON 문자열에서 파싱
+              let parsedQuestion = JSON.parse(data.question);
+              // 다음 문제로 업데이트
+              $('.question-number p').text(`현재의 문제: ${data.currentIndex}번째 문제`);
+              $('.quiz-item p').html(parsedQuestion.content);  // 문제 내용 업데이트
+              $('.quiz-options').empty();  // 이전 선택지 초기화
+              parsedQuestion.options.forEach(function(option, index) {
+                $('.quiz-options').append(`<button>${index + 1}. ${option}</button>`);
+              });
+            } else {
+              console.error('올바른 데이터 형식이 아닙니다.');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('다음 문제 불러오기 실패:', error);
+          }
+        });
+      };
+
+      // 페이지 로드 시 첫 번째 문제 불러오기
+      loadFirstQuestion();
+
+      // "다음 문제" 버튼 클릭 시 AJAX 요청으로 다음 문제를 불러옴
+      $('form').on('submit', function(event) {
+        event.preventDefault();  // 기본 폼 제출을 막음
+        loadNextQuestion();      // 다음 문제 요청
+      });
+    });
+  </script>
 </head>
 <body>
 
-<div class="quiz-container">
-  <h1>한국어 레벨업 퀴즈</h1>
+<h1>GPT 퀴즈</h1>
 
-  <!-- 몇 번째 문제인지 표시 -->
-  <div class="question-number">
-    <!-- currentIndex 값을 사용하여 n번째 문제 표시 -->
-    <p th:text="'현재의 문제: ' + ${currentIndex} + '번째 문제'"></p>
-  </div>
-
-  <!-- 생성된 퀴즈 표시 -->
-  <div class="question" th:text="${question}">
-    <!-- 문제 텍스트 -->
-  </div>
-
-  <!-- 선택지 버튼들 -->
-  <div class="quiz-options">
-    <button type="button">1</button>
-    <button type="button">2</button>
-    <button type="button">3</button>
-    <button type="button">4</button>
-  </div>
-
-  <!-- 다음 문제로 이동하는 버튼 -->
-  <form action="/quiz/levelup/kor/next" method="post" class="next-button">
-    <button type="submit">다음 문제</button>
-  </form>
+<!-- 몇 번째 문제인지 표시 -->
+<div class="question-number">
+  <p>현재의 문제: 1번째 문제</p> <!-- 초기값 설정 -->
 </div>
+
+<!-- 생성된 퀴즈 표시 -->
+<h2>생성된 퀴즈</h2>
+<div class="quiz-item">
+  <p>퀴즈가 여기에 표시됩니다.</p> <!-- 문제 텍스트가 여기에 표시됨 -->
+</div>
+
+<!-- 선택지 버튼 -->
+<div class="quiz-options">
+  <!-- 선택지 버튼들이 여기에 동적으로 추가됨 -->
+</div>
+
+<!-- 다음 문제로 이동하는 버튼 -->
+<form>
+  <button type="submit">다음 문제</button>
+</form>
 
 </body>
 </html>

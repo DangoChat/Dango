@@ -1,5 +1,8 @@
 package com.dangochat.dango.dto;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import com.dangochat.dango.entity.LevelsEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +27,7 @@ public class StudyDTO {
     private String exampleTranslation1;
     private String example2;
     private String exampleTranslation2;
+    
     
     // 단일 필드 생성자 추가
     public StudyDTO(String content) {
