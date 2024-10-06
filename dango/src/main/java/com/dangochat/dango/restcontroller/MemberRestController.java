@@ -1,5 +1,7 @@
 package com.dangochat.dango.restcontroller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import com.dangochat.dango.service.MemberService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Slf4j
 @RestController
@@ -92,6 +95,13 @@ public class MemberRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
     }
 
+    @PostMapping("/mileage")
+    public Integer getUserMileage(@RequestBody Map<String, Object> payload) {
+        Integer userId = (Integer) payload.get("userId");
+        int mileage = memberService.getUserMileage(userId);
+        return mileage;
+    }
+    
     // 로그인 요청을 위한 DTO
     @Data
     public static class LoginRequest {

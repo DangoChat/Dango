@@ -113,5 +113,10 @@ public class MemberService {
 		
 		return memberRepository.findUserNationalityById(id);
 	}
+
+    public Integer getUserMileage(int id) {
+        MemberEntity memberEntity = memberRepository.findById(id).orElse(null);
+        return memberEntity.getUserMileage();
+    }
 	
 }

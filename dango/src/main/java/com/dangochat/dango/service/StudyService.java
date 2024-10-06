@@ -150,7 +150,7 @@ public class StudyService {
         }
         
         // 마일리지 로직 (레벨 비교 후)
-        if ("grammar".equalsIgnoreCase(studyType)) {
+        if ("문법".equalsIgnoreCase(studyType)) {
             if (isCorrect) {
                 // 문법 학습에서 정답일 경우 +3 마일리지
                 user.setUserMileage(user.getUserMileage() + 3);
@@ -158,7 +158,7 @@ public class StudyService {
                 // 문법 학습에서 오답일 경우 +1 마일리지
                 user.setUserMileage(user.getUserMileage() + 1);
             }
-        } else if ("word".equalsIgnoreCase(studyType) && isCorrect) {
+        } else if ("단어".equalsIgnoreCase(studyType) && isCorrect) {
             user.setUserMileage(user.getUserMileage() + 1);
         }
 

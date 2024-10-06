@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController // @Controller 대신 @RestController로 변경
+@RestController ///@RestController
 @RequestMapping("/api/quiz/levelup/kor")
 public class KorLevelupTestRestController {
 
