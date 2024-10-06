@@ -170,68 +170,33 @@ public class StudyService {
         
         
         
-     // Korea 국적의 유저에게 레벨별로 달성 포인트 추가**
+     // 달성 포인트 누적 로직
+        int achievementPoints = 0;
         if ("Korea".equalsIgnoreCase(userNationality) && isCorrect) {
-            int achievementPoints = 0;
             switch (originalLevel) {
-                case "N1":
-                    achievementPoints = 12;
-                    break;
-                case "N2":
-                    achievementPoints = 11;
-                    break;
-                case "N3":
-                    achievementPoints = 6;
-                    break;
-                case "N4":
-                    achievementPoints = 5;
-                    break;
-                case "N5":
-                    achievementPoints = 2;
-                    break;
-                default:
-                    log.info("유효하지 않은 레벨: {}", originalLevel);
-                    break;
+                case "N1": achievementPoints = 12; break;
+                case "N2": achievementPoints = 11; break;
+                case "N3": achievementPoints = 6; break;
+                case "N4": achievementPoints = 5; break;
+                case "N5": achievementPoints = 2; break;
+                default: log.info("유효하지 않은 레벨: {}", originalLevel); break;
             }
-
-            // weekly_points와 total_points 업데이트
-            if (achievementPoints > 0) {
-                userCompletionRateRepository.updatePoints(userId, achievementPoints);
+        } else if ("Japan".equalsIgnoreCase(userNationality) && isCorrect) {
+            switch (originalLevel) {
+                case "6": achievementPoints = 8; break;
+                case "5": achievementPoints = 6; break;
+                case "4": achievementPoints = 4; break;
+                case "3": achievementPoints = 3; break;
+                case "2": achievementPoints = 2; break;
+                case "1": achievementPoints = 1; break;
+                default: log.info("유효하지 않은 레벨: {}", originalLevel); break;
             }
         }
-        if ("Japan".equalsIgnoreCase(userNationality) && isCorrect) {
-            int achievementPoints = 0;
-            switch (originalLevel) {
-                case "6":
-                    achievementPoints = 8;
-                    break;
-                case "5":
-                    achievementPoints = 6;
-                    break;
-                case "4":
-                    achievementPoints = 4;
-                    break;
-                case "3":
-                    achievementPoints = 3;
-                    break;
-                case "2":
-                    achievementPoints = 2;
-                    break;
-                case "1":
-                    achievementPoints = 1;
-                    break;
-                default:
-                    log.info("유효하지 않은 레벨: {}", originalLevel);
-                    break;
-            }
 
-            // weekly_points와 total_points 업데이트
-            if (achievementPoints > 0) {
-                userCompletionRateRepository.updatePoints(userId, achievementPoints);
-            }
+        // 포인트 누적
+        if (achievementPoints > 0) {
+            userCompletionRateRepository.updatePoints(userId, achievementPoints);
         }
-        
-        
     }
 
 

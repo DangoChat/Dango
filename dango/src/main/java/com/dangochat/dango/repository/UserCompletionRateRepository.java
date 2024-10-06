@@ -17,9 +17,11 @@ import jakarta.transaction.Transactional;
 public interface UserCompletionRateRepository extends JpaRepository<UserCompletionRateEntity, Integer> {
     
 	 
-	 @Modifying
-	 @Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points, ucr.totalPoints = ucr.totalPoints + :points WHERE ucr.user.userId = :userId")
-	 void updatePoints(@Param("userId") int userId, @Param("points") int points);
+	@Modifying
+	@Transactional
+	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points, ucr.totalPoints = ucr.totalPoints + :points WHERE ucr.user.userId = :userId")
+	void updatePoints(@Param("userId") int userId, @Param("points") int points);
+
 	 
 	 @Modifying
 	 @Transactional
