@@ -100,49 +100,7 @@ public class MemberController {
 	
 	
 	
-	@PostMapping("levelSetting")                              
-	public ResponseEntity<Map<String, Object>> levelSetting(@RequestBody Map<String, Object> request, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-	    String level = (String) request.get("level");
-	    boolean updateBoth = (boolean) request.get("updateBoth");
-
-	    // 현재 사용자의 레벨을 가져옴
-	    String currentLevel = service.getUserCurrentLevel(userDetails.getId());
-	    String originalLevel = service.getOriginalLevel(userDetails.getId());
-
-	    // 두 번째 줄 버튼: current_level은 original_level보다 하위로만 설정 가능
-	    if (!updateBoth && isInvalidHigherLevelChange(originalLevel, level)) {
-	        Map<String, Object> responseBody = new HashMap<>();
-	        responseBody.put("error", "original_level보다 하위로만 이동할 수 없습니다.");
-	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseBody);
-	    }
-	    
-	    // 레벨 업데이트
-	    if (updateBoth) {
-	        // 첫 번째 줄 버튼: current_level과 original_level 둘 다 업데이트 (제한 없음)
-	        service.updateUserLevels(userDetails.getId(), level, level);
-	    } else {
-	        // 두 번째 줄 버튼: current_level만 업데이트 (original_level보다 상위 레벨만 설정 가능)
-	        service.updateCurrentLevel(userDetails.getId(), level);
-	    }
-
-	    // 업데이트된 레벨을 다시 가져옴
-	    currentLevel = service.getUserCurrentLevel(userDetails.getId());
-	    originalLevel = service.getOriginalLevel(userDetails.getId());
-
-	    // 응답으로 새 레벨 정보를 반환
-	    Map<String, Object> responseBody = new HashMap<>();
-	    responseBody.put("message", "레벨이 성공적으로 업데이트되었습니다.");
-	    responseBody.put("currentLevel", currentLevel);
-	    responseBody.put("originalLevel", originalLevel);
-
-	    return ResponseEntity.ok(responseBody);
-	}
-
-	private boolean isInvalidHigherLevelChange(String originalLevel, String level) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+	
 
 
 

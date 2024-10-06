@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.dangochat.dango.dto.MemberDTO;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.repository.MemberRepository;
+import com.dangochat.dango.repository.UserCompletionRateRepository;
 
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,9 @@ public class MemberService {
 
 	//회원정보 DB처리
 	private final MemberRepository memberRepository;
+	private final UserCompletionRateRepository userCompletionRateRepository;
+	
+	
 	// EmailService를 주입받음
 	@Resource(name="emailService")
 	private final EmailService emailService;  
@@ -72,10 +76,30 @@ public class MemberService {
 	
 	// current_level과 original_level 둘 다 업데이트
     public void updateUserLevels(Integer userId, String currentLevel, String originalLevel) {
-        MemberEntity member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        MemberEntity member = memberRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 기존 originalLevel을 저장해둠
+        String previousOriginalLevel = member.getOriginalLevel();
+        
+        // 레벨 업데이트
         member.setCurrentLevel(currentLevel);
         member.setOriginalLevel(originalLevel);
         memberRepository.save(member);
+        
+        // 기존 originalLevel과 새로운 originalLevel을 비교하여 변경된 경우에만 total_points 초기화
+        if (!previousOriginalLevel.equals(originalLevel)) {
+        	resetUserCompletionRatePoints(userId);  // total_points 초기화
+        }
+        
+        
+    }
+
+    
+ // 유저의 total_points 초기화 메소드
+    private void resetUserCompletionRatePoints(Integer userId) {
+    	 // user_completion_rate 테이블의 total_points와 weekly_points를 0으로 초기화
+        userCompletionRateRepository.resetPointsByUserId(userId);
     }
 
  // current_level만 업데이트

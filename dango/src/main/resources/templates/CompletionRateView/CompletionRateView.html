@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>유저 달성율</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery 라이브러리 추가 -->
+</head>
+<body>
+	<h1>[ 유저 달성율 확인 ]</h1>
+
+	<p>주간 획득한 달성율포인트: <span id="weeklyPoints">0</span></p>
+	<p>총 획득한 달성율포인트: <span id="totalPoints">0</span></p>
+	<p>현재 레벨의 총 달성율 포인트: <span id="levelNumber">0</span></p>
+	<p>총 달성율: <span id="percentage">0</span></p>
+
+	<script>
+		$(document).ready(function() {
+			// API 호출을 통해 데이터를 가져옴
+			$.ajax({
+				type: 'GET',
+				url: '/api/CompletionRate/CompletionRateData', // REST API 엔드포인트
+				success: function(response) {
+					// 가져온 데이터를 HTML 요소에 동적으로 설정
+					$('#weeklyPoints').text(response.weeklyPoints);
+					$('#totalPoints').text(response.totalPoints);
+					$('#levelNumber').text(response.levelNumber);
+					$('#percentage').text(response.percentage + '%');
+				},
+				error: function(xhr, status, error) {
+					alert('데이터를 가져오는 중 오류가 발생했습니다.');
+				}
+			});
+		});
+	</script>
+</body>
+</html>

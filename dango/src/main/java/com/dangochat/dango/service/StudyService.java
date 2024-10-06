@@ -32,6 +32,7 @@ public class StudyService {
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
     private final UserQuizQuestionReviewRepository userQuizQuestionReviewRepository;
+    private final UserCompletionRateRepository userCompletionRateRepository;
 
     private static final int LIMIT = 20;
     private static final double MAX_MISTAKE_RATIO = 0.2; // 최대 20%
@@ -64,7 +65,6 @@ public class StudyService {
     }
     //오리지날 레벨과 커렌트 레벨을 비교하기 위해 필요한 메서드
     public boolean isInvalidHigherLevelChangeKR(String originalLevel, String currentLevel) {
-    	System.out.println("ggggggggggggggggggggggggggggggggg"+originalLevel+currentLevel);
     	
         Map<String, Integer> levelMap = Map.of(
             "6", 6,  // 가장 높은 레벨
@@ -124,6 +124,9 @@ public class StudyService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid study content ID: " + studyContentId));
         String userNationality = user.getUserNationality();
         
+        
+        
+        
         UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
         userStudyContent.setUser(user);
         userStudyContent.setStudyContent(studyContent);
@@ -164,6 +167,36 @@ public class StudyService {
 
         // 변경된 마일리지 정보 저장
         memberRepository.save(user);
+        
+        
+        
+     // 달성 포인트 누적 로직
+        int achievementPoints = 0;
+        if ("Korea".equalsIgnoreCase(userNationality) && isCorrect) {
+            switch (originalLevel) {
+                case "N1": achievementPoints = 12; break;
+                case "N2": achievementPoints = 11; break;
+                case "N3": achievementPoints = 6; break;
+                case "N4": achievementPoints = 5; break;
+                case "N5": achievementPoints = 2; break;
+                default: log.info("유효하지 않은 레벨: {}", originalLevel); break;
+            }
+        } else if ("Japan".equalsIgnoreCase(userNationality) && isCorrect) {
+            switch (originalLevel) {
+                case "6": achievementPoints = 8; break;
+                case "5": achievementPoints = 6; break;
+                case "4": achievementPoints = 4; break;
+                case "3": achievementPoints = 3; break;
+                case "2": achievementPoints = 2; break;
+                case "1": achievementPoints = 1; break;
+                default: log.info("유효하지 않은 레벨: {}", originalLevel); break;
+            }
+        }
+
+        // 포인트 누적
+        if (achievementPoints > 0) {
+            userCompletionRateRepository.updatePoints(userId, achievementPoints);
+        }
     }
 
 
