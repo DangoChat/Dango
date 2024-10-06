@@ -32,7 +32,7 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_URLS = {
             "/", "/images/**", "/css/**", "/js/**", "/member/joinForm", "/member/join", 
             "/member/idCheck", "/member/passwordSearch", "/miynnn", "/honeybitterchip", 
-            "/leean", "/hyeonmin", "/study/**", "/mail/**", "/api/member/**", "/api/study/**"
+            "/leean", "/hyeonmin", "/study/**", "/mail/**", "/api/member/**", "/api/study/**", "/api/quiz/**"
     };
 
     @Bean
@@ -47,15 +47,17 @@ public class WebSecurityConfig {
             )
             // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
-            // // 폼 로그인 설정 유지
-            // .formLogin(formLogin -> formLogin
-            //         .loginPage("/member/loginForm")
-            //         .usernameParameter("userEmail")
-            //         .passwordParameter("userPassword")
-            //         .loginProcessingUrl("/member/login")
-            //         .defaultSuccessUrl("/")
-            //         .permitAll()
-            // )
+                // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
+
+                 // 폼 로그인 설정 유지
+                //  .formLogin(formLogin -> formLogin
+                //          .loginPage("/member/loginForm")
+                //          .usernameParameter("userEmail")
+                //          .passwordParameter("userPassword")
+                //          .loginProcessingUrl("/member/login")
+                //          .defaultSuccessUrl("/")
+                //          .permitAll()
+                //  )
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     // .logoutSuccessUrl("https://scit45dango.site/") // 서버 환경의 경우
