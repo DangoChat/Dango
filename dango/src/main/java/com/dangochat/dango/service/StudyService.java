@@ -240,8 +240,8 @@ public class StudyService {
 
 
     // 공부 내용에서 승급 테스트시 사용할 문법만 6개 가져오기 JLPT
-    public List<StudyDTO> getGrammerContent(){
-        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerContent();
+    public List<StudyDTO> getGrammerContent(String userLevel){
+        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerContent(userLevel);
         List<StudyDTO> studyDTOList = new ArrayList<>();
 
         for (StudyEntity entity : studyGrammerContent){
@@ -263,9 +263,9 @@ public class StudyService {
     }
 
 
-    // 승급 테스트에서 사용할 문법 문제 6개를 가져오는 메서드
-    public List<StudyDTO> getGrammerKorContent() {
-        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerKorContent();
+    // 한국어 능력시험 승급 테스트에서 사용할 문법 문제 6개를 가져오는 메서드
+    public List<StudyDTO> getGrammerKorContent(String userLevel) {
+        List<StudyEntity> studyGrammerContent = studyRepository.findRandomGrammerKorContent(userLevel);
         List<StudyDTO> studyDTOList = new ArrayList<>();
 
         for (StudyEntity entity : studyGrammerContent) {

@@ -39,12 +39,12 @@ public class GPTGrammerService {
     private final RestTemplate restTemplate;
 
     // GPT 문법 프롬프트 메시지를 생성하는 메서드
-    private List<Message> createGrammerMessages(StudyDTO content, int promptType) {
+    private List<Message> createGrammerMessages(StudyDTO content, int promptType, String currentLevel) {
         String prompt;
         switch (promptType) {
             case 1:
                 prompt = content.getContent() + "는 " + content.getMeaning() +
-                "라는 뜻의 문법입니다." +
+                "라는 뜻의 문법입니다. JLPT" +currentLevel+"수준으로 문제를 내주세요"+
                 content.getContent() + "을 사용하여 빈칸 채우기 문제를 만들어 주세요. "
                 + "예를 들어, \"水を (　　　) にしないようにね。\"와 같은 형식의 문제가 필요합니다. "
                 + "빈칸에 " + content.getContent() + "의 알맞은 형태가 무엇인지를 객관식 보기에서 고르는 문제입니다."
@@ -71,7 +71,7 @@ public class GPTGrammerService {
     }
 
     // GPT에 생성한 메시지로 질문 응답 받고 리턴
-    public List<String> generateGrammerQuestions(List<StudyDTO> contentList, int messageType, int numOfQuestions) throws IOException {
+    public List<String> generateGrammerQuestions(List<StudyDTO> contentList, int messageType, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         // 만들 문제의 개수
@@ -83,7 +83,7 @@ public class GPTGrammerService {
             if (content != null && !content.getContent().trim().isEmpty()){
                 log.debug("현재 처리 중인 문법 : {}, 뜻 : {}", content.getContent(), content.getMeaning());
                 // gpt 에게 보낼 메시지 
-                List<Message> messages = createGrammerMessages(content, messageType);
+                List<Message> messages = createGrammerMessages(content, messageType, currentLevel);
 
                 // gpt 요청 객체 생성
                 GPTRequest request = new GPTRequest(model, messages, null,0.7, 256, 1, 0, 0);
@@ -123,18 +123,20 @@ public class GPTGrammerService {
         }
         return generatedQuestions;
     }
-
-    public void loadQuestions(HttpSession session, int startIndex, int count) {
+    // 문법 문제를 생성하고 반환
+    public List<String> loadQuestions(HttpSession session, int count, String currentLevel) {
         List<StudyDTO> contentList = (List<StudyDTO>) session.getAttribute("grammerList");
         List<String> grammerQuestions = new ArrayList<>();
 
-        try{
+        try {
             int messageType = (int) session.getAttribute("messageType");
-            grammerQuestions = generateGrammerQuestions(contentList, messageType, count);
+            grammerQuestions = generateGrammerQuestions(contentList, messageType, count, currentLevel);
             session.setAttribute("grammerQuestions", grammerQuestions);
             log.debug("초기 문제 : {}", grammerQuestions);
-        } catch (Exception e ) {
+        } catch (Exception e) {
             log.error("문제 생성 X", e);
         }
+
+        return grammerQuestions;
     }
 }

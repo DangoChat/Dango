@@ -56,16 +56,21 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     // (성준) [ 승급 테스트 JLPT ] 문법 문제 - 단어 6개 뽑기
     @Query(value = "SELECT *\n" +
             "FROM study_content\n" +
-            "WHERE study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
+            "WHERE level = :level \n" + // 사용자 level로 필터링
+            "AND study_content_content NOT REGEXP '[\\u3040-\\u309F]' \n" + // 히라가나 제외
             "AND study_content_content NOT REGEXP '[\\u30A0-\\u30FF]' \n" + // 가타카나 제외
             "AND study_content_type = '문법'\n" +
             "ORDER BY RAND() \n" +
             "LIMIT 6;", nativeQuery = true)
-    List<StudyEntity> findRandomGrammerContent();
+    List<StudyEntity> findRandomGrammerContent(@Param("level")String level);
 
     // (미연) [ 승급 테스트 한국어 능력 시험 ] 문법 문제 단어 6개 뽑기
-    @Query(value = "SELECT * FROM study_content WHERE study_content_type = '문법' ORDER BY RAND() LIMIT 6;", nativeQuery = true)
-    List<StudyEntity> findRandomGrammerKorContent();
+    @Query(value = "SELECT *\n" +
+            "FROM study_content\n" +
+            "WHERE level = :level \n" + // 사용자 level로 필터링
+            "AND study_content_type = '문법' " +
+            "ORDER BY RAND() LIMIT 6;", nativeQuery = true)
+    List<StudyEntity> findRandomGrammerKorContent(@Param("level")String level);
 
     // 특정 유저의 '단어' 타입 학습 콘텐츠를 가져오는 쿼리 (일일 테스트)
     @Query("SELECT s FROM StudyEntity s JOIN UserStudyContentEntity usc ON s.studyContentId = usc.studyContent.studyContentId " +

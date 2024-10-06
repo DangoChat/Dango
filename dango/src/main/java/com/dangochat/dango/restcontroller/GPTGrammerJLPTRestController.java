@@ -1,12 +1,11 @@
-package com.dangochat.dango.controller;
+package com.dangochat.dango.restcontroller;
 
 import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.MemberService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.service.GPTGrammerService;
@@ -19,16 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
-public class GPTGrammerController {
+@RequestMapping("/api")  // Rest API 경로를 명시
+public class GPTGrammerJLPTRestController {
 
     private final GPTGrammerService gptGrammerService;
     private final StudyService studyService;
     private final MemberService memberService;
 
-    @GetMapping("sungjun")
-    public String sungjun(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    @GetMapping("/sungjun")
+    public List<String> sungjun(HttpSession session,int count, @AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
         String currentLevel = memberService.getUserCurrentLevel(userId);
         session.setAttribute("level", currentLevel);
@@ -37,15 +37,11 @@ public class GPTGrammerController {
         // 1. 승급 테스트용 문제를 만드는 경우
         // 1-1. 승급테스트에서 다룰 단어를 추출
         List<StudyDTO> grammerList = studyService.getGrammerContent(currentLevel);
-        // log.debug("grammer content : {} ", grammerList);
         session.setAttribute("grammerList", grammerList);
         session.setAttribute("currentIndex", 1);
         session.setAttribute("messageType", 1);
-        // 1-2. 추출한 단어로 문제 생성 및 전달
-        gptGrammerService.loadQuestions(session, 1, currentLevel);
-        // 1-3. 생성한 문제중 첫번째 문제를 화면에 표시
-        // 2. 문법 일일 / 주간 테스트 문제를 만드는 경우
 
-        return "QuizView/grammer";
+        return gptGrammerService.loadQuestions(session, count, currentLevel);
+
     }
 }

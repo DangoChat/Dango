@@ -1,4 +1,4 @@
-package com.dangochat.dango.restcontroller;
+package com.dangochat.dango.controller;
 
 import com.dangochat.dango.dto.StudyDTO;
 import com.dangochat.dango.security.AuthenticatedUser;
@@ -10,24 +10,24 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @Slf4j
-@RestController
+@Controller
 @RequiredArgsConstructor
-@RequestMapping("/api")
-public class GPTGrammerKorRestController {
+public class GPTGrammerKorController {
 
     private final GPTGrammerKorService gptGrammerKorService;
     private final StudyService studyService;
     private final MemberService memberService;
 
-    @GetMapping("/korgrammer")
-    public List<String> getKorGrammerQuestions(HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    @GetMapping("grammer/korgrammer")
+    public String getKorGrammerQuestions(Model model, HttpSession session, @AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
         String currentLevel = memberService.getUserCurrentLevel(userId);
         session.setAttribute("level", currentLevel);
@@ -42,6 +42,13 @@ public class GPTGrammerKorRestController {
         session.setAttribute("messageType", 1);
 
         // 문법 문제 생성 및 전달
-        return gptGrammerKorService.loadQuestions(session, 1, currentLevel);
+        List<String> questions = gptGrammerKorService.loadQuestions(session, 1, currentLevel);
+
+        // 모델에 데이터를 추가하여 View에 전달
+        model.addAttribute("questions", questions);
+        model.addAttribute("currentLevel", currentLevel);
+
+        return "QuizView/grammerKor";  // 올바른 View 이름 반환
     }
 }
+
