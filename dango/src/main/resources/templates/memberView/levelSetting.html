@@ -11,7 +11,7 @@
         // 버튼을 클릭하면 해당 레벨을 서버로 전송
         function updateLevel(level, updateBoth) {
             $.ajax({
-                url: '/member/levelSetting',
+                url: '/api/member/levelSetting',  // REST API 경로로 수정
                 type: 'POST',
                 data: JSON.stringify({
                     level: level,

@@ -1,5 +1,6 @@
 package com.dangochat.dango.restcontroller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,4 +110,64 @@ public class MemberRestController {
         private String userEmail;
         private String userPassword;
     }
+    
+    
+    
+    
+    
+ // 현재 레벨 정보 가져오는 Controller
+    @GetMapping("/levelSetting")
+    public ResponseEntity<Map<String, Object>> getLevelSetting(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        String currentLevel = memberService.getUserCurrentLevel(userDetails.getId());
+        String originalLevel = memberService.getOriginalLevel(userDetails.getId());
+        String userNationality = memberService.getUserNationality(userDetails.getId());
+
+        response.put("currentLevel", currentLevel);
+        response.put("originalLevel", originalLevel);
+        response.put("userNationality", userNationality);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 레벨 업데이트 API
+    @PostMapping("/levelSetting")
+    public ResponseEntity<Map<String, Object>> levelSetting(@RequestBody Map<String, Object> request,
+                                                            @AuthenticationPrincipal AuthenticatedUser userDetails) {
+        String level = (String) request.get("level");
+        boolean updateBoth = (boolean) request.get("updateBoth");
+
+        String currentLevel = memberService.getUserCurrentLevel(userDetails.getId());
+        String originalLevel = memberService.getOriginalLevel(userDetails.getId());
+
+        if (!updateBoth && isInvalidHigherLevelChange(originalLevel, level)) {
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("error", "original_level보다 하위로만 이동할 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseBody);
+        }
+
+        if (updateBoth) {
+            memberService.updateUserLevels(userDetails.getId(), level, level);
+        } else {
+            memberService.updateCurrentLevel(userDetails.getId(), level);
+        }
+
+        currentLevel = memberService.getUserCurrentLevel(userDetails.getId());
+        originalLevel = memberService.getOriginalLevel(userDetails.getId());
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "레벨이 성공적으로 업데이트되었습니다.");
+        responseBody.put("currentLevel", currentLevel);
+        responseBody.put("originalLevel", originalLevel);
+
+        return ResponseEntity.ok(responseBody);
+    }
+
+    private boolean isInvalidHigherLevelChange(String originalLevel, String level) {
+        // 원래의 레벨보다 높은 레벨로 변경이 가능한지 확인하는 로직
+        return false;
+    }
+    
+    
+    
 }

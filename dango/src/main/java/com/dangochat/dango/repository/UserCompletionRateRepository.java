@@ -19,7 +19,7 @@ public interface UserCompletionRateRepository extends JpaRepository<UserCompleti
 	 
 	@Modifying
 	@Transactional
-	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points, ucr.totalPoints = ucr.totalPoints + :points WHERE ucr.user.userId = :userId")
+	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points WHERE ucr.user.userId = :userId")
 	void updatePoints(@Param("userId") int userId, @Param("points") int points);
 
 	 
