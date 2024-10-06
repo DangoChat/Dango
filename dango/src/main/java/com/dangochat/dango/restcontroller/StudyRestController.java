@@ -226,9 +226,9 @@ public class StudyRestController {
 
     
     //    단어, 문법 복습 기능 
-    @GetMapping("/studyReview")
-    public List<String> studyReview(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
+    @PostMapping("/studyReview")
+    public List<String> studyReview(@RequestBody Map<String, Integer> payload) {
+        int userId = payload.get("userId");
         
         // 유저가 학습한 모든 날짜 리스트를 가져옴
         return studyService.getUserStudyDates(userId);

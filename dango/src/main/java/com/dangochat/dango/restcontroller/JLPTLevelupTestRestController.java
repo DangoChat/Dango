@@ -2,6 +2,8 @@ package com.dangochat.dango.restcontroller;
 
 import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.JLPTLevelupTestService;
+import com.dangochat.dango.service.MemberService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,13 +24,14 @@ import java.util.Map;
 public class JLPTLevelupTestRestController {
 
     private final JLPTLevelupTestService jlptLevelupTestService;
+    private final MemberService memberService;
 
     // 첫 번째 문제 요청 시 문제를 생성하는 메서드 (항상 문제 3개 유지)
     @PostMapping("/start")
     public Map<String, Object> startQuiz(@RequestBody Map<String, Object> payload) {
         String level = (String) payload.get("level");
         int userId = (Integer) payload.get("userId");
-        int totalQuestions = (Integer) payload.get("totalQuestions");
+        // int totalQuestions = (Integer) payload.get("totalQuestions");
 
         // 초기 3개의 문제를 생성
         log.info("초기 3개의 문제 생성 시작.");
@@ -55,6 +61,17 @@ public class JLPTLevelupTestRestController {
 
         return createResponse(jlptGeneratedQuestions);
     }
+
+    // 끝이 났을때 기준에 맞는다면 current & original 레벨 설정
+    @PostMapping("/finish")
+    public String finishTest(@RequestBody Map<String, Object> payload) {
+        String level = (String) payload.get("level");
+        int userId = (int) payload.get("userId");
+
+        memberService.updateUserLevels(userId, level, level);
+        return level + "updated";
+    }
+    
 
     // 문제를 생성하는 메서드 (문제 개수 유지)
     private List<String> generateQuestions(String level, int count) {
