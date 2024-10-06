@@ -1,8 +1,8 @@
 package com.dangochat.dango.restcontroller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
@@ -35,13 +35,13 @@ public class UserCompletionRateRestController {
         int userId = userDetails.getId();
 
         // 해당 유저의 completion rate 데이터 가져오기
-        List<UserCompletionRateEntity> completionRates = userCompletionRateService.getCompletionRatesByUserId(userId);
+        Optional<UserCompletionRateEntity> completionRateOpt = userCompletionRateService.getCompletionRatesByUserId(userId);
 
         Map<String, Object> response = new HashMap<>();
 
-        // 최신 기록을 찾거나 필요에 따라 첫 번째 데이터를 선택
-        if (!completionRates.isEmpty()) {
-            UserCompletionRateEntity latestCompletionRate = completionRates.get(0); // 필요에 따라 최신 기록을 선택
+        // 데이터가 존재하는 경우
+        if (completionRateOpt.isPresent()) {
+            UserCompletionRateEntity latestCompletionRate = completionRateOpt.get();  // Optional에서 값 추출
             response.put("weeklyPoints", latestCompletionRate.getWeeklyPoints());
             response.put("totalPoints", latestCompletionRate.getTotalPoints());
         } else {
@@ -94,9 +94,9 @@ public class UserCompletionRateRestController {
         }
 
         // 퍼센티지 계산 (총 획득 포인트 / 현재 레벨 총 달성 포인트) * 100
-        int totalPoints = (Integer) response.get("totalPoints");
+        Integer totalPoints = (Integer) response.get("totalPoints");  // NullPointerException 방지
         int percentage = 0;
-        if (levelNumber > 0) {
+        if (totalPoints != null && levelNumber > 0) {
             percentage = (int) (((double) totalPoints / levelNumber) * 100);
         }
 

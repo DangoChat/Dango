@@ -139,7 +139,7 @@ public class MemberController {
 	}
 
 	private boolean isInvalidHigherLevelChange(String originalLevel, String level) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

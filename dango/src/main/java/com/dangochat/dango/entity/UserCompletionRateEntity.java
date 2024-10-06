@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class UserCompletionRateEntity {
     private int completionNum;
     
  // 회원 고유 아이디 (외래키)
-    @ManyToOne(fetch = FetchType.LAZY)  // 다대일 관계 설정
+    @OneToOne  // 각 유저는 하나의 레코드만 가짐
     @JoinColumn(name = "user_id", nullable = false,referencedColumnName = "user_id")
     private MemberEntity user; 
     
