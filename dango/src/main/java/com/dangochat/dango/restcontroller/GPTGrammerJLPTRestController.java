@@ -20,15 +20,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")  // Rest API 경로를 명시
+@RequestMapping("/api/quiz/levelup")  // Rest API 경로를 명시
 public class GPTGrammerJLPTRestController {
 
     private final GPTGrammerService gptGrammerService;
     private final StudyService studyService;
     private final MemberService memberService;
 
-    @GetMapping("/sungjun")
-    public List<String> sungjun(HttpSession session,int count, @AuthenticationPrincipal AuthenticatedUser userDetails) {
+    @GetMapping("/jlptgrammer")
+    public List<String> jlptgrammer(HttpSession session,int count, @AuthenticationPrincipal AuthenticatedUser userDetails) {
         int userId = userDetails.getId();
         String currentLevel = memberService.getUserCurrentLevel(userId);
         session.setAttribute("level", currentLevel);

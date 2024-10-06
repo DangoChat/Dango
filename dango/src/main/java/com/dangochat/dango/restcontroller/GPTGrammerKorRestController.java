@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/quiz/levelup")
 public class GPTGrammerKorRestController {
 
     private final GPTGrammerKorService gptGrammerKorService;
