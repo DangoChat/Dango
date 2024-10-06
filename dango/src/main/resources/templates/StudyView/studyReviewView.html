@@ -14,12 +14,12 @@
                     
                     data.forEach(date => {
                         const paragraph = document.createElement('p');
-
+						
                         // 날짜 표시
                         const dateSpan = document.createElement('span');
                         dateSpan.textContent = date;
                         paragraph.appendChild(dateSpan);
-
+						
                         // 단어 버튼 생성
                         const wordForm = document.createElement('form');
                         wordForm.method = 'get';
