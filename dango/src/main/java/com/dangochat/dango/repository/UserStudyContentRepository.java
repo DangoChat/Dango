@@ -27,6 +27,7 @@ public interface UserStudyContentRepository extends JpaRepository<UserStudyConte
     @Query("SELECT usc FROM UserStudyContentEntity usc JOIN usc.studyContent sc WHERE usc.user.id = :userId")
     List<UserStudyContentEntity> findStudyContentByUserId(@Param("userId") int userId);
 
+    // 사용자가 공부한 날짜 기록
     @Query("SELECT DISTINCT DATE(usc.recordStudyDate) FROM UserStudyContentEntity usc WHERE usc.user.id = :userId")
     List<String> findStudyDatesByUserId(@Param("userId") int userId);
 

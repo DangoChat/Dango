@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,18 +45,18 @@ public class OMiKuZiRestController {
 
     // 랜덤 오미쿠지 뽑기 및 세션 저장
     @PostMapping("OmikuziList")
-    public OMiKuZiDTO drawOmikuzi(@AuthenticationPrincipal AuthenticatedUser userDetails, HttpSession session) {
+    public OMiKuZiDTO drawOmikuzi(@RequestBody Map<String, Integer> payload, HttpSession session) {
         // 랜덤 오미쿠지 뽑기
         OMiKuZiDTO selectedOmikuzi = omikuziService.drawRandomOmikuzi();
-
+        Integer userId = payload.get("userId");
         // 세션에 저장
         session.setAttribute("selectedOmikuzi", selectedOmikuzi);
         
      // '大吉'이거나 "大凶"이면 마일리지 추가
         if ("大吉".equals(selectedOmikuzi.getOmikuziResult())) {
-            omikuziService.addMileage(userDetails.getId(), 10);
+            omikuziService.addMileage(userId, 10);
         }else if("大凶".equals(selectedOmikuzi.getOmikuziResult())) {
-        	omikuziService.addMileage(userDetails.getId(), 50);
+        	omikuziService.addMileage(userId, 50);
         }
         
         // 뽑은 오미쿠지 정보를 반환

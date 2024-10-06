@@ -405,7 +405,7 @@ public class StudyService {
         return userQuizQuestionReviewRepository.findByQuizTypeAndUserId(quizType, userId);
     }
     
-    
+    //사용자 공부기록 가져오기
     public List<String> getUserStudyDates(int userId) {
         return userStudyContentRepository.findStudyDatesByUserId(userId);
     }
