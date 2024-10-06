@@ -654,7 +654,7 @@ public class GPTQuizController {
         if (generatedQuestions == null || questionNumber > generatedQuestions.size() || questionNumber < 1) {
             return "redirect:/weeklyWordTest/1"; // 범위를 벗어나면 첫 문제로 리다이렉트
         }
-
+        
         if (generatedQuestions != null && questionNumber <= generatedQuestions.size()) {
             String currentQuestion = generatedQuestions.get(questionNumber - 1); // 1-based index
             model.addAttribute("question", currentQuestion);
