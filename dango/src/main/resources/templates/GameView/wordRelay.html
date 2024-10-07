@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>끝말잇기 게임</title>
+  <style>
+    #result-box {
+      display: none; /* 처음에는 숨김 */
+      margin-top: 20px;
+      font-size: 18px;
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+
+<div id="chat-box">
+  <!-- GPT 첫 메시지: 페이지 로드 시 자동으로 추가 -->
+</div>
+
+<div>
+  <input type="text" id="user-input" placeholder="단어를 입력하세요..." />
+  <button id="send-btn">보내기</button>
+</div>
+
+<!-- 게임 결과를 보여주는 박스 -->
+<div id="result-box">
+  <h2>게임 결과</h2>
+  <p id="result-message"></p>
+</div>
+
+<script>
+  const chatBox = document.getElementById('chat-box');
+  const userInput = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+  const resultBox = document.getElementById('result-box');
+  const resultMessage = document.getElementById('result-message');
+  let userTimeout;
+  let gptTimeout;
+  let userWordCount = 0; // 사용자가 입력한 단어 수를 추적하는 변수
+  const userId = 1;  // 사용자의 고유 ID (서버에서 전달\)
+
+  // 페이지가 로드되면 바로 GPT에게 첫 번째 단어 요청
+  window.onload = async function() {
+    await startGame(); // 페이지 로드 시 /start API 호출
+  }
+
+  // 첫 번째 메시지: 게임 시작
+  async function startGame() {
+    try {
+      const response = await fetch('/game/wordRelay/start');  // /start 엔드포인트 호출
+      const firstWord = await response.text();  // GPT의 첫 단어 응답 받음
+      addMessage('GPT', firstWord);  // GPT의 첫 단어를 화면에 추가
+      startUserTimer(); // 사용자 응답 대기 시작
+    } catch (error) {
+      console.error('Error during startGame:', error);  // 에러 처리
+      endGame("게임을 시작할 수 없습니다. 오류 발생.");
+    }
+  }
+
+  // 메시지를 대화창에 추가하는 함수
+  function addMessage(sender, message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = sender === 'user' ? `사용자: ${message}` : `GPT: ${message}`;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight; // 스크롤을 아래로 이동
+  }
+
+  // 사용자 타이머 시작 (10초)
+  function startUserTimer() {
+    clearTimeout(userTimeout);
+    userTimeout = setTimeout(() => {
+      endGame("사용자가 10초 안에 응답하지 못했습니다. 게임 종료.");
+    }, 10000);
+  }
+
+  // GPT 타이머 시작 (GPT 응답 후 10초)
+  function startGptTimer() {
+    clearTimeout(gptTimeout);
+    gptTimeout = setTimeout(() => {
+      endGame("GPT가 10초 안에 응답하지 못했습니다. 게임 종료.");
+    }, 10000);
+  }
+
+  // 게임 종료 처리 및 결과 표시
+  function endGame(message) {
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+    clearTimeout(userTimeout); // 모든 타이머 해제
+    clearTimeout(gptTimeout);
+
+    // 결과 메시지 설정 및 화면에 표시
+    resultMessage.textContent = `${message} 사용자 점수: ${userWordCount-1}`;
+    resultBox.style.display = 'block'; // 결과 박스를 보이도록 설정
+
+    // 게임 결과 서버로 전송하여 마일리지 추가 처리
+    processGameResult(userId, userWordCount);
+  }
+
+  // 게임 결과를 서버에 보내는 함수
+  async function processGameResult(userId, gameScore) {
+    try {
+      const response = await fetch('/game/wordRelay/result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          userId: userId,
+          gameScore: gameScore
+        })
+      });
+
+      const result = await response.text();
+      console.log(result);  // 서버 응답 메시지 확인
+    } catch (error) {
+      console.error('Error during processGameResult:', error);  // 오류 처리
+    }
+  }
+
+  // 사용자가 단어를 입력하고 보내는 기능
+  sendBtn.addEventListener('click', async () => {
+    const userWord = userInput.value.trim();
+    if (userWord === '') return;
+
+    clearTimeout(userTimeout); // 사용자 타이머 해제
+    addMessage('user', userWord);
+    userWordCount++; // 사용자가 입력한 단어 수 증가
+
+    // GPT에게 단어 전달
+    try {
+      const response = await fetch(`/game/wordRelay/relay?word=${userWord}&userWordCount=${userWordCount}`);
+      const gptWord = await response.text();
+      addMessage('GPT', gptWord);
+
+      // GPT가 "제가 이겼습니다" 또는 "제가 졌습니다"를 보낸 경우 게임 종료
+      if (gptWord.includes("제가 이겼습니다") || gptWord.includes("제가 졌습니다")) {
+        endGame(gptWord);
+      } else {
+        startUserTimer(); // 사용자에게 다시 10초 타이머 시작
+      }
+    } catch (error) {
+      console.error('Error during relayWord:', error);  // 에러 처리
+      endGame("GPT가 응답하지 못했습니다. 게임 종료.");
+    }
+
+    userInput.value = ''; // 입력 필드 초기화
+  });
+
+</script>
+
+</body>
+</html>
