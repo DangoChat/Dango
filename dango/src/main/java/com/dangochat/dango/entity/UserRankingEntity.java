@@ -19,7 +19,7 @@ public class UserRankingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_ranking_id")
-    private Long userRankingId;  // Long 타입으로 수정
+    private int userRankingId;  // Long 타입으로 수정
 
     @Column(name = "user_id", nullable = false)
     private int userId;
