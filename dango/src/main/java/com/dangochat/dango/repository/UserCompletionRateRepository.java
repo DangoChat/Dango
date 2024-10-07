@@ -19,16 +19,15 @@ public interface UserCompletionRateRepository extends JpaRepository<UserCompleti
 	 
 	@Modifying
 	@Transactional
-	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points WHERE ucr.user.userId = :userId")
+	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points, ucr.totalPoints = ucr.totalPoints + :points WHERE ucr.user.userId = :userId")
 	void updatePoints(@Param("userId") int userId, @Param("points") int points);
 
-	 
-	 @Modifying
-	 @Transactional
-	 @Query("UPDATE UserCompletionRateEntity ucr SET ucr.totalPoints = 0, ucr.weeklyPoints = 0 WHERE ucr.user.userId = :userId")
-	 void resetPointsByUserId(@Param("userId") Integer userId);
+	@Modifying
+	@Transactional
+	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.totalPoints = 0, ucr.weeklyPoints = 0 WHERE ucr.user.userId = :userId")
+	void resetPointsByUserId(@Param("userId") Integer userId);
 	
 	// 유저 ID로 completion_rate 레코드 조회
-	    Optional<UserCompletionRateEntity> findByUser_UserId(int userId);
+	Optional<UserCompletionRateEntity> findByUser_UserId(int userId);
 }
 
