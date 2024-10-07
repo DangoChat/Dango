@@ -92,5 +92,6 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Integer> {
     	       "WHERE usc.user.userId = :userId AND s.type = '문법' AND usc.recordStudyDate BETWEEN :startDate AND :endDate")
     	List<StudyEntity> findWeekGrammarContentByUserId(@Param("userId") int userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
+ 
 
 }

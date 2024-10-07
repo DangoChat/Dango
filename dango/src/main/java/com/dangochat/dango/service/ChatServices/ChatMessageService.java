@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.dangochat.dango.dto.chatDTOs.ChatMessageCreateCommand;
+import com.dangochat.dango.dto.chatDTOs.ChatMessageRequest;
+import com.dangochat.dango.dto.chatDTOs.ChatMessageResponse;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatMessageJpaEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatRoomJpaEntity;
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
+    private final ChatRoomService chatRoomService;
 
     // 채팅 메시지 생성 및 저장
     public Long createChatMessage(ChatMessageJpaEntity chatMessage) {
@@ -43,4 +47,29 @@ public class ChatMessageService {
         return memberRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    public ChatMessageResponse sendMessage(Long roomId, ChatMessageRequest chatMessage) {
+        ChatMessageCreateCommand command = ChatMessageCreateCommand.builder()
+                .roomId(roomId)
+                .content(chatMessage.text())
+                .from(chatMessage.from())
+                .to(chatMessage.to())
+                .build();
+
+        Long chatId = createChatMessage(
+            ChatMessageJpaEntity.builder()
+                .chatRoom(chatRoomService.loadById(roomId))
+                .messagesContents(command.content())
+                .sender(getUserById(command.from()))
+                .receiver(getUserById(command.to()))
+                .build()
+        );
+
+        return ChatMessageResponse.builder()
+                .id(chatId)
+                .content(chatMessage.text())
+                .writer(chatMessage.from())
+                .build();
+    }   
+
 }
