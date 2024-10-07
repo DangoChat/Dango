@@ -27,8 +27,12 @@ public class MemberService {
 	private final EmailService emailService;  
 
     private final PasswordEncoder passwordEncoder;
-	
-	
+
+    // 사용자 ID로 user_nationality를 조회하는 메서드
+    public String findUserNationalityById(int userId) {
+        return memberRepository.findUserNationalityById(userId);
+    }
+
 	public void join(MemberDTO member) {
 		try {
             // 비밀번호를 AES로 암호화
