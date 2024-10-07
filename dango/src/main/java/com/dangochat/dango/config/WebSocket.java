@@ -25,15 +25,27 @@ public class WebSocket implements WebSocketMessageBrokerConfigurer{
     //     // 서버로 보내는 메시지의 경로 ( prefix 정의 )
     //     registry.setApplicationDestinationPrefixes("/app");
     // }
+    // @Override
+    // public void configureMessageBroker(MessageBrokerRegistry config) {
+    //     config.enableSimpleBroker("/topic");
+    //     config.setApplicationDestinationPrefixes("/app");
+    // }
+
+    // @Override
+    // public void registerStompEndpoints(StompEndpointRegistry registry) {
+    //     // setAllowedOrigins("*") 대신 setAllowedOriginPatterns("*")를 사용하여 모든 도메인 허용
+    //     registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+    // }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // setAllowedOrigins("*") 대신 setAllowedOriginPatterns("*")를 사용하여 모든 도메인 허용
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 }

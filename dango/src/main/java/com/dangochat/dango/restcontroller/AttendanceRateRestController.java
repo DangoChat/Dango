@@ -6,25 +6,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/member")
+@RequestMapping("/api/member")
 public class AttendanceRateRestController {
 
     private final StudyService studyService;
 
     @PostMapping("/dates")
-    public String getUserStudyDates(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-
+    public int getUserStudyDates(@RequestBody Map<String, Integer> payload) {
+        int userId = payload.get("userId");
         // 로그인 된 사용자의 학습 날짜 목록 가져오기
-        List<String> studyDates = studyService.getUserStudyDates(userDetails.getId());
+        List<String> studyDates = studyService.getUserStudyDates(userId);
 
         // 이번 달의 첫 날부터 오늘까지의 날짜 계산 (10월 6일이면 = 6)
         int thisMonthCount = LocalDate.now().getDayOfMonth();
@@ -43,6 +45,6 @@ public class AttendanceRateRestController {
 //        log.info("이번 달 날짜 수 : {}", thisMonthCount);
 //        log.info("목록: {}%", studyDates);
         log.info("출석률: {}%", attendanceRate);
-        return "attendanceRate";
+        return attendanceRate;
     }
 }

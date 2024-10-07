@@ -3,6 +3,9 @@ package com.dangochat.dango.controller;
 import com.dangochat.dango.dto.chatDTOs.ChatMessageCreateCommand;
 import com.dangochat.dango.dto.chatDTOs.ChatMessageRequest;
 import com.dangochat.dango.dto.chatDTOs.ChatMessageResponse;
+import com.dangochat.dango.dto.chatDTOs.ChatRoomResponse;
+import com.dangochat.dango.dto.chatDTOs.ChatRoomResponse.ChatRoomUserResponse;
+import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatMessageJpaEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatRoomJpaEntity;
 import com.dangochat.dango.service.ChatServices.ChatMessageService;
@@ -10,7 +13,10 @@ import com.dangochat.dango.service.ChatServices.ChatRoomService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
@@ -35,12 +41,12 @@ public class ChatController {
      * @return ChatMessageResponse
      */
     @MessageMapping("/chat/rooms/{roomId}/send")
-    @SendTo("/topic/public/rooms/{roomId}")
+    @SendTo("/topic/rooms/{roomId}")
     public ChatMessageResponse sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageRequest chatMessage) {
         ChatMessageCreateCommand command = ChatMessageCreateCommand.builder()
                 .content(chatMessage.text())
                 .from(chatMessage.from())
-                .to(chatMessage.to())  // 수신자 추가
+                .to(chatMessage.to())
                 .roomId(roomId)
                 .build();
 
@@ -49,8 +55,8 @@ public class ChatController {
             ChatMessageJpaEntity.builder()
                 .chatRoom(chatRoomService.loadById(roomId))
                 .messagesContents(command.content())
-                .sender(chatMessageService.getUserById(command.from())) // 발신자
-                .receiver(chatMessageService.getUserById(command.to())) // 수신자
+                .sender(chatMessageService.getUserById(command.from()))
+                .receiver(chatMessageService.getUserById(command.to()))
                 .build()
         );
 
@@ -58,7 +64,7 @@ public class ChatController {
         return ChatMessageResponse.builder()
                 .id(chatId)
                 .content(chatMessage.text())
-                .writer(chatMessage.from())  // 발신자의 userId를 int로 반환
+                .writer(chatMessage.from())
                 .build();
     }
 
@@ -112,9 +118,9 @@ public class ChatController {
     }
 
     @PostMapping("/chat/rooms")
-    public String createRoom(@RequestParam String roomName) {
+    public void createRoom(@RequestParam String roomName) {
         chatRoomService.createChatRoom(roomName);
-        return "redirect:/chat/rooms";
+        // return "redirect:/chat/rooms";
     }
 
     // 특정 채팅방으로 이동
@@ -126,4 +132,93 @@ public class ChatController {
         return "chatRoom";  // chatRoom.html로 이동
     }
 
+    // 특정 사용자가 속한 채팅방 목록 가져오기
+    @ResponseBody
+    @GetMapping("/chat/rooms/user/{userId}")
+    public ResponseEntity<List<ChatRoomResponse>> getChatRoomsForUser(@PathVariable int userId) {
+        List<ChatRoomJpaEntity> chatRooms = chatRoomService.getChatRoomsForUser(userId);
+        List<ChatRoomResponse> response = chatRooms.stream()
+            .map(room -> ChatRoomResponse.builder()
+                .roomId(room.getRoomId())
+                .roomName(room.getRoomName())
+                .messages(room.getMessages().stream()
+                    .map(message -> ChatMessageResponse.builder()
+                        .id(message.getChatMessagesId())
+                        .content(message.getMessagesContents())
+                        .writer(message.getSender().getUserId())
+                        .build())
+                    .collect(Collectors.toList()))
+                .users(room.getUsers().stream()
+                    .map(user -> ChatRoomUserResponse.builder()
+                        .roomUserId(user.getUser().getUserId())
+                        .nickname(user.getUser().getNickname())
+                        .build())
+                    .collect(Collectors.toList()))
+                .build())
+            .collect(Collectors.toList());
+
+        System.out.println("chat room response , " + response);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/chat/rooms")
+    @ResponseBody
+    public ResponseEntity<Map<String, Long>> createChatRoom(@RequestBody Map<String, Object> request) {
+        String userNationality = (String) request.get("nationality");
+        Integer userId = (Integer) request.get("userId");
+
+        // 상대방의 국적 설정
+        String partnerNationality = "Korea".equals(userNationality) ? "Japan" : "Korea";
+
+        // 랜덤한 상대방을 찾는 메소드 호출
+        MemberEntity partner = chatRoomService.findRandomUserByNationality(partnerNationality);
+
+        Long roomId = chatRoomService.createChatRoomWithPartner(partner, userId);
+        Map<String, Long> response = new HashMap<>();
+        response.put("roomId", roomId);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @PostMapping("/api/chat/rooms/{roomId}/send")
+    public ResponseEntity<ChatMessageResponse> sendChatMessage(
+        @PathVariable Long roomId,
+        @RequestBody ChatMessageRequest chatMessage
+    ) {
+        ChatMessageResponse response = chatMessageService.sendMessage(roomId, chatMessage);
+        return ResponseEntity.ok(response);
+    }
+    @ResponseBody
+    @PostMapping("/chat/rooms/{roomId}")
+    public ResponseEntity<Long> enterChatRoom(@PathVariable Long roomId) {
+        // 이 부분에 필요한 로직을 추가합니다.
+        return ResponseEntity.ok(roomId);
+    }
+
+    @ResponseBody
+    @GetMapping("/api/chat/rooms/{roomId}")
+    public ResponseEntity<ChatRoomResponse> getChatRoomDetails(@PathVariable Long roomId) {
+        ChatRoomJpaEntity chatRoom = chatRoomService.loadById(roomId);
+        
+        ChatRoomResponse response = ChatRoomResponse.builder()
+            .roomId(chatRoom.getRoomId())
+            .roomName(chatRoom.getRoomName())
+            .messages(chatRoom.getMessages().stream()
+                .map(message -> ChatMessageResponse.builder()
+                    .id(message.getChatMessagesId())
+                    .content(message.getMessagesContents())
+                    .writer(message.getSender().getUserId())
+                    .build())
+                .collect(Collectors.toList()))
+            .users(chatRoom.getUsers().stream()
+                .map(user -> ChatRoomResponse.ChatRoomUserResponse.builder()
+                    .roomUserId(user.getUser().getUserId())
+                    .nickname(user.getUser().getNickname())
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
+
+        return ResponseEntity.ok(response);
+    }
 }

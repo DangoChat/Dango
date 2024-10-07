@@ -10,6 +10,7 @@ import com.dangochat.dango.repository.ChatRepositorys.ChatRoomUserRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,5 +55,26 @@ public class ChatRoomService {
      // 모든 채팅방 조회
     public List<ChatRoomJpaEntity> getAllChatRooms() {
         return chatRoomRepository.findAll();
+    }
+
+    public List<ChatRoomJpaEntity> getChatRoomsForUser(int userId) {
+        // 필요한 로직을 사용하여 사용자가 속한 채팅방 목록을 가져옵니다.
+        return chatRoomRepository.findChatRoomsByUserId(userId);
+    }
+
+    public MemberEntity findRandomUserByNationality(String nationality) {
+        return memberRepository.findRandomUserByNationality(nationality);
+    }
+
+    public Long createChatRoomWithPartner(MemberEntity partner, int userId) {
+        ChatRoomJpaEntity chatRoom = new ChatRoomJpaEntity();
+        chatRoom.setRoomName(userId + " Chat with " + partner.getNickname());
+        
+        // 새 채팅방을 저장하고, 현재 사용자와 상대방을 방에 추가합니다.
+        chatRoomRepository.save(chatRoom);
+        addUserToRoom(chatRoom.getRoomId(), userId);
+        addUserToRoom(chatRoom.getRoomId(), partner.getUserId());
+    
+        return chatRoom.getRoomId();
     }
 }
