@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>GPT Study Chat</title>
+</head>
+<body>
+    <h1>GPT Study Chat</h1>
+
+    <!-- 오늘 학습한 단어나 문법을 기반으로 문장을 작성하라는 메시지 -->
+    <div id="studyPromptContainer">
+        <p id="studyPrompt">Loading...</p>
+    </div>
+
+    <!-- 사용자가 문장을 입력할 수 있는 입력 필드 -->
+    <form id="studyChatForm" style="display: none;">
+        <label for="userSentence">Enter a sentence:</label>
+        <input type="text" id="userSentence" name="userSentence" placeholder="문장을 만들어주세요.">
+        <button type="button" onclick="sendSentence()">GPT채점</button>
+        <!-- 새로고침 버튼 추가 -->
+        <button type="button" onclick="location.reload();">다음 문제</button>
+    </form>
+
+    <!-- GPT의 응답을 표시할 영역 -->
+    <div id="gptResponse">
+        <h3>GPT's Response:</h3>
+        <p id="responseContent"></p>
+    </div>
+
+    <script>
+    // 페이지 로드 시 서버에서 학습 데이터를 가져오는 함수
+    window.onload = function() {
+        fetch('/api/gptChat/gptStudyChat')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error in fetching study prompt.");
+                }
+                return response.json(); // JSON 형식으로 응답을 받음
+            })
+            .then(data => {
+                document.getElementById("studyPrompt").innerText = data.studyPrompt;
+
+                // 학습이 완료된 경우 입력 폼 숨기기
+                if (data.studyPrompt !== "모든 단어를 학습하셨습니다.") {
+                    document.getElementById("studyChatForm").style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    };
+
+    // 사용자가 문장을 입력하면, 그 문장을 GPT API로 전송하는 함수
+    function sendSentence() {
+        const userSentence = document.getElementById("userSentence").value;
+
+        // userSentence 값이 비어 있는지 확인
+        if (!userSentence) {
+            alert("Please enter a sentence!");
+            return;
+        }
+
+        // fetch로 요청 보낼 때 userSentence를 query parameter로 전송
+        fetch('/api/gptChat/studyChat?userSentence=' + encodeURIComponent(userSentence))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error in GPT API call.");
+                }
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById("responseContent").innerText = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    </script>
+
+</body>
+</html>
