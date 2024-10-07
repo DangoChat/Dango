@@ -128,7 +128,7 @@ public class GPTStudyChatRestController {
                 userSentence,
                 1, 256, 1, 2, 2
         );
-
+        
         GPTChatResponse gptResponse = restTemplate.postForObject(
                 apiUrl,
                 request,
@@ -145,6 +145,10 @@ public class GPTStudyChatRestController {
         // GPT의 응답이 "정답입니다"인지 확인
         if (gptMessage.getContent().contains("정답입니다")) {
             int updatedMileage = user.getUserMileage() + 2;
+            user.setUserMileage(updatedMileage);
+            memberRepository.save(user);
+        }else if(gptMessage.getContent().contains("正解です")) {
+        	int updatedMileage = user.getUserMileage() + 2;
             user.setUserMileage(updatedMileage);
             memberRepository.save(user);
         }
