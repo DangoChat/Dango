@@ -152,5 +152,10 @@ public class MemberService {
         MemberEntity memberEntity = memberRepository.findById(id).orElse(null);
         return memberEntity.getUserMileage();
     }
+    @Transactional
+    public void updateMileage(int id, int mileage){
+        MemberEntity memberEntity = memberRepository.findById(id).orElse(null);
+        memberEntity.setUserMileage(memberEntity.getUserMileage() + mileage);
+    }
 	
 }

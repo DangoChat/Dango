@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.repository.MemberRepository;
+import com.dangochat.dango.service.DailyQuizService;
 import com.dangochat.dango.service.GPTService;
 import com.dangochat.dango.service.StudyService;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WeeklyTestRestController {
     private final GPTService gptService;
+    private final DailyQuizService dailyQuizService;
     private final StudyService studyService;
     private final MemberRepository memberRepository;
 
@@ -41,13 +43,13 @@ public class WeeklyTestRestController {
         log.info("사용자 ID: {}, 국적: {}", userId, userNationality);
 
         List<String> studyWordContent = studyService.getWeekWordContent(userId); // 유저 ID를 이용해 학습 내용 가져오기
-        List<String> studyGrammerContent = studyService.getWeekGrammarContent(userId); // '문법' 타입 콘텐츠만 가져온다
+        // List<String> studyGrammerContent = studyService.getWeekGrammarContent(userId); // '문법' 타입 콘텐츠만 가져온다
         // 두 리스트를 합치기 위한 새로운 리스트 생성
         List<String> studyContent = new ArrayList<>();
 
         // 두 리스트를 studyContent에 추가
         studyContent.addAll(studyWordContent);
-        studyContent.addAll(studyGrammerContent);
+        // studyContent.addAll(studyGrammerContent);
         Collections.shuffle(studyContent);
         log.debug("daily shuffled : {}", studyContent);
         List<String> initialQuestions = generateWeeklyQuestions(studyContent, userNationality, 0,3);
@@ -80,7 +82,7 @@ public class WeeklyTestRestController {
         try {
             int toIndex = Math.min(currentIndex + count, studyContent.size());
             if(toIndex > currentIndex){
-                newQuestions = gptService.generateGPTQuestions(studyContent.subList(currentIndex, toIndex), 1, count, userNationality);
+                newQuestions = dailyQuizService.GenerateGPTQuestions(studyContent.subList(currentIndex, toIndex), 1, count, userNationality);
             } else {
                 log.debug("학습 내용 끝");
             }

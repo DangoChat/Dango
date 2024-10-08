@@ -53,9 +53,9 @@ public class DailyQuizService {
                 // user_nationality에 따라 다르게 메시지 생성
                 List<Message> messages;
                 if ("Korea".equalsIgnoreCase(userNationality)) {
-                    messages = createMessagesJP(content, messageType);
+                    messages = createMessagesJP(content, 2);
                 } else if ("Japan".equalsIgnoreCase(userNationality)) {
-                    messages = createMessagesKR(content, messageType);
+                    messages = createMessagesKR(content, 2);
                 } else {
                     throw new IllegalArgumentException("지원되지 않는 국적입니다: " + userNationality);
                 }

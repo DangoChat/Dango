@@ -87,7 +87,7 @@ public class DailyTestRestController {
         try {
             int toIndex = Math.min(currentIndex + count, studyContent.size());
             if(toIndex > currentIndex){
-                newQuestions = dailyQuizService.GenerateGPTQuestions(studyContent.subList(currentIndex, toIndex), 1, count, userNationality);
+                newQuestions = dailyQuizService.GenerateGPTQuestions(studyContent.subList(currentIndex, toIndex), 2, count, userNationality);
             } else {
                 log.debug("학습 내용 끝");
             }
