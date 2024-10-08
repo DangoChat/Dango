@@ -3,6 +3,10 @@ package com.dangochat.dango.service;
 import com.dangochat.dango.dto.GPTRequest;
 import com.dangochat.dango.dto.GPTResponse;
 import com.dangochat.dango.dto.Message;
+import com.dangochat.dango.entity.MemberEntity;
+import com.dangochat.dango.entity.QuizType;
+import com.dangochat.dango.entity.UserQuizQuestionReviewEntity;
+import com.dangochat.dango.repository.UserQuizQuestionReviewRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GPTService {
+public class DailyQuizService {
 
     @Value("${gpt.model}") // GPT 모델 지정
     private String model;
@@ -24,10 +28,12 @@ public class GPTService {
     @Value("${gpt.api.url}") // GPT API URL 지정
     private String apiUrl;
 
+    private final UserQuizQuestionReviewRepository userQuizQuestionReviewRepository;
+
     private final RestTemplate restTemplate;
 
- // GPT에 문제 요청하고 응답 받는 메서드 (매개변수를 List<String>으로 수정)
-    public List<String> generateGPTQuestions(List<String> contentList, int messageType, int numOfQuestions,String userNationality) throws IOException {
+    // GPT에 문제 요청하고 응답 받는 메서드 (매개변수를 List<String>으로 수정)
+    public List<String> GenerateGPTQuestions(List<String> contentList, int messageType, int numOfQuestions,String userNationality) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
 
         // contentList의 크기와 numOfQuestions 중 작은 값을 사용
@@ -38,12 +44,12 @@ public class GPTService {
 
             // contentList에서 순차적으로 단어를 가져옴
             String content = contentList.get(i);
-            
+
             // null이 아니고 빈 공백 문자가 아닌지 확인
             if (content != null && !content.trim().isEmpty()) {
 
                 System.out.println("현재 처리 중인 단어: " + content);
-                
+
                 // user_nationality에 따라 다르게 메시지 생성
                 List<Message> messages;
                 if ("Korea".equalsIgnoreCase(userNationality)) {
@@ -76,7 +82,7 @@ public class GPTService {
                             request,  // POST 요청의 본문에 포함될 데이터 (GPTRequest 객체)
                             GPTResponse.class // 응답을 변환할 클래스 타입 (GPTResponse 객체)
                     );
-                    
+
                     // GPT 응답에서 문제 파싱
                     if (gptResponse != null && gptResponse.getChoices() != null) {
                         String quizResponse = gptResponse.getChoices().get(0).getMessage().getContent();
@@ -98,7 +104,7 @@ public class GPTService {
     // GPT 메시지를 생성하는 메서드
     private List<Message> createMessagesJP(String content, int promptType) {
         String prompt;
-        
+
         switch (promptType) {
             case 1:
                 prompt =  content + "이라는 단어를 사용한 **새로운** 문제를 만들어 주세요. 일본어로만 구성해야 합니다 "
@@ -126,39 +132,38 @@ public class GPTService {
                         "{ \"content\": \"Sentence with ()\", \"options\": [ \"1. option1\", \"2. option2\", \"3. option3\", \"4. option4\" ], \"answer\": \"number of the correct answer\" }\n" +
                         "answer는 정답의 번호를 숫자로만 표기 해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요." +
                         "JLPT 니까 모두 일본어로만 구성 되어야 합니다" ;
+            break;
+
+
+            case 3:
+                prompt =
+                        content + "이라는 문법을 사용한 **새로운** 문제를 만들어 주세요. "
+                                + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
+                                + "밑줄의 단어의 의미와 가장 가까운 것을 고르는 JLPT 스타일의 4지선다 문제를 만들어 주세요. "
+                                + "문제 예시: \"子供向けの絵本に<u>ややこしい</u>説明はない。\" "
+                                + "객관식 예시: 1. 奇妙な  2. 複雑な  3. 簡潔な  4. 明確な "
+                                + "이 형식으로 문제를 만들어 주세요. "
+                                + "JSON 형식으로 다음과 같이 반환해 주세요: "
+                                + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
+                                + "반드시 줄 바꿈해서 보기 쉽게 보여주세요."
+                                + " **일본어로만 문제와 객관식을 만들어 주세요** "
+                                + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요.";        //문법
                 break;
 
 
 
-            case 3:
-            prompt =
-                    content + "이라는 문법을 사용한 **새로운** 문제를 만들어 주세요. "
-                            + "이 단어는 문제 문장이나 객관식 보기에 들어갈 수 있으며, 정답이 아니어도 괜찮습니다. "
-                            + "밑줄의 단어의 의미와 가장 가까운 것을 고르는 JLPT 스타일의 4지선다 문제를 만들어 주세요. "
-                            + "문제 예시: \"子供向けの絵本に<u>ややこしい</u>説明はない。\" "
-                            + "객관식 예시: 1. 奇妙な  2. 複雑な  3. 簡潔な  4. 明確な "
-                            + "이 형식으로 문제를 만들어 주세요. "
-                            + "JSON 형식으로 다음과 같이 반환해 주세요: "
-                            + "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"정답인것의 숫자만 표시\" } "
-                            + "반드시 줄바꿈해서 보기 쉽게 보여주세요."
-                            + " **일본어로만 문제와 객관식을 만들어 주세요** "
-                            + "응답에 한국어나 영어 또는 이상한 문자는 절대 포함되지 않도록 주의해 주세요.";        //문법
-            break;
+            default:
+                throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
+        }
 
-        
-
-        default:
-            throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
+        return List.of(new Message("user", prompt)); //프롬프트 내용들
     }
 
-    return List.of(new Message("user", prompt)); //프롬프트 내용들
-}
-    
-    
- // GPT 메시지를 생성하는 메서드
+
+    // GPT 메시지를 생성하는 메서드
     private List<Message> createMessagesKR(String content, int promptType) {
         String prompt;
-        
+
         switch (promptType) {
             case 1:
                 prompt =  content + "이라는 단어를 사용한 **새로운** 문제를 만들어 주세요. "
@@ -189,36 +194,48 @@ public class GPTService {
                 break;
 
 
-
             case 3:
-            prompt = content+ "이라는 단어를 사용한 **새로운** 한국어능력시험 스타일의 문제를 만들어 주세요. " +
-                            content + "을 사용하여 빈칸 채우기 문제를 만들어 주세요. " +
-                            "예를 들어, \"저는 매일 아침 (　　　) 운동을 합니다.\"와 같은 형식의 문제가 필요합니다. " +
-                            "빈칸에 " + content + "의 알맞은 형태가 무엇인지를 객관식 보기에서 고르는 문제입니다." +
-                            "객관식 보기는 4개 제공해 주세요. 예시는 1. 하는  2. 했다  3. 할  4. 하고 와 같이 작성해 주세요. " +
-                            "예시로 주어진 문장과 보기는 사용하지 말고, 새로운 문제와 보기를 작성하세요. " +
-                            "문제에는 반드시 빈칸이 있어야 합니다." +
-                            "문제에는 문맥상 자연스럽고 문법적으로 적절한 문장이 포함되어야 합니다. " +
-                            "그리고, 보기의 내용도 문맥상 자연스럽고 문법적으로 적절해야 합니다." +
-                            "문법 사용이 부자연스럽거나, 일상적인 대화에서 사용되지 않는 표현은 피해주세요. " +
-                            "모든 문제와 선택지는 반드시 한국어로 작성해 주세요." +
-                            "답안은 'answer' 필드에 1에서 4 사이의 숫자로 표시해 주세요. " +
-                            "문제의 빈칸에 답안을 넣었을 때, 문맥상으로 적절한 문장이어야 합니다." +
-                            "문제 형식은 다음과 같이 JSON 형식으로 만들어 주세요: " +
-                            "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"number of the correct answer\" } "
-                            + "answer는 정답의 번호를 숫자로만 표기 해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요.그리고 반드시 줄바꿈해서 보기 쉽게 보여주세요. "
-                            + "문제와 객관식은 한국어로만 작성해 주세요.**  일반 상식 문제는 포함하지 마세요.";        //문법
-            ;
-            break;
-              
-           
-            	
-        default:
-            throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
+                prompt = content+ "이라는 단어를 사용한 **새로운** 한국어능력시험 스타일의 문제를 만들어 주세요. " +
+                        content + "을 사용하여 빈칸 채우기 문제를 만들어 주세요. " +
+                        "예를 들어, \"저는 매일 아침 (　　　) 운동을 합니다.\"와 같은 형식의 문제가 필요합니다. " +
+                        "빈칸에 " + content + "의 알맞은 형태가 무엇인지를 객관식 보기에서 고르는 문제입니다." +
+                        "객관식 보기는 4개 제공해 주세요. 예시는 1. 하는  2. 했다  3. 할  4. 하고 와 같이 작성해 주세요. " +
+                        "예시로 주어진 문장과 보기는 사용하지 말고, 새로운 문제와 보기를 작성하세요. " +
+                        "문제에는 반드시 빈칸이 있어야 합니다." +
+                        "문제에는 문맥상 자연스럽고 문법적으로 적절한 문장이 포함되어야 합니다. " +
+                        "그리고, 보기의 내용도 문맥상 자연스럽고 문법적으로 적절해야 합니다." +
+                        "문법 사용이 부자연스럽거나, 일상적인 대화에서 사용되지 않는 표현은 피해주세요. " +
+                        "모든 문제와 선택지는 반드시 한국어로 작성해 주세요." +
+                        "답안은 'answer' 필드에 1에서 4 사이의 숫자로 표시해 주세요. " +
+                        "문제의 빈칸에 답안을 넣었을 때, 문맥상으로 적절한 문장이어야 합니다." +
+                        "문제 형식은 다음과 같이 JSON 형식으로 만들어 주세요: " +
+                        "{ \"content\": \"문제\", \"options\": [\"1번\", \"2번\", \"3번\", \"4번\"], \"answer\": \"number of the correct answer\" } "
+                        + "answer는 정답의 번호를 숫자로만 표기 해주세요. 그리고 지정된 형식 이외의 설명이나 추가 정보는 포함하지 마세요.그리고 반드시 줄바꿈해서 보기 쉽게 보여주세요. "
+                        + "문제와 객관식은 한국어로만 작성해 주세요.**  일반 상식 문제는 포함하지 마세요.";        //문법
+                ;
+                break;
+
+
+
+            default:
+                throw new IllegalArgumentException("잘못된 메시지 유형입니다.");
+        }
+
+        return List.of(new Message("user", prompt)); //프롬프트 내용들
+    }
+    // 문제를 저장하는 메서드
+    public void saveQuestionsToDatabase(List<String> questions, MemberEntity user) {
+        questions.forEach(question -> {
+            UserQuizQuestionReviewEntity reviewEntity = new UserQuizQuestionReviewEntity();
+            reviewEntity.setUser(user);  // 사용자 설정
+            reviewEntity.setQuizType(QuizType.daily);  // 퀴즈 타입 설정 (daily로 설정)
+            reviewEntity.setQuizContent(question);  // 퀴즈 내용 저장
+            reviewEntity.setQuizStatus(false);  // 초기 상태는 미완료로 설정
+
+            // 엔티티를 데이터베이스에 저장
+            userQuizQuestionReviewRepository.save(reviewEntity);
+        });
     }
 
-    return List.of(new Message("user", prompt)); //프롬프트 내용들
-}
-    
-    
+
 }

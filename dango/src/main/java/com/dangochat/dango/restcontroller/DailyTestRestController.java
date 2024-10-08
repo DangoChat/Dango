@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dangochat.dango.service.DailyQuizService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,7 @@ public class DailyTestRestController {
     private final GPTService gptService;
     private final StudyService studyService;
     private final MemberRepository memberRepository;
+    private final DailyQuizService dailyQuizService;
 
     @PostMapping("/start")
     public ResponseEntity<Map<String, Object>> startDailyTest(@RequestBody Map<String, Integer> payload) {
@@ -46,8 +49,11 @@ public class DailyTestRestController {
         List<String> studyContent = studyService.studyContentForToday(userId);
         Collections.shuffle(studyContent);
         log.debug("daily shuffled : {}", studyContent);
-        List<String> initialQuestions = generateDailyQuestions(studyContent, userNationality, 0,3);
+        List<String> initialQuestions = GenerateDailyQuestions(studyContent, userNationality, 0,3);
         log.info("초기 3개의 Daily 문제 생성 완료: {}", initialQuestions);
+
+        // 문제를 데이터베이스에 저장
+        dailyQuizService.saveQuestionsToDatabase(initialQuestions, member);
 
         Map<String, Object> response = new HashMap<>();
         response.put("questions", initialQuestions);
@@ -64,19 +70,24 @@ public class DailyTestRestController {
         int currentIndex = (Integer) payload.get("currentIndex");  // 현재 문제의 인덱스를 프론트에서 받아옴
         
         // currentIndex를 반영하여 다음 단어에서 문제 생성
-        List<String> newQuestions = generateDailyQuestions(studyContent, userNationality, currentIndex, 1);
+        List<String> newQuestions = GenerateDailyQuestions(studyContent, userNationality, currentIndex, 1);
         generatedQuestions.addAll(newQuestions);
-        
+
+        // 생성된 문제들을 데이터베이스에 저장
+        MemberEntity member = memberRepository.findById((Integer) payload.get("userId"))
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        dailyQuizService.saveQuestionsToDatabase(newQuestions, member);
+
         return ResponseEntity.ok(createResponse(generatedQuestions));
     }
     
-    private List<String> generateDailyQuestions(List<String> studyContent, String userNationality, int currentIndex, int count) {
+    private List<String> GenerateDailyQuestions(List<String> studyContent, String userNationality, int currentIndex, int count) {
         List<String> newQuestions = new ArrayList<>();
 
         try {
             int toIndex = Math.min(currentIndex + count, studyContent.size());
             if(toIndex > currentIndex){
-                newQuestions = gptService.generateGPTQuestions(studyContent.subList(currentIndex, toIndex), 1, count, userNationality);
+                newQuestions = dailyQuizService.GenerateGPTQuestions(studyContent.subList(currentIndex, toIndex), 1, count, userNationality);
             } else {
                 log.debug("학습 내용 끝");
             }

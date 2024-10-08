@@ -55,7 +55,6 @@ public class JLPTLevelupTestService {
         return List.of(new Message("user", questionPrompt));
     }
 
-
     // GPT에 문제 요청하고 만들어진 문제들을 반환하는 메서드
     public List<String> jlptGenerateQuestions(List<String> contentList, int numOfQuestions, String currentLevel) throws IOException {
         List<String> generatedQuestions = new ArrayList<>();
