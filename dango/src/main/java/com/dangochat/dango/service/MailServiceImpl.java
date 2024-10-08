@@ -18,75 +18,54 @@ import jakarta.mail.internet.MimeMessage;
 
 import java.io.UnsupportedEncodingException;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
 @Transactional
 public class MailServiceImpl implements MailService {
-    // MailConfig에서 등록해둔 Bean을 autowired하여 사용하기
     private final JavaMailSender emailSender;
-    private final MemberRepository memberRepository;
+    private final Map<String, String> verificationCodes = new HashMap<>(); // 이메일-인증 코드 매핑
 
     @Value("${naver.id}")
     private String id;
 
-
-    // 메일 발송
-    // sendSimpleMessage 의 매개변수 to는 이메일 주소가 되고,
-    // MimeMessage 객체 안에 내가 전송할 메일의 내용을 담는다
-    // bean으로 등록해둔 javaMail 객체를 사용하여 이메일을 발송한다
     @Override
     public String sendSimpleMessage(String to) throws Exception {
-        MimeMessage message = creatMessage(to); // "to" 로 메일 발송
+        String verificationCode = generateVerificationCode();
+        verificationCodes.put(to, verificationCode); // 메모리에 인증 코드 저장
+        System.out.println("make verify : " + verificationCode);
+        MimeMessage message = createMessage(to, verificationCode); 
         log.info("********생성된 메시지******** => " + message);
-        // 예외처리
         try {
-            // 이게 메일로 보내주는 메소드
             emailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException();
         }
-        return null;
+        return verificationCode;
     }
 
-    // 메일 내용 작성
-    private MimeMessage creatMessage(String to) throws MessagingException, UnsupportedEncodingException {
-        log.info("메일받을 사용자 : " + to);
-        MemberEntity entity = memberRepository.findByUserEmail(to);
-        String password = entity.getUserPassword();
-        String decryptedPassword = null;
-    
-        try {
-            // AESUtil을 사용하여 비밀번호 복호화
-            decryptedPassword = AESUtil.decrypt(password);
-        } catch (Exception e) {
-            log.error("비밀번호 복호화에 실패했습니다.", e);
-        }
+    private String generateVerificationCode() {
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(899999) + 100000; // 6자리 코드 생성
+        return String.valueOf(code);
+    }
+
+    private MimeMessage createMessage(String to, String verificationCode) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = emailSender.createMimeMessage();
         message.addRecipients(Message.RecipientType.TO, to);
-        // 이메일 제목
-        message.setSubject("관리자 회원가입을 위한 이메일 인증코드");
+        message.setSubject("Dango - 이메일 인증코드");
 
-        String msgg = "";
-        msgg += "<h1>안녕하세요</h1>";
-        msgg += "<h1>저희는 Dango 입니다</h1>";
-        msgg += "<br>";
-        msgg += "<br>";
-        msgg += "<div align='center' style='border:1px solid black'>";
-        msgg += "<h3 style='color:black'>" +  to + "님의 비밀번호입니다</h3>";
-        msgg += "<div style='font-size:130%'>";
-        msgg += "<strong>" + decryptedPassword + "</strong></div><br/>"; // 메일에 인증번호 ePw 넣기
-        // msgg += "<p>유효 시간: " + validityDuration.toMinutes() + "분 동안만 유효합니다.</p>";
-        msgg += "</div>";
-        // 메일 내용, charset타입, subtype
+        String msgg = "<h1>안녕하세요</h1>"
+                    + "<p>아래 인증 코드를 입력하여 이메일을 인증하세요:</p>"
+                    + "<h2>" + verificationCode + "</h2>";
         message.setText(msgg, "utf-8", "html");
-        // 보내는 사람의 이메일 주소, 보내는 사람 이름
         message.setFrom(id);
-        log.info("********creatMessage 함수에서 생성된 msgg 메시지********" + msgg);
-        log.info("********creatMessage 함수에서 생성된 리턴 메시지********" + message);
-
         return message;
     }
-
 }

@@ -18,6 +18,7 @@ import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.security.AESUtil;
 import com.dangochat.dango.security.AuthenticatedUser;
+import com.dangochat.dango.service.MailService;
 import com.dangochat.dango.service.MemberService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,9 @@ public class MemberRestController {
     private final AuthenticationManager authenticationManager;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final MailService mailService;
+
+    private final Map<String, String> verificationCodes = new HashMap<>(); // 이메일-인증 코드 매핑
 
     // 로그인 API
     @PostMapping("/login")
@@ -85,7 +89,19 @@ public class MemberRestController {
         }
     }
 
-
+    // 인증번호 전송 엔드포인트
+    @PostMapping("/send-verification")
+    public ResponseEntity<String> sendVerificationCode(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        try {
+            // 인증번호 생성 후 이메일 발송
+            String verificationCode = mailService.sendSimpleMessage(email);
+            verificationCodes.put(email, verificationCode); // 이메일과 인증 코드 매핑
+            return ResponseEntity.ok("인증번호가 전송되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증번호 전송에 실패했습니다.");
+        }
+    }
 
     // 회원가입 API
     @PostMapping("/join")
@@ -95,6 +111,21 @@ public class MemberRestController {
         memberService.join(member);
         
         return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String inputCode = payload.get("code");
+
+        String savedCode = verificationCodes.get(email);
+        System.out.println("check : " + savedCode + " " + inputCode);
+        if (savedCode == null || !savedCode.equals(inputCode)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 코드가 잘못되었습니다.");
+        }
+
+        verificationCodes.remove(email); // 인증 성공 후 코드 삭제
+        return ResponseEntity.ok("이메일 인증이 성공했습니다.");
     }
 
     @PostMapping("/mileage")

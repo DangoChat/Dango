@@ -254,9 +254,11 @@ public class StudyRestController {
         return studyService.getUserStudyDates(userId);
     }
     
-    @GetMapping("/studyReviewByDateAndType")
-    public List<UserStudyContentDTO> studyReviewByDateAndType(@RequestParam("date") String date, @RequestParam("type") String type, @AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
+    @PostMapping("/studyReviewByDateAndType")
+    public List<UserStudyContentDTO> studyReviewByDateAndType(@RequestBody Map<String, Object> payload) {
+        int userId = (Integer) payload.get("userId");
+        String date = (String) payload.get("date");
+        String type = (String) payload.get("type");
         
         // String을 java.sql.Date로 변환
         LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));

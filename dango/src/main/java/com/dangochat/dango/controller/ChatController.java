@@ -8,6 +8,8 @@ import com.dangochat.dango.dto.chatDTOs.ChatRoomResponse.ChatRoomUserResponse;
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatMessageJpaEntity;
 import com.dangochat.dango.entity.ChatEntitys.ChatRoomJpaEntity;
+import com.dangochat.dango.repository.MemberRepository;
+import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.ChatServices.ChatMessageService;
 import com.dangochat.dango.service.ChatServices.ChatRoomService;
 
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 public class ChatController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
+    private final MemberService memberService;
 
     /**
      * STOMP를 사용하여 채팅방에 메시지 전송
@@ -59,6 +62,8 @@ public class ChatController {
                 .receiver(chatMessageService.getUserById(command.to()))
                 .build()
         );
+        memberService.updateMileage(command.from(), -5);
+        System.out.println("mileage done??? "+ memberService.getUserMileage(command.from()));
 
         // 메시지 응답 생성 및 반환
         return ChatMessageResponse.builder()
