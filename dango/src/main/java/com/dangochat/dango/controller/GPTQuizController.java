@@ -257,7 +257,7 @@ public class GPTQuizController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadDailyWordTestQuestions(session/*, 1, 3, userId,userNationality*/);  // 첫 번째 문제에서 3개의 문제 생성
+        loadDailyWordTestQuestions(session, 1, 3, userId,userNationality);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         // 첫 번째 문제를 가져와서 화면에 표시
@@ -273,7 +273,7 @@ public class GPTQuizController {
     }
     
 
-    
+ /*   
     private void loadDailyWordTestQuestions(HttpSession session) {
         // user_quiz_question_review 테이블에서 특정 user_quiz_question_id에 해당하는 데이터 가져오기
         List<Integer> quizQuestionIds = Arrays.asList(14, 15, 16, 17, 19, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56); // 특정 ID 리스트
@@ -296,8 +296,8 @@ public class GPTQuizController {
             log.error("퀴즈 문제를 가져오지 못했습니다.", e);
         }
     }
-
-/*    
+*/
+    
     // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
     private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
@@ -324,7 +324,7 @@ public class GPTQuizController {
             log.error("단어 문제가 생성되지 않았습니다.", e);
         }
     }
-*/
+
 
 
     @PostMapping("/dailyWordTest/next")
