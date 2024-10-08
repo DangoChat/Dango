@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import com.dangochat.dango.dto.GPTChatResponse;
 import com.dangochat.dango.dto.GPTRequest;
@@ -41,8 +43,8 @@ public class GameWordRelayRestController {
 
     // 끝말잇기 게임을 시작하는 엔드포인트
     @PostMapping("/start")
-    public ResponseEntity<String> startGame(@AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException {
-        int userId = userDetails.getId();  // 인증된 사용자의 ID 가져오기
+    public ResponseEntity<String> startGame(@RequestBody Map<String, Integer> payload) throws IOException {
+        int userId = payload.get("userId");  // 인증된 사용자의 ID 가져오기
         String userNationality = memberService.findUserNationalityById(userId);  // 사용자 국적 확인
 
         // 대화 기록 및 플래그 초기화
@@ -86,9 +88,10 @@ public class GameWordRelayRestController {
 
     // 사용자의 단어를 GPT에 전달하고 응답을 받는 엔드포인트
     @PostMapping("/relay")
-    public ResponseEntity<String> relayWord(@RequestParam("word") String word, @AuthenticationPrincipal AuthenticatedUser userDetails) throws IOException {
+    public ResponseEntity<String> relayWord(@RequestBody Map<String, String> payload) throws IOException {
+        System.out.println("Relay");
+        String word = payload.get("word");
         conversationHistory.add(new Message("user", word));  // 사용자의 단어를 대화 기록에 추가
-
         // GPT에게 보낼 요청 생성
         String prompt = "단어만 보내줘. 설명은 필요 없어, 단어만.";
         GPTRequest request = new GPTRequest(model, conversationHistory, prompt, 1, 256, 1, 2, 2);
@@ -110,10 +113,9 @@ public class GameWordRelayRestController {
     // 게임 결과를 서버에 전송하여 마일리지 및 랭킹을 업데이트하는 엔드포인트
     @PostMapping("/result")
     public ResponseEntity<String> updateMileageAndRanking(
-            @AuthenticationPrincipal AuthenticatedUser userDetails,
-            @RequestParam("gameScore") int gameScore) {
-
-        int userId = userDetails.getId();  // 로그인된 사용자 ID 가져오기
+            @RequestBody Map<String, Integer> payload) {
+        int userId = payload.get("userId");
+        int gameScore = payload.get("gameScore");
 
         try {
             // 마일리지 업데이트 (중복 방지 처리)
