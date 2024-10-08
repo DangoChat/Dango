@@ -16,4 +16,5 @@ public interface UserQuizQuestionReviewRepository extends JpaRepository<UserQuiz
 	@Query("SELECT q FROM UserQuizQuestionReviewEntity q WHERE q.quizType = :quizType AND q.user.id = :userId")
 	List<UserQuizQuestionReviewEntity> findByQuizTypeAndUserId(@Param("quizType") QuizType quizType, @Param("userId") int userId);
 	
+	 List<UserQuizQuestionReviewEntity> findByUserQuizQuestionIdIn(List<Integer> ids);
 }

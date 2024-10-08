@@ -8,6 +8,9 @@ import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.repository.StudyRepository;
 import com.dangochat.dango.repository.UserQuizQuestionReviewRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -37,5 +40,9 @@ public class userQuizQuestionReviewService {
 
 	        // 엔티티 저장
 	        userQuizQuestionReviewRepository.save(review);  // 엔티티를 데이터베이스에 저장
+	    }
+
+	    public List<UserQuizQuestionReviewEntity> findQuizContentByIds(List<Integer> ids) {
+	        return userQuizQuestionReviewRepository.findByUserQuizQuestionIdIn(ids);
 	    }
 }

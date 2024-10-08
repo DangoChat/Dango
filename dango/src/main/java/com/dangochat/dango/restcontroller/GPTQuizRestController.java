@@ -3,6 +3,7 @@ package com.dangochat.dango.restcontroller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.entity.MemberEntity;
+import com.dangochat.dango.entity.UserQuizQuestionReviewEntity;
 import com.dangochat.dango.repository.MemberRepository;
 import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.GPTQuizService;
 import com.dangochat.dango.service.GPTService;
 import com.dangochat.dango.service.StudyService;
+import com.dangochat.dango.service.userQuizQuestionReviewService;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
@@ -39,6 +42,7 @@ public class GPTQuizRestController {
     private final GPTQuizService gptQuizService;
     private final StudyService studyService;
     private final MemberRepository memberRepository;
+    private final userQuizQuestionReviewService userQuizQuestionReviewService;
 
     // 첫 번째 단어 문제를 시작하는 API
     @GetMapping("/dailyWordTest/1")
@@ -57,7 +61,7 @@ public class GPTQuizRestController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadDailyWordTestQuestions(session, 1, 3, userId, userNationality);  // 첫 번째 문제에서 3개의 문제 생성
+        loadDailyWordTestQuestions(session/*, 1, 3, userId, userNationality*/);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
@@ -73,13 +77,38 @@ public class GPTQuizRestController {
     }
 
     // '단어'만 가져올 수 있도록 기존의 loadInitialListeningQuestions 수정
-    private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId, String userNationality) {
-        // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
-        List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가져온다
-        System.out.println("Study content: " + studyContent);
-
+    private void loadDailyWordTestQuestions(HttpSession session) {
+        // user_quiz_question_review 테이블에서 특정 user_quiz_question_id에 해당하는 데이터 가져오기
+        List<Integer> quizQuestionIds = Arrays.asList(14, 15, 16, 17, 19, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56); // 특정 ID 리스트
         List<String> generatedQuestions = new ArrayList<>();
-        int word = 2; // 서비스에 단어 관련 문제를 요청하는 정수
+
+        try {
+            // QuizContentService를 통해 데이터베이스에서 퀴즈 콘텐츠를 가져옴
+            List<UserQuizQuestionReviewEntity> quizQuestions = userQuizQuestionReviewService.findQuizContentByIds(quizQuestionIds);
+
+            // 가져온 quiz_content를 generatedQuestions 리스트에 추가
+            for (UserQuizQuestionReviewEntity question : quizQuestions) {
+                generatedQuestions.add(question.getQuizContent());
+            }
+
+            // 세션에 generatedQuestions 저장
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("user_quiz_question_review 테이블에서 가져온 문제: {}", generatedQuestions);
+
+        } catch (Exception e) {
+            log.error("퀴즈 문제를 가져오지 못했습니다.", e);
+        }
+    }
+
+    /*    
+    // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadDailyWordTestQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
+        // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
+        List<String> studyContent = studyService.getTodayWordContent(userId); // '단어' 타입 콘텐츠만 가저온다
+        System.out.println("Study content: " + studyContent);
+        
+        List<String> generatedQuestions = new ArrayList<>();
+        int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
 
@@ -87,7 +116,7 @@ public class GPTQuizRestController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex), word, count, userNationality);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
@@ -98,7 +127,8 @@ public class GPTQuizRestController {
             log.error("단어 문제가 생성되지 않았습니다.", e);
         }
     }
-
+*/
+    
     // 다음 문제로 이동하는 API
     @PostMapping("/dailyWordTest/next")
     public ResponseEntity<Map<String, Object>> nextDailyWordTestQuestion(HttpSession session) {
@@ -208,7 +238,7 @@ public class GPTQuizRestController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadDailyGrammarTestQuestions(session, 1, 3, userId, userNationality);  // 첫 번째 문제에서 3개의 문제 생성
+        loadDailyGrammarQuestions(session/*, 1, 3, userId,userNationality*/);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
@@ -223,6 +253,30 @@ public class GPTQuizRestController {
         return ResponseEntity.ok(response);  // JSON으로 반환
     }
 
+    private void loadDailyGrammarQuestions(HttpSession session) {
+        // user_quiz_question_review 테이블에서 특정 user_quiz_question_id에 해당하는 데이터 가져오기
+        List<Integer> quizQuestionIds = Arrays.asList(20, 21, 22, 23, 24, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76); // 특정 ID 리스트
+        List<String> generatedQuestions = new ArrayList<>();
+
+        try {
+            // QuizContentService를 통해 데이터베이스에서 퀴즈 콘텐츠를 가져옴
+            List<UserQuizQuestionReviewEntity> quizQuestions = userQuizQuestionReviewService.findQuizContentByIds(quizQuestionIds);
+
+            // 가져온 quiz_content를 generatedQuestions 리스트에 추가
+            for (UserQuizQuestionReviewEntity question : quizQuestions) {
+                generatedQuestions.add(question.getQuizContent());
+            }
+
+            // 세션에 generatedQuestions 저장
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("user_quiz_question_review 테이블에서 가져온 문제: {}", generatedQuestions);
+
+        } catch (Exception e) {
+            log.error("퀴즈 문제를 가져오지 못했습니다.", e);
+        }
+    }
+    
+/*    
     // '문법'만 가져올 수 있도록 
     private void loadDailyGrammarTestQuestions(HttpSession session, int startIndex, int count, int userId, String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
@@ -249,7 +303,7 @@ public class GPTQuizRestController {
             log.error("단어 문제가 생성되지 않았습니다.", e);
         }
     }
-
+*/
     // 다음 문제로 이동하는 API
     @PostMapping("/dailyGrammarTest/next")
     public ResponseEntity<Map<String, Object>> nextDailyGrammarTestQuestion(HttpSession session) {
@@ -358,7 +412,7 @@ public class GPTQuizRestController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadWeeklyWordTestQuestions(session, 1, 3, userId, userNationality);  // 첫 번째 문제에서 3개의 문제 생성
+        loadWeeklyWordQuestions(session/*, 1, 3, userId,userNationality*/);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
@@ -373,14 +427,38 @@ public class GPTQuizRestController {
         return ResponseEntity.ok(response);  // JSON으로 반환
     }
 
-    // '단어'만 가져올 수 있도록
-    private void loadWeeklyWordTestQuestions(HttpSession session, int startIndex, int count, int userId, String userNationality) {
+    private void loadWeeklyWordQuestions(HttpSession session) {
+        // user_quiz_question_review 테이블에서 특정 user_quiz_question_id에 해당하는 데이터 가져오기
+        List<Integer> quizQuestionIds = Arrays.asList(26, 27, 28,  29, 30, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66); // 특정 ID 리스트
+        List<String> generatedQuestions = new ArrayList<>();
+
+        try {
+            // QuizContentService를 통해 데이터베이스에서 퀴즈 콘텐츠를 가져옴
+            List<UserQuizQuestionReviewEntity> quizQuestions = userQuizQuestionReviewService.findQuizContentByIds(quizQuestionIds);
+
+            // 가져온 quiz_content를 generatedQuestions 리스트에 추가
+            for (UserQuizQuestionReviewEntity question : quizQuestions) {
+                generatedQuestions.add(question.getQuizContent());
+            }
+
+            // 세션에 generatedQuestions 저장
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("user_quiz_question_review 테이블에서 가져온 문제: {}", generatedQuestions);
+
+        } catch (Exception e) {
+            log.error("퀴즈 문제를 가져오지 못했습니다.", e);
+        }
+    }
+   
+/*   
+    // '단어'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadWeeklyWordQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
-        List<String> studyContent = studyService.getWeekWordContent(userId); // '단어' 타입 콘텐츠만 가져온다
+        List<String> studyContent = studyService.getWeekWordContent(userId); // '단어' 타입 콘텐츠만 가저온다 (주간)
         System.out.println("Study content: " + studyContent);
 
         List<String> generatedQuestions = new ArrayList<>();
-        int word = 2; // 서비스에 단어 관련 문제를 요청하는 정수
+        int word = 2; // 서비스에 단어관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
 
@@ -388,17 +466,18 @@ public class GPTQuizRestController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex), word, count, userNationality);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),word,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
 
             session.setAttribute("generatedQuestions", generatedQuestions);
-            log.info("초기 생성된 {}개의 단어 문제: {}", count, generatedQuestions);
+            log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
-            log.error("단어 문제가 생성되지 않았습니다.", e);
+            log.error("청해 문제가 생성되지 않았습니다.", e);
         }
     }
+*/
     
     // 다음 문제로 이동하는 API
     @PostMapping("/weeklyWordTest/next")
@@ -507,7 +586,7 @@ public class GPTQuizRestController {
 
         // 3개의 문제를 미리 생성해서 세션에 저장
         log.info("초기 3개의 문제 생성 시작.");
-        loadWeeklyGrammarTestQuestions(session, 1, 3, userId, userNationality);  // 첫 번째 문제에서 3개의 문제 생성
+        loadWeeklyGrammarQuestions(session/*, 1, 3, userId,userNationality*/);  // 첫 번째 문제에서 3개의 문제 생성
         log.info("초기 3개의 문제 생성 완료.");
 
         List<String> generatedQuestions = (List<String>) session.getAttribute("generatedQuestions");
@@ -522,14 +601,39 @@ public class GPTQuizRestController {
         return ResponseEntity.ok(response);  // JSON으로 반환
     }
 
-    // '문법'만 가져올 수 있도록 
-    private void loadWeeklyGrammarTestQuestions(HttpSession session, int startIndex, int count, int userId, String userNationality) {
+    private void loadWeeklyGrammarQuestions(HttpSession session) {
+        // user_quiz_question_review 테이블에서 특정 user_quiz_question_id에 해당하는 데이터 가져오기
+        List<Integer> quizQuestionIds = Arrays.asList(31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46); // 특정 ID 리스트
+        List<String> generatedQuestions = new ArrayList<>();
+
+        try {
+            // QuizContentService를 통해 데이터베이스에서 퀴즈 콘텐츠를 가져옴
+            List<UserQuizQuestionReviewEntity> quizQuestions = userQuizQuestionReviewService.findQuizContentByIds(quizQuestionIds);
+
+            // 가져온 quiz_content를 generatedQuestions 리스트에 추가
+            for (UserQuizQuestionReviewEntity question : quizQuestions) {
+                generatedQuestions.add(question.getQuizContent());
+            }
+
+            // 세션에 generatedQuestions 저장
+            session.setAttribute("generatedQuestions", generatedQuestions);
+            log.info("user_quiz_question_review 테이블에서 가져온 문제: {}", generatedQuestions);
+
+        } catch (Exception e) {
+            log.error("퀴즈 문제를 가져오지 못했습니다.", e);
+        }
+    }
+    
+    
+ /*   
+    // '문법'만 가저올 수 있도록 기존의 loadInitialListeningQuestions 수정
+    private void loadWeeklyGrammarQuestions(HttpSession session, int startIndex, int count, int userId,String userNationality) {
         // 유저의 학습 콘텐츠를 가져오기 위해 studyService 사용
-        List<String> studyContent = studyService.getWeekGrammarContent(userId); // '문법' 타입 콘텐츠만 가져온다
+        List<String> studyContent = studyService.getWeekGrammarContent(userId); // '문법' 타입 콘텐츠만 가저온다
         System.out.println("Study content: " + studyContent);
 
         List<String> generatedQuestions = new ArrayList<>();
-        int Grammar = 3; // 서비스에 단어 관련 문제를 요청하는 정수
+        int grammar = 3; // 서비스에 문법관련 문제를 요청하는 정수
         try {
             int messageType = (int) session.getAttribute("currentMessageType");  // 명시적 형변환
 
@@ -537,17 +641,18 @@ public class GPTQuizRestController {
             int endIndex = Math.min(startIndex - 1 + count, studyContent.size());
             // subList 범위가 리스트 크기를 넘지 않도록 안전하게 처리
             if (startIndex - 1 < studyContent.size()) {
-                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex), Grammar, count, userNationality);
+                generatedQuestions = gptService.generateGPTQuestions(studyContent.subList(startIndex - 1, endIndex),grammar,count,userNationality);
             } else {
                 log.warn("startIndex가 studyContent의 크기를 초과했습니다.");
             }
 
             session.setAttribute("generatedQuestions", generatedQuestions);
-            log.info("초기 생성된 {}개의 문법 문제: {}", count, generatedQuestions);
+            log.info("초기 생성된 {}개의 청해 문제: {}", count, generatedQuestions);
         } catch (Exception e) {
-            log.error("단어 문제가 생성되지 않았습니다.", e);
+            log.error("청해 문제가 생성되지 않았습니다.", e);
         }
     }
+*/
 
     // 다음 문제로 이동하는 API
     @PostMapping("/weeklyGrammarTest/next")
