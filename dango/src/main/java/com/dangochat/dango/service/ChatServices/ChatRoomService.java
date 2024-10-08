@@ -77,4 +77,20 @@ public class ChatRoomService {
     
         return chatRoom.getRoomId();
     }
+    public MemberEntity findUserById(int userId) {
+        return memberRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    }
+
+    // 새 채팅방을 생성하는 메서드
+    public Long createNewChatRoom(String roomName) {
+        ChatRoomJpaEntity chatRoom = ChatRoomJpaEntity.builder()
+            .roomName(roomName)
+            .build();
+        
+        // 새 채팅방을 저장
+        chatRoomRepository.save(chatRoom);
+        return chatRoom.getRoomId();
+    }
+
 }

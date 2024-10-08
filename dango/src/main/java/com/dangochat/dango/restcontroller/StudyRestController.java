@@ -58,6 +58,26 @@ public class StudyRestController {
         System.out.println("studyContent constnet : " + studyContent);
         return studyContent;
     }
+    @PostMapping("/word/levelN3")
+    public List<StudyDTO> getN3Words(@RequestBody Map<String, Object> payload) {
+        int userId = (Integer) payload.get("userId"); // userId 추출
+        String type = "단어"; // 단어를 고정하여 단어 데이터만 가져오도록 설정
+        
+        log.debug("User ID: {}, Type: {}, Level: N3", userId, type);
+        
+        // N3 단어 데이터 가져오기
+        List<StudyDTO> studyContent = studyService.getRandomStudyContentByLevelAndType("N3", type, userId)
+                .stream()
+                .map(studyEntity -> StudyDTO.builder()
+                        .studyContentId(studyEntity.getStudyContentId())
+                        .content(studyEntity.getContent())
+                        .pronunciation(studyEntity.getPronunciation())
+                        .meaning(studyEntity.getMeaning())
+                        .build())
+                .collect(Collectors.toList());
+
+        return studyContent;
+    }
 
     // O, X를 누를 때 유저 공부 기록으로 보내는 기능.
     @PostMapping("/answer")

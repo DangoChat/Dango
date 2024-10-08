@@ -95,8 +95,14 @@ public class MemberService {
         if (!previousOriginalLevel.equals(originalLevel)) {
         	resetUserCompletionRatePoints(userId);  // total_points 초기화
         }
-        
-        
+    }
+
+    public void updateLeveTest(Integer userId, String currentLevel, String originalLevel){
+        MemberEntity member = memberRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        member.setCurrentLevel(currentLevel);
+        member.setOriginalLevel(originalLevel);
+        memberRepository.save(member);
     }
 
     

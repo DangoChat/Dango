@@ -68,7 +68,7 @@ public class JLPTLevelupTestRestController {
         String level = (String) payload.get("level");
         int userId = (int) payload.get("userId");
 
-        memberService.updateUserLevels(userId, level, level);
+        memberService.updateLeveTest(userId, level, level);
         return level + "updated";
     }
     
