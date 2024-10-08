@@ -44,8 +44,6 @@ public class GPTController {
     // 이전 대화를 저장하는 리스트 (임시로 메모리에 저장)
     private List<Message> conversationHistory = new ArrayList<>();
 
-    
-    
     @GetMapping("chat")
     public String chat(@RequestParam("prompt") String prompt) throws IOException, MessagingException {
 

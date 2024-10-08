@@ -124,9 +124,6 @@ public class StudyService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid study content ID: " + studyContentId));
         String userNationality = user.getUserNationality();
         
-        
-        
-        
         UserStudyContentEntity userStudyContent = new UserStudyContentEntity();
         userStudyContent.setUser(user);
         userStudyContent.setStudyContent(studyContent);
@@ -168,9 +165,7 @@ public class StudyService {
         // 변경된 마일리지 정보 저장
         memberRepository.save(user);
         
-        
-        
-     // 달성 포인트 누적 로직
+        // 달성 포인트 누적 로직   
         int achievementPoints = 0;
         if ("Korea".equalsIgnoreCase(userNationality) && isCorrect) {
             switch (originalLevel) {
@@ -195,7 +190,24 @@ public class StudyService {
 
         // 포인트 누적
         if (achievementPoints > 0) {
-            userCompletionRateRepository.updatePoints(userId, achievementPoints);
+            // 포인트를 누적한 적이 있다면 
+            if(userCompletionRateRepository.findByUser_UserId(userId).isPresent()){
+                userCompletionRateRepository.updatePoints(userId, achievementPoints);
+                System.out.println("achievement update 되는 중..." + achievementPoints + "userId : ," + userId);
+            }
+            // 포인트를 처음으로 누적하는 것이라면 
+            else{
+                UserCompletionRateEntity entity = UserCompletionRateEntity.builder()
+                    .user(user)
+                    .weeklyPoints(achievementPoints)
+                    .totalPoints(achievementPoints)
+                    .completionDate(LocalDateTime.now())
+                    .build();
+                userCompletionRateRepository.save(entity);
+                System.out.println("achievement save 되는 중..." + achievementPoints + "userId : ," + userId);
+            }
+            // // userCompletionRateRepository.updatePoints(userId, achievementPoints);
+            // System.out.println("achievement : 되는 중..." + achievementPoints + "userId : ," + userId);
         }
     }
 

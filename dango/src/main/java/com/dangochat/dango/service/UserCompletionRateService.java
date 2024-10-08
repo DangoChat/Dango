@@ -17,9 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserCompletionRateService {
 
 	private final UserCompletionRateRepository userCompletionRateRepository;
-
-	
-	
 	 // 특정 사용자의 completion rate 기록 조회
     public Optional<UserCompletionRateEntity> getCompletionRatesByUserId(int userId) {
         log.info("Fetching completion rates for userId: {}", userId);

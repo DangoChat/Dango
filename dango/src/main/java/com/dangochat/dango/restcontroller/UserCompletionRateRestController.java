@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.UserCompletionRateEntity;
-import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.UserCompletionRateService;
 
@@ -23,16 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/CompletionRate")  // REST API에서는 보통 /api를 사용
+@RequestMapping("/api/member")  // REST API에서는 보통 /api를 사용
 public class UserCompletionRateRestController {
 
     private final UserCompletionRateService userCompletionRateService;
     private final MemberService memberService;
 
-    @GetMapping("/CompletionRateData")
-    public ResponseEntity<Map<String, Object>> getCompletionRateData(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+    @PostMapping("/CompletionRateData")
+    public ResponseEntity<Map<String, Object>> getCompletionRateData(@RequestBody Map<String, Integer> payload) {
         // 로그인한 유저의 ID 가져오기
-        int userId = userDetails.getId();
+        int userId = payload.get("userId");
 
         // 해당 유저의 completion rate 데이터 가져오기
         Optional<UserCompletionRateEntity> completionRateOpt = userCompletionRateService.getCompletionRatesByUserId(userId);

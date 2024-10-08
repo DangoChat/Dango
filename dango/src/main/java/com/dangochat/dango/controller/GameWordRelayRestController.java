@@ -50,12 +50,24 @@ public class GameWordRelayRestController {
         mileageUpdated = false;
         rankingUpdated = false;
 
-        // GPT에게 보낼 첫 번째 요청 메시지 생성
-        String prompt = userNationality + "어 단어로 끝말잇기 하자. 너는 " +
-                userNationality + "어 단어만 보내줘. 설명은 하지 말고 단어만 보내. 규칙은 다음과 같아." +
-                "사전에 등록된 명사만 사용할 수 있고, 한 글자는 사용하면 안돼 그리고 이미 나온 단어는 말하면 안 돼." +
-                "만약 내가 규칙을 위반하면 바로 'YOU LOSE'라고 말해줘. 너가 먼저 시작해줘 그리고 너는 사전에 있는 단어를 이용해서 " +
-                "내 끝말을 이어줘 내가 규칙을 위반하면 바로 'YOU LOSE'보내줘 ";
+        //대소문자 모두 동일하게 처리해서 국적이 japan이면 korea language 로 끝말잇기 할 수 있게 만듬
+        if (userNationality.equalsIgnoreCase("korea")) {
+            userNationality = "japan";
+        } else if (userNationality.equalsIgnoreCase("japan")) {
+            userNationality = "korea";
+        }
+
+        log.info("Updated userNationality: {}", userNationality);
+
+        String prompt = userNationality + " 언어로 끝말잇기 게임을 시작하자. 너는 " +
+                userNationality + " 단어만 보내줘. 설명하지 말고, 단어만 보내. 규칙은 다음과 같아. " +
+                "네이버에서 검색 가능한 명사만 사용할 수 있고, 한 글자 단어는 사용할 수 없어. 이미 사용된 단어를 반복해서도 안 돼. " +
+                "또한, 단어가 'ん'으로 끝나면 그 앞의 음절을 사용해서 이어갈 수 있어 (예: 'しんぶん'이면 'ぶん'). " +
+                "만약 내가 규칙을 어기면 바로 'YOU LOSE'라고 말해줘. 너가 먼저 시작해줘. 너는 네이버에서 검색할 수 있는 단어를 사용해서 " +
+                "내 마지막 단어를 이어줘. 내가 규칙을 어기면 'YOU LOSE'라고 보내줘.";
+
+
+        log.info("Generated prompt: {}", prompt);
 
         // 대화 기록에 메시지 추가
         conversationHistory.add(new Message("user", prompt));
