@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Completion Rate Rank</title>
+    <script>
+        // 페이지가 로드되었을 때 API를 호출하여 순위를 가져오는 함수
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchUserRank();
+        });
+
+        function fetchUserRank() {
+            fetch('/api/member/rank')  // 엔드포인트 수정
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // JSON 데이터에서 순위 정보를 추출하여 화면에 표시
+                    document.getElementById("userRank").textContent = data.userRank;
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>현재 순위</h1>
+    <p>현재 로그인한 사용자의 순위: <span id="userRank"></span>위</p>
+</body>
+</html>

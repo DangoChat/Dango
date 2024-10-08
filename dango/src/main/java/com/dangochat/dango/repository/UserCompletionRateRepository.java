@@ -29,5 +29,9 @@ public interface UserCompletionRateRepository extends JpaRepository<UserCompleti
 	
 	// 유저 ID로 completion_rate 레코드 조회
 	Optional<UserCompletionRateEntity> findByUser_UserId(int userId);
+	
+	
+	 // weekly_points를 기준으로 내림차순으로 모든 레코드를 조회하는 메서드
+    List<UserCompletionRateEntity> findAllByOrderByWeeklyPointsDesc();
 }
 

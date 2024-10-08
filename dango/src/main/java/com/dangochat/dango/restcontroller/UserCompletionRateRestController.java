@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.UserCompletionRateEntity;
+import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.UserCompletionRateService;
 
@@ -105,4 +108,19 @@ public class UserCompletionRateRestController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    
+    @GetMapping("/rank")
+    public ResponseEntity<Map<String, Object>> getUserRank(@AuthenticationPrincipal AuthenticatedUser userDetails) {
+        int userId = userDetails.getId();
+        int userRank = userCompletionRateService.getUserRank(userId);
+
+        // 응답 데이터 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", userId);
+        response.put("userRank", userRank);
+
+        return ResponseEntity.ok(response);
+    }
+    
 }

@@ -35,4 +35,13 @@ public class UserCompletionRateController {
 	
 	
 	
+	 @GetMapping("/rank")
+	    public String getUserRank(@AuthenticationPrincipal AuthenticatedUser userDetails, Model model) {
+	       
+	        return "CompletionRateView/rankView";
+	    }
+	 
+	 
+	 
+	 
 }

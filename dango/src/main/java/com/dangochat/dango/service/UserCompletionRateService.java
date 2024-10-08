@@ -22,6 +22,20 @@ public class UserCompletionRateService {
         log.info("Fetching completion rates for userId: {}", userId);
         return userCompletionRateRepository.findByUser_UserId(userId);
     }
+    
+    
+    
+    public int getUserRank(int userId) {
+        List<UserCompletionRateEntity> rankings = userCompletionRateRepository.findAllByOrderByWeeklyPointsDesc();
+
+        // 현재 로그인한 사용자의 순위 찾기
+        for (int i = 0; i < rankings.size(); i++) {
+            if (rankings.get(i).getUser().getUserId() == userId) { // 수정된 부분
+                return i + 1; // 순위는 1부터 시작
+            }
+        }
+        return -1; // 사용자가 순위에 없을 경우 -1 반환
+    }
 	
 	
 }
