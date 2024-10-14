@@ -15,23 +15,17 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface UserCompletionRateRepository extends JpaRepository<UserCompletionRateEntity, Integer> {
-    
-	 
 	@Modifying
 	@Transactional
 	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.weeklyPoints = ucr.weeklyPoints + :points, ucr.totalPoints = ucr.totalPoints + :points WHERE ucr.user.userId = :userId")
 	void updatePoints(@Param("userId") int userId, @Param("points") int points);
-
 	@Modifying
 	@Transactional
 	@Query("UPDATE UserCompletionRateEntity ucr SET ucr.totalPoints = 0, ucr.weeklyPoints = 0 WHERE ucr.user.userId = :userId")
 	void resetPointsByUserId(@Param("userId") Integer userId);
-	
 	// 유저 ID로 completion_rate 레코드 조회
 	Optional<UserCompletionRateEntity> findByUser_UserId(int userId);
-	
-	
-	 // weekly_points를 기준으로 내림차순으로 모든 레코드를 조회하는 메서드
+	// weekly_points를 기준으로 내림차순으로 모든 레코드를 조회하는 메서드
     List<UserCompletionRateEntity> findAllByOrderByWeeklyPointsDesc();
 }
 

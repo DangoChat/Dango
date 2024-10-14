@@ -32,7 +32,10 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_URLS = {
             "/", "/images/**", "/css/**", "/js/**", "/member/joinForm", "/member/join", 
             "/member/idCheck", "/member/passwordSearch", "/miynnn", "/honeybitterchip", 
-            "/leean", "/hyeonmin", "/study/**", "/mail/**", "/api/member/**", "/api/study/**", "/api/quiz/**"
+            "/leean", "/hyeonmin", "/study/**", "/mail/**", "/api/member/**", "/api/study/**", 
+            "/api/quiz/**", "/api/OMiKuZi/**", "/chat/**", "/api/chat/**", "/topic/**", "/ws/**",
+            "/api/gptChat/**", "/api/game/**", "/api/**", "/member/**"
+
     };
 
     @Bean
@@ -45,7 +48,7 @@ public class WebSecurityConfig {
                 .requestMatchers(PUBLIC_URLS).permitAll()   // 모두 접근 허용
                 .anyRequest().authenticated()               // 나머지 요청은 인증 필요
             )
-             .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
+            //  .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
                 // .httpBasic(Customizer.withDefaults())           // HTTP Basic 인증 사용
 
@@ -59,14 +62,14 @@ public class WebSecurityConfig {
                 //          .permitAll()
                 //  )
              // 폼 로그인 설정 유지
-             .formLogin(formLogin -> formLogin
-                     .loginPage("/member/loginForm")
-                     .usernameParameter("userEmail")
-                     .passwordParameter("userPassword")
-                     .loginProcessingUrl("/member/login")
-                     .defaultSuccessUrl("/")
-                     .permitAll()
-             )
+            //  .formLogin(formLogin -> formLogin
+            //          .loginPage("/member/loginForm")
+            //          .usernameParameter("userEmail")
+            //          .passwordParameter("userPassword")
+            //          .loginProcessingUrl("/member/login")
+            //          .defaultSuccessUrl("/")
+            //          .permitAll()
+            //  )
             .logout(logout -> logout
                     .logoutUrl("/logout")
                     // .logoutSuccessUrl("https://scit45dango.site/") // 서버 환경의 경우
@@ -95,6 +98,7 @@ public class WebSecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             // .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))  // REST API 경로는 CSRF 비활성화
             .cors(Customizer.withDefaults());  // CORS 설정 활성화
+            // .cors(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -103,7 +107,9 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins)); // 프로파일에 따라 도메인 설정
+        // configuration.setAllowedOrigins(Arrays.asList(allowedOrigins)); // 프로파일에 따라 도메인 설정
+        // configuration.setAllowedOrigins(Arrays.asList("*")); // 모든 출처 허용 (개발용으로만 사용)
+        configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true); // 자격 증명 허용

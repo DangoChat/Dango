@@ -23,7 +23,9 @@ public class UserCompletionRateService {
         return userCompletionRateRepository.findByUser_UserId(userId);
     }
     
-    
+    public List<UserCompletionRateEntity> getAllUserId(){
+        return userCompletionRateRepository.findAll();
+    }
     
     public int getUserRank(int userId) {
         List<UserCompletionRateEntity> rankings = userCompletionRateRepository.findAllByOrderByWeeklyPointsDesc();

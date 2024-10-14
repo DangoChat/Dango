@@ -44,34 +44,49 @@ public class ChatController {
      * @return ChatMessageResponse
      */
     @MessageMapping("/chat/rooms/{roomId}/send")
-    @SendTo("/topic/rooms/{roomId}")
-    public ChatMessageResponse sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageRequest chatMessage) {
-        ChatMessageCreateCommand command = ChatMessageCreateCommand.builder()
-                .content(chatMessage.text())
-                .from(chatMessage.from())
-                .to(chatMessage.to())
-                .roomId(roomId)
-                .build();
+@SendTo("/topic/rooms/{roomId}")
+public ChatMessageResponse sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageRequest chatMessage) {
+    // 사용자의 남은 마일리지 확인
+    int userMileage = memberService.getUserMileage(chatMessage.from());
 
-        // 메시지를 DB에 저장
-        Long chatId = chatMessageService.createChatMessage(
-            ChatMessageJpaEntity.builder()
-                .chatRoom(chatRoomService.loadById(roomId))
-                .messagesContents(command.content())
-                .sender(chatMessageService.getUserById(command.from()))
-                .receiver(chatMessageService.getUserById(command.to()))
-                .build()
-        );
-        memberService.updateMileage(command.from(), -5);
-        System.out.println("mileage done??? "+ memberService.getUserMileage(command.from()));
-
-        // 메시지 응답 생성 및 반환
+    if (userMileage <= 5) {
+        // 마일리지가 5 이하인 경우, 에러 메시지를 담아 반환
         return ChatMessageResponse.builder()
-                .id(chatId)
-                .content(chatMessage.text())
+                .id(null)  // 메시지가 DB에 저장되지 않았음을 나타내기 위해 ID를 null로 설정
+                .content("마일리지가 부족하여 메시지를 보낼 수 없습니다.")
                 .writer(chatMessage.from())
                 .build();
     }
+
+    // 마일리지가 충분한 경우에만 메시지 전송
+    ChatMessageCreateCommand command = ChatMessageCreateCommand.builder()
+            .content(chatMessage.text())
+            .from(chatMessage.from())
+            .to(chatMessage.to())
+            .roomId(roomId)
+            .build();
+
+    // 메시지를 DB에 저장
+    Long chatId = chatMessageService.createChatMessage(
+        ChatMessageJpaEntity.builder()
+            .chatRoom(chatRoomService.loadById(roomId))
+            .messagesContents(command.content())
+            .sender(chatMessageService.getUserById(command.from()))
+            .receiver(chatMessageService.getUserById(command.to()))
+            .build()
+    );
+
+    // 마일리지 업데이트
+    memberService.updateMileage(command.from(), -5);
+
+    // 메시지 응답 생성 및 반환
+    return ChatMessageResponse.builder()
+            .id(chatId)
+            .content(chatMessage.text())
+            .writer(chatMessage.from())
+            .build();
+}
+
 
     /**
      * 새로운 채팅방 생성

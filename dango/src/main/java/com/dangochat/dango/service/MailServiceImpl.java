@@ -61,7 +61,7 @@ public class MailServiceImpl implements MailService {
         message.addRecipients(Message.RecipientType.TO, to);
         message.setSubject("Dango - 이메일 인증코드");
 
-        String msgg = "<h1>안녕하세요</h1>"
+        String msgg = "<h1>Dango</h1>"
                     + "<p>아래 인증 코드를 입력하여 이메일을 인증하세요:</p>"
                     + "<h2>" + verificationCode + "</h2>";
         message.setText(msgg, "utf-8", "html");

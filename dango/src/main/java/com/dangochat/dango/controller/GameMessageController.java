@@ -23,9 +23,11 @@ public class GameMessageController {
     @MessageMapping("/game/{roomId}/word")
     public void sendGameWord(@DestinationVariable Long roomId) {
         List<StudyEntity> words = studyService.getRandomStudyContentByLevelAndType("N3", "단어", 0); // userId는 필요 시 추가
+        System.out.println("sdjfkladsfjkladsjfklajsfklajdfskl");
         if (!words.isEmpty()) {
             StudyEntity word = words.get(0); // 임시로 첫 단어만 사용
             messagingTemplate.convertAndSend("/topic/game/" + roomId, word);
+            System.out.println("word :::::: " + word);
         }
     }
 }

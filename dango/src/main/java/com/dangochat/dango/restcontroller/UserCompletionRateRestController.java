@@ -1,21 +1,21 @@
 package com.dangochat.dango.restcontroller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dangochat.dango.entity.MemberEntity;
 import com.dangochat.dango.entity.UserCompletionRateEntity;
-import com.dangochat.dango.security.AuthenticatedUser;
 import com.dangochat.dango.service.MemberService;
 import com.dangochat.dango.service.UserCompletionRateService;
 
@@ -111,14 +111,14 @@ public class UserCompletionRateRestController {
     
     
     @GetMapping("/rank")
-    public ResponseEntity<Map<String, Object>> getUserRank(@AuthenticationPrincipal AuthenticatedUser userDetails) {
-        int userId = userDetails.getId();
+    public ResponseEntity<Map<String, Object>> getUserRank(@RequestParam Integer userId) {
         int userRank = userCompletionRateService.getUserRank(userId);
-
+        List<UserCompletionRateEntity> rankingIdList = userCompletionRateService.getAllUserId();
         // 응답 데이터 생성
         Map<String, Object> response = new HashMap<>();
         response.put("userId", userId);
         response.put("userRank", userRank);
+        response.put("RankingList", rankingIdList);
 
         return ResponseEntity.ok(response);
     }
